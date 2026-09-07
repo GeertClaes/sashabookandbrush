@@ -1,0 +1,38 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  cover: string;
+  alt: string;
+  class?: string;
+  width: number;
+  height: number;
+  sizes?: string;
+}
+
+const { cover, alt, class: className = "", width, height, sizes = `${width}px` } = Astro.props;
+
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/covers/*.{jpg,jpeg,png,webp}",
+  { eager: true },
+);
+const filename = (cover || "").split("/").pop() || "";
+const match = Object.entries(modules).find(([key]) => key.endsWith(`/${filename}`));
+const image = match?.[1].default;
+---
+
+{
+  image ? (
+    <Image
+      src={image}
+      alt={alt}
+      width={width}
+      height={height}
+      sizes={sizes}
+      class={className}
+    />
+  ) : (
+    <div class:list={["bg-muted", className]} role="img" aria-label={alt}></div>
+  )
+}

@@ -4,9 +4,40 @@ import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
-const books = (await getCollection("books")).sort((a, b) => a.data.order - b.data.order);
-const genres = ["All", ...new Set(books.map((book) => book.data.genre))];
+const books = (await getCollection("books")).sort((a, b) => {
+  if (a.data.status !== b.data.status) {
+    return a.data.status === "currently-reading" ? -1 : 1;
+  }
+  const aDate = a.data.status === "currently-reading" ? a.data.dateAdded : a.data.dateRead || a.data.dateAdded;
+  const bDate = b.data.status === "currently-reading" ? b.data.dateAdded : b.data.dateRead || b.data.dateAdded;
+  return (bDate || "").localeCompare(aDate || "");
+});
+const shelves = [
+  { id: "all", label: "All" },
+  { id: "currently-reading", label: "Reading now" },
+  { id: "read", label: "Read" },
+];
+const ratings = [
+  { id: "all", label: "Any rating" },
+  { id: "5", label: "5 stars" },
+  { id: "4", label: "4+" },
+  { id: "3", label: "3+" },
+  { id: "reviewed", label: "Has a review" },
+];
+const genreChips = [
+  "All",
+  ...(books.some((book) => book.data.genre === "Read") ? ["Unshelved"] : []),
+  ...[...new Set(
+    books
+      .map((book) => book.data.genre)
+      .filter((genre) => genre && genre !== "Currently reading" && genre !== "Read"),
+  )].sort((a, b) => a.localeCompare(b)),
+];
 const total = books.length;
+const chip = (active: boolean) =>
+  active
+    ? "rounded-full px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground"
+    : "rounded-full px-3 py-1.5 text-sm font-medium border border-border text-muted-foreground hover:border-foreground hover:text-foreground";
 ---
 
 <BaseLayout
@@ -55,29 +86,53 @@ const total = books.length;
           />
         </label>
 
-        <div
-          class="mt-4 flex flex-wrap gap-2"
-          data-genre-filters
-          role="group"
-          aria-label="Filter by genre"
-        >
-          {
-            genres.map((genre, index) => (
-              <button
-                type="button"
-                data-genre={genre}
-                aria-pressed={index === 0 ? "true" : "false"}
-                class:list={[
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                  index === 0
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border text-muted-foreground hover:border-foreground hover:text-foreground",
-                ]}
+        <div class="mt-4 space-y-3">
+          <div class="flex flex-wrap gap-2" data-filter-group="shelf" role="group" aria-label="Filter by shelf">
+            {
+              shelves.map((item, index) => (
+                <button type="button" data-value={item.id} aria-pressed={index === 0 ? "true" : "false"} class={chip(index === 0)}>
+                  {item.label}
+                </button>
+              ))
+            }
+          </div>
+          <div class="flex flex-wrap gap-2" data-filter-group="rating" role="group" aria-label="Filter by rating">
+            {
+              ratings.map((item, index) => (
+                <button type="button" data-value={item.id} aria-pressed={index === 0 ? "true" : "false"} class={chip(index === 0)}>
+                  {item.label}
+                </button>
+              ))
+            }
+          </div>
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex flex-wrap gap-2" data-filter-group="genre" role="group" aria-label="Filter by genre">
+              {
+                genreChips.map((genre, index) => (
+                  <button type="button" data-value={genre === "Unshelved" ? "Read" : genre} aria-pressed={index === 0 ? "true" : "false"} class={chip(index === 0)}>
+                    {genre}
+                  </button>
+                ))
+              }
+            </div>
+            <label class="shrink-0 text-sm text-muted-foreground">
+              <span class="sr-only">Sort books</span>
+              <select
+                id="book-sort"
+                class="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:w-auto"
               >
-                {genre}
-              </button>
-            ))
-          }
+                <option value="reading">Currently reading first</option>
+                <option value="read-desc">Recently read</option>
+                <option value="read-asc">Oldest read</option>
+                <option value="added-desc">Recently added</option>
+                <option value="rating-desc">Highest rated</option>
+                <option value="title-asc">Title A–Z</option>
+                <option value="author-asc">Author A–Z</option>
+                <option value="year-desc">Newest published</option>
+                <option value="pages-desc">Longest</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         <p class="mt-3 text-xs text-muted-foreground" data-result-count>
@@ -90,7 +145,16 @@ const total = books.length;
           books.map((book) => (
             <div
               data-book-genre={book.data.genre}
-              data-book-search={`${book.data.title} ${book.data.author} ${book.data.genre} ${book.data.note}`.toLowerCase()}
+              data-book-status={book.data.status}
+              data-has-note={book.data.note ? "1" : "0"}
+              data-sort-read={book.data.dateRead || ""}
+              data-sort-added={book.data.dateAdded || ""}
+              data-sort-title={book.data.title.toLowerCase()}
+              data-sort-author={book.data.author.toLowerCase()}
+              data-sort-rating={String(book.data.rating)}
+              data-sort-year={String(book.data.yearPublished || book.data.originalYear || "")}
+              data-sort-pages={String(book.data.pages || "")}
+              data-book-search={`${book.data.title} ${book.data.author} ${book.data.genre} ${book.data.note} ${book.data.isbn || ""} ${book.data.publisher || ""}`.toLowerCase()}
             >
               <BookCard {...book.data} variant="row" />
             </div>
@@ -107,7 +171,8 @@ const total = books.length;
 
 <script>
   const search = document.querySelector<HTMLInputElement>("#book-search");
-  const filters = document.querySelectorAll<HTMLButtonElement>("[data-genre-filters] [data-genre]");
+  const sort = document.querySelector<HTMLSelectElement>("#book-sort");
+  const list = document.querySelector<HTMLElement>("[data-book-list]");
   const cards = document.querySelectorAll<HTMLElement>("[data-book-search]");
   const empty = document.querySelector<HTMLElement>("[data-empty]");
   const count = document.querySelector<HTMLElement>("[data-result-count]");
@@ -121,16 +186,69 @@ const total = books.length;
     "hover:text-foreground",
   ];
 
-  let genre = "All";
+  const filters = {
+    shelf: "all",
+    rating: "all",
+    genre: "All",
+  };
+
+  function compareDate(a: string, b: string, oldest = false) {
+    if (!a && !b) return 0;
+    if (!a) return 1;
+    if (!b) return -1;
+    return oldest ? a.localeCompare(b) : b.localeCompare(a);
+  }
+
+  function setChipState(group: string, value: string) {
+    document.querySelectorAll<HTMLButtonElement>(`[data-filter-group="${group}"] button`).forEach((button) => {
+      const on = button.dataset.value === value;
+      button.setAttribute("aria-pressed", String(on));
+      activeClasses.forEach((cls) => button.classList.toggle(cls, on));
+      idleClasses.forEach((cls) => button.classList.toggle(cls, !on));
+    });
+  }
+
+  function sortCards() {
+    if (!list) return;
+    const mode = sort?.value ?? "reading";
+    const items = [...list.children] as HTMLElement[];
+    items.sort((left, right) => {
+      if (mode === "reading") {
+        const leftReading = left.dataset.bookStatus === "currently-reading" ? 0 : 1;
+        const rightReading = right.dataset.bookStatus === "currently-reading" ? 0 : 1;
+        if (leftReading !== rightReading) return leftReading - rightReading;
+        return compareDate(left.dataset.sortAdded ?? "", right.dataset.sortAdded ?? "");
+      }
+      if (mode === "read-desc") return compareDate(left.dataset.sortRead ?? "", right.dataset.sortRead ?? "");
+      if (mode === "read-asc") return compareDate(left.dataset.sortRead ?? "", right.dataset.sortRead ?? "", true);
+      if (mode === "added-desc") return compareDate(left.dataset.sortAdded ?? "", right.dataset.sortAdded ?? "");
+      if (mode === "rating-desc") return Number(right.dataset.sortRating) - Number(left.dataset.sortRating);
+      if (mode === "title-asc") return (left.dataset.sortTitle ?? "").localeCompare(right.dataset.sortTitle ?? "");
+      if (mode === "author-asc") return (left.dataset.sortAuthor ?? "").localeCompare(right.dataset.sortAuthor ?? "");
+      if (mode === "year-desc") return compareDate(left.dataset.sortYear ?? "", right.dataset.sortYear ?? "");
+      if (mode === "pages-desc") return Number(right.dataset.sortPages || 0) - Number(left.dataset.sortPages || 0);
+      return 0;
+    });
+    items.forEach((item) => list.appendChild(item));
+  }
 
   function apply() {
     const query = (search?.value ?? "").trim().toLowerCase();
     let visible = 0;
 
     cards.forEach((card) => {
-      const genreMatch = genre === "All" || card.dataset.bookGenre === genre;
+      const shelfMatch =
+        filters.shelf === "all" || card.dataset.bookStatus === filters.shelf;
+      const genreMatch = filters.genre === "All" || card.dataset.bookGenre === filters.genre;
+      const ratingValue = Number(card.dataset.sortRating || 0);
+      const ratingMatch =
+        filters.rating === "all" ||
+        (filters.rating === "reviewed" && card.dataset.hasNote === "1") ||
+        (filters.rating === "5" && ratingValue === 5) ||
+        (filters.rating === "4" && ratingValue >= 4) ||
+        (filters.rating === "3" && ratingValue >= 3);
       const textMatch = !query || (card.dataset.bookSearch ?? "").includes(query);
-      const show = genreMatch && textMatch;
+      const show = shelfMatch && genreMatch && ratingMatch && textMatch;
       card.classList.toggle("hidden", !show);
       if (show) visible += 1;
     });
@@ -138,26 +256,25 @@ const total = books.length;
     empty?.classList.toggle("hidden", visible > 0);
 
     if (count) {
-      if (visible === total && !query && genre === "All") {
-        count.textContent = `${total} ${total === 1 ? "book" : "books"}`;
-      } else {
-        count.textContent = `Showing ${visible} of ${total}`;
-      }
+      const idle =
+        visible === total && !query && filters.shelf === "all" && filters.rating === "all" && filters.genre === "All";
+      count.textContent = idle
+        ? `${total} ${total === 1 ? "book" : "books"}`
+        : `Showing ${visible} of ${total}`;
     }
-
-    filters.forEach((button) => {
-      const on = button.dataset.genre === genre;
-      button.setAttribute("aria-pressed", String(on));
-      activeClasses.forEach((cls) => button.classList.toggle(cls, on));
-      idleClasses.forEach((cls) => button.classList.toggle(cls, !on));
-    });
   }
 
   search?.addEventListener("input", apply);
-  filters.forEach((button) => {
+  sort?.addEventListener("change", sortCards);
+  document.querySelectorAll<HTMLButtonElement>("[data-filter-group] button").forEach((button) => {
     button.addEventListener("click", () => {
-      genre = button.dataset.genre ?? "All";
-      apply();
+      const group = button.closest("[data-filter-group]")?.getAttribute("data-filter-group");
+      const value = button.dataset.value ?? "all";
+      if (group === "shelf" || group === "rating" || group === "genre") {
+        filters[group] = value;
+        setChipState(group, value);
+        apply();
+      }
     });
   });
 </script>

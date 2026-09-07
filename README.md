@@ -31,20 +31,23 @@ You do not need to touch the page templates for ordinary updates.
 ---
 title: "Fourth Wing"
 author: "Rebecca Yarros"
-cover: "/images/covers/fourth-wing.jpg"
+cover: "fourth-wing.jpg"
 note: "A short personal note — a couple of sentences is enough."
 rating: 5
 genre: "Romantasy"
+status: "read"
 bookshop: "https://bookshop.org/a/YOUR-ID/9781649374042"
 amazon: "https://www.amazon.com/dp/1649374046?tag=YOUR-TAG"
 featured: true
 order: 1
+isbn: "9781649374042"
+dateRead: "2024-06-12"
 ---
 ```
 
-3. Put the cover image in `public/images/covers/` and point `cover` at that path.
+3. Put the cover image in `src/assets/covers/` and set `cover` to the filename. Astro will optimize it.
 4. Set `featured: true` to show it on the home page (aim for 4–9).
-5. Use `order` to control list order (lower numbers first).
+5. `status` is `read` or `currently-reading`. Use `order` only as a fallback; the Books page sorts by date, rating, title, and so on.
 6. Rebuild or refresh the dev server.
 
 Genres on the Recommendations page are generated from whatever is in these files.
@@ -56,22 +59,26 @@ Copy-paste will not work for hundreds of books. Goodreads has an official CSV ex
 1. Log in at [goodreads.com](https://www.goodreads.com) on a computer.
 2. Go to **My Books** → **Import and export** (under Tools in the left sidebar). Direct: [goodreads.com/review/import](https://www.goodreads.com/review/import).
 3. Click **Export Library** and wait for the download link (a large shelf can take a few minutes).
-4. Save the file as `data/goodreads_library_export.csv` in this repo.
+4. Save the file as `data/export.csv` (or `data/goodreads_library_export.csv`) in this repo.
 5. Run:
 
 ```bash
 npm run import:goodreads
 ```
 
-That imports **read books with a rating of 1–5**. TBR and unrated rows are skipped, and existing files (the Instagram picks already on the site) are left alone. Existing books are not overwritten unless you pass `--force`.
+That imports **read books with a rating of 1–5** plus anything on the **currently-reading** shelf (Goodreads allows more than one). TBR/`to-read` rows stay off the site. Existing Instagram picks keep their notes and covers; ISBN, dates, and shelf status are merged in.
+
+On Windows, extra flags after `npm run` can get eaten by npm. Prefer:
 
 ```bash
-npm run import:goodreads -- --dry-run
-npm run import:goodreads -- --min-rating=4
-npm run import:goodreads -- --csv="C:\path\to\export.csv"
+npm run import:goodreads
+node scripts/import-goodreads.mjs --check
+node scripts/import-goodreads.mjs --skip-covers
+node scripts/import-goodreads.mjs --min-rating=4
+node scripts/import-goodreads.mjs "C:\path\to\export.csv"
 ```
 
-Then refresh the Books page. Search and genre filters will handle the longer list. Covers come from Open Library via ISBN when the CSV has one.
+Then refresh the Books page. Shelf, rating, genre, and sort are independent (like Goodreads). Covers are downloaded into `src/assets/covers/` so Astro can optimize them. Review HTML such as `<br/>` is turned into real line breaks.
 
 ### Add or edit art
 
@@ -130,16 +137,7 @@ The footer already includes an affiliate disclosure.
 
 ### Currently reading
 
-Edit `src/data/currently-reading.json`:
-
-```json
-{
-  "title": "Wild Reverence",
-  "author": "Rebecca Ross",
-  "cover": "/images/covers/wild-reverence.jpg",
-  "thoughts": "A short in-progress note."
-}
-```
+This comes from Goodreads `currently-reading` on import — more than one book at a time is expected. Re-run `npm run import:goodreads` after a new export to refresh the home shelf. TBR stays off the public site.
 
 ### Site copy, stats, and packages
 
@@ -171,5 +169,3 @@ The site is served on port **8080**. Point your domain (and Caddy/Traefik HTTPS)
 Warm, bookish palette: cream background, burgundy primary, forest green secondary, rust accent. Headings use Fraunces; body uses DM Sans.
 
 The home hero and About photo use `public/images/SashaHero.jpg` in light mode and `public/images/SashaHeroDark.jpg` in dark mode.
-
-The `FimgaMake/` folder is the original Figma Make export. It is not used by the site.

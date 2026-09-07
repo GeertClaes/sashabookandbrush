@@ -1,0 +1,20 @@
+---
+title: "Throttled (Rylie Cooper Mysteries #3)"
+author: "Stella Bixby"
+cover: ""
+note: ""
+rating: 4
+genre: "Read"
+bookshop: "#"
+amazon: "#"
+featured: false
+order: 1052
+status: "read"
+goodreadsId: "45436207"
+dateRead: "2025-06-29"
+dateAdded: "2025-06-27"
+pages: 220
+yearPublished: 2019
+publisher: "Ferry Tail Publishing LLC"
+readCount: 1
+---
