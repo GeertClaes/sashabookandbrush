@@ -33,6 +33,11 @@ const image = match?.[1].default;
       class={className}
     />
   ) : (
-    <div class:list={["bg-muted", className]} role="img" aria-label={alt}></div>
+    <div
+      class:list={["bg-muted", className]}
+      role={alt ? "img" : undefined}
+      aria-label={alt || undefined}
+      aria-hidden={alt ? undefined : "true"}
+    ></div>
   )
 }

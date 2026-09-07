@@ -1,0 +1,163 @@
+---
+import AffiliateButtons from "../../components/AffiliateButtons.astro";
+import CoverImage from "../../components/CoverImage.astro";
+import StarRating from "../../components/StarRating.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { bookHref, formatFullDate } from "../../lib/books";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+  return books.map((book) => ({
+    params: { slug: book.id },
+    props: { book },
+  }));
+}
+
+const { book } = Astro.props;
+const { data } = book;
+const reading = data.status === "currently-reading";
+const genericGenre = data.genre === "Read" || data.genre === "Currently reading" || !data.genre;
+const label = reading ? "Currently reading" : genericGenre ? "" : data.genre;
+const description = data.note
+  ? data.note.replace(/\s+/g, " ").trim().slice(0, 160)
+  : `${data.title} by ${data.author}`;
+
+const facts = [
+  reading ? { label: "Shelf", value: "Currently reading" } : data.dateRead && { label: "Read", value: formatFullDate(data.dateRead) },
+  data.dateAdded && { label: "Added", value: formatFullDate(data.dateAdded) },
+  data.pages && { label: "Pages", value: String(data.pages) },
+  (data.yearPublished || data.originalYear) && {
+    label: "Published",
+    value: String(data.originalYear || data.yearPublished),
+  },
+  data.publisher && { label: "Publisher", value: data.publisher },
+  data.isbn && { label: "ISBN", value: data.isbn },
+  data.isbn10 && data.isbn10 !== data.isbn && { label: "ISBN-10", value: data.isbn10 },
+  data.readCount && data.readCount > 1 && { label: "Times read", value: String(data.readCount) },
+].filter(Boolean) as { label: string; value: string }[];
+
+const moreByAuthor = (await getCollection("books"))
+  .filter((entry) => entry.id !== book.id && entry.data.author === data.author)
+  .sort((a, b) => (b.data.dateRead || b.data.dateAdded || "").localeCompare(a.data.dateRead || a.data.dateAdded || ""))
+  .slice(0, 4);
+---
+
+<BaseLayout title={data.title} description={description}>
+  <article class="min-h-screen bg-background">
+    <div class="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-16">
+      <p class="mb-8">
+        <a href="/recommendations" class="text-sm font-medium text-primary underline-offset-4 hover:underline">
+          ← All recommendations
+        </a>
+      </p>
+
+      <div class="grid items-start gap-10 md:grid-cols-[14rem_minmax(0,1fr)]">
+        <CoverImage
+          cover={data.cover}
+          alt={`${data.title} by ${data.author}`}
+          class="mx-auto w-56 rounded-lg object-cover shadow-lg md:mx-0 md:w-full"
+          width={320}
+          height={480}
+          sizes="(min-width: 768px) 224px, 224px"
+        />
+
+        <div class="min-w-0">
+          {
+            label && (
+              <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{label}</p>
+            )
+          }
+          <h1 class="font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
+            {data.title}
+          </h1>
+          <p class="mt-3 text-lg text-muted-foreground">{data.author}</p>
+          {
+            data.rating > 0 && (
+              <div class="mt-4">
+                <StarRating rating={data.rating} />
+              </div>
+            )
+          }
+          {reading && <p class="mt-3 text-sm text-accent">On the currently-reading shelf</p>}
+
+          {
+            facts.length > 0 && (
+              <dl class="mt-8 grid gap-3 text-sm sm:grid-cols-2">
+                {facts.map((fact) => (
+                  <div>
+                    <dt class="text-xs tracking-widest text-muted-foreground uppercase">{fact.label}</dt>
+                    <dd class="mt-0.5 text-foreground">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )
+          }
+
+          <div class="mt-8">
+            <AffiliateButtons bookshop={data.bookshop} amazon={data.amazon} />
+          </div>
+
+          {
+            data.goodreadsId && (
+              <p class="mt-4">
+                <a
+                  href={`https://www.goodreads.com/book/show/${data.goodreadsId}`}
+                  class="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  View on Goodreads
+                </a>
+              </p>
+            )
+          }
+        </div>
+      </div>
+
+      {
+        data.note ? (
+          <section class="mt-12 max-w-3xl border-t border-border pt-10">
+            <h2 class="font-display mb-5 text-2xl font-semibold text-foreground">Sasha's notes</h2>
+            <div class="whitespace-pre-wrap text-base leading-relaxed text-foreground">{data.note}</div>
+          </section>
+        ) : (
+          <section class="mt-12 max-w-3xl border-t border-border pt-10">
+            <p class="text-muted-foreground">
+              {reading
+                ? "Still on the nightstand — a note will land here when it's finished."
+                : "Rated, but no written review on this one yet."}
+            </p>
+          </section>
+        )
+      }
+
+      {
+        moreByAuthor.length > 0 && (
+          <section class="mt-16 border-t border-border pt-10">
+            <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">More by {data.author}</h2>
+            <ul class="grid gap-3 sm:grid-cols-2">
+              {moreByAuthor.map((entry) => (
+                <li>
+                  <a
+                    href={bookHref(entry.id)}
+                    class="block rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-foreground"
+                  >
+                    <p class="font-display font-semibold text-foreground">{entry.data.title}</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                      {entry.data.status === "currently-reading"
+                        ? "Reading now"
+                        : entry.data.dateRead
+                          ? `Read ${formatFullDate(entry.data.dateRead)}`
+                          : entry.data.author}
+                    </p>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </div>
+  </article>
+</BaseLayout>

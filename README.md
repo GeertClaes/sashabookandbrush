@@ -50,6 +50,8 @@ dateRead: "2024-06-12"
 5. `status` is `read` or `currently-reading`. Use `order` only as a fallback; the Books page sorts by date, rating, title, and so on.
 6. Rebuild or refresh the dev server.
 
+Each book also gets a page at `/books/<filename>` (for example `/books/fourth-wing`) with the full note, ISBN, dates, and other Goodreads fields. Cards on Home and Books link there.
+
 Genres on the Recommendations page are generated from whatever is in these files.
 
 ### Import from Goodreads

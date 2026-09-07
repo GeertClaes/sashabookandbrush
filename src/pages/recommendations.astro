@@ -2,6 +2,7 @@
 import BookCard from "../components/BookCard.astro";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { bookHref } from "../lib/books";
 import { getCollection } from "astro:content";
 
 const books = (await getCollection("books")).sort((a, b) => {
@@ -34,10 +35,8 @@ const genreChips = [
   )].sort((a, b) => a.localeCompare(b)),
 ];
 const total = books.length;
-const chip = (active: boolean) =>
-  active
-    ? "rounded-full px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground"
-    : "rounded-full px-3 py-1.5 text-sm font-medium border border-border text-muted-foreground hover:border-foreground hover:text-foreground";
+const selectClass =
+  "min-w-0 w-full rounded-lg border border-border bg-card px-2.5 py-2 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none";
 ---
 
 <BaseLayout
@@ -59,83 +58,77 @@ const chip = (active: boolean) =>
       </div>
 
       <div
-        class="sticky top-16 z-30 mb-8 border-b border-border bg-background/95 py-4 backdrop-blur-sm"
+        class="sticky top-16 z-30 mb-8 border-b border-border bg-background/95 py-3 backdrop-blur-sm"
         data-library-controls
       >
-        <label class="relative block">
-          <span class="sr-only">Search books by title, author, or note</span>
-          <svg
-            class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"></path>
-          </svg>
-          <input
-            id="book-search"
-            type="search"
-            placeholder="Search titles, authors, or a vibe…"
-            autocomplete="off"
-            class="min-w-0 w-full rounded-lg border border-border bg-card py-2.5 pr-10 pl-10 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-          />
-        </label>
-
-        <div class="mt-4 space-y-3">
-          <div class="flex flex-wrap gap-2" data-filter-group="shelf" role="group" aria-label="Filter by shelf">
-            {
-              shelves.map((item, index) => (
-                <button type="button" data-value={item.id} aria-pressed={index === 0 ? "true" : "false"} class={chip(index === 0)}>
-                  {item.label}
-                </button>
-              ))
-            }
-          </div>
-          <div class="flex flex-wrap gap-2" data-filter-group="rating" role="group" aria-label="Filter by rating">
-            {
-              ratings.map((item, index) => (
-                <button type="button" data-value={item.id} aria-pressed={index === 0 ? "true" : "false"} class={chip(index === 0)}>
-                  {item.label}
-                </button>
-              ))
-            }
-          </div>
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div class="flex flex-wrap gap-2" data-filter-group="genre" role="group" aria-label="Filter by genre">
-              {
-                genreChips.map((genre, index) => (
-                  <button type="button" data-value={genre === "Unshelved" ? "Read" : genre} aria-pressed={index === 0 ? "true" : "false"} class={chip(index === 0)}>
-                    {genre}
-                  </button>
-                ))
-              }
-            </div>
-            <label class="shrink-0 text-sm text-muted-foreground">
-              <span class="sr-only">Sort books</span>
-              <select
-                id="book-sort"
-                class="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:w-auto"
-              >
-                <option value="reading">Currently reading first</option>
-                <option value="read-desc">Recently read</option>
-                <option value="read-asc">Oldest read</option>
-                <option value="added-desc">Recently added</option>
-                <option value="rating-desc">Highest rated</option>
-                <option value="title-asc">Title A–Z</option>
-                <option value="author-asc">Author A–Z</option>
-                <option value="year-desc">Newest published</option>
-                <option value="pages-desc">Longest</option>
-              </select>
-            </label>
-          </div>
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <label class="relative min-w-0 flex-1">
+            <span class="sr-only">Search books by title, author, or note</span>
+            <svg
+              class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"></path>
+            </svg>
+            <input
+              id="book-search"
+              type="search"
+              placeholder="Search titles, authors, or a vibe…"
+              autocomplete="off"
+              class="min-w-0 w-full rounded-lg border border-border bg-card py-2 pr-3 pl-10 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+            />
+          </label>
+          <label class="sm:w-48">
+            <span class="sr-only">Sort books</span>
+            <select id="book-sort" class={selectClass}>
+              <option value="reading">Reading first</option>
+              <option value="read-desc">Recently read</option>
+              <option value="read-asc">Oldest read</option>
+              <option value="added-desc">Recently added</option>
+              <option value="rating-desc">Highest rated</option>
+              <option value="title-asc">Title A–Z</option>
+              <option value="author-asc">Author A–Z</option>
+              <option value="year-desc">Newest published</option>
+              <option value="pages-desc">Longest</option>
+            </select>
+          </label>
         </div>
 
-        <p class="mt-3 text-xs text-muted-foreground" data-result-count>
+        <div class="mt-2 grid grid-cols-3 gap-2">
+          <label>
+            <span class="sr-only">Shelf</span>
+            <select id="book-shelf" class={selectClass}>
+              {shelves.map((item) => <option value={item.id}>{item.label}</option>)}
+            </select>
+          </label>
+          <label>
+            <span class="sr-only">Rating</span>
+            <select id="book-rating" class={selectClass}>
+              {ratings.map((item) => <option value={item.id}>{item.label}</option>)}
+            </select>
+          </label>
+          <label>
+            <span class="sr-only">Genre</span>
+            <select id="book-genre" class={selectClass}>
+              {
+                genreChips.map((genre) => (
+                  <option value={genre === "Unshelved" ? "Read" : genre}>
+                    {genre === "All" ? "Any genre" : genre}
+                  </option>
+                ))
+              }
+            </select>
+          </label>
+        </div>
+
+        <p class="mt-2 text-xs text-muted-foreground" data-result-count>
           {total} {total === 1 ? "book" : "books"}
         </p>
       </div>
@@ -156,7 +149,7 @@ const chip = (active: boolean) =>
               data-sort-pages={String(book.data.pages || "")}
               data-book-search={`${book.data.title} ${book.data.author} ${book.data.genre} ${book.data.note} ${book.data.isbn || ""} ${book.data.publisher || ""}`.toLowerCase()}
             >
-              <BookCard {...book.data} variant="row" />
+              <BookCard {...book.data} href={bookHref(book.id)} variant="row" />
             </div>
           ))
         }
@@ -172,40 +165,20 @@ const chip = (active: boolean) =>
 <script>
   const search = document.querySelector<HTMLInputElement>("#book-search");
   const sort = document.querySelector<HTMLSelectElement>("#book-sort");
+  const shelf = document.querySelector<HTMLSelectElement>("#book-shelf");
+  const rating = document.querySelector<HTMLSelectElement>("#book-rating");
+  const genre = document.querySelector<HTMLSelectElement>("#book-genre");
   const list = document.querySelector<HTMLElement>("[data-book-list]");
   const cards = document.querySelectorAll<HTMLElement>("[data-book-search]");
   const empty = document.querySelector<HTMLElement>("[data-empty]");
   const count = document.querySelector<HTMLElement>("[data-result-count]");
   const total = cards.length;
-  const activeClasses = ["bg-primary", "text-primary-foreground"];
-  const idleClasses = [
-    "border",
-    "border-border",
-    "text-muted-foreground",
-    "hover:border-foreground",
-    "hover:text-foreground",
-  ];
-
-  const filters = {
-    shelf: "all",
-    rating: "all",
-    genre: "All",
-  };
 
   function compareDate(a: string, b: string, oldest = false) {
     if (!a && !b) return 0;
     if (!a) return 1;
     if (!b) return -1;
     return oldest ? a.localeCompare(b) : b.localeCompare(a);
-  }
-
-  function setChipState(group: string, value: string) {
-    document.querySelectorAll<HTMLButtonElement>(`[data-filter-group="${group}"] button`).forEach((button) => {
-      const on = button.dataset.value === value;
-      button.setAttribute("aria-pressed", String(on));
-      activeClasses.forEach((cls) => button.classList.toggle(cls, on));
-      idleClasses.forEach((cls) => button.classList.toggle(cls, !on));
-    });
   }
 
   function sortCards() {
@@ -234,19 +207,21 @@ const chip = (active: boolean) =>
 
   function apply() {
     const query = (search?.value ?? "").trim().toLowerCase();
+    const shelfValue = shelf?.value ?? "all";
+    const ratingValue = rating?.value ?? "all";
+    const genreValue = genre?.value ?? "All";
     let visible = 0;
 
     cards.forEach((card) => {
-      const shelfMatch =
-        filters.shelf === "all" || card.dataset.bookStatus === filters.shelf;
-      const genreMatch = filters.genre === "All" || card.dataset.bookGenre === filters.genre;
-      const ratingValue = Number(card.dataset.sortRating || 0);
+      const shelfMatch = shelfValue === "all" || card.dataset.bookStatus === shelfValue;
+      const genreMatch = genreValue === "All" || card.dataset.bookGenre === genreValue;
+      const stars = Number(card.dataset.sortRating || 0);
       const ratingMatch =
-        filters.rating === "all" ||
-        (filters.rating === "reviewed" && card.dataset.hasNote === "1") ||
-        (filters.rating === "5" && ratingValue === 5) ||
-        (filters.rating === "4" && ratingValue >= 4) ||
-        (filters.rating === "3" && ratingValue >= 3);
+        ratingValue === "all" ||
+        (ratingValue === "reviewed" && card.dataset.hasNote === "1") ||
+        (ratingValue === "5" && stars === 5) ||
+        (ratingValue === "4" && stars >= 4) ||
+        (ratingValue === "3" && stars >= 3);
       const textMatch = !query || (card.dataset.bookSearch ?? "").includes(query);
       const show = shelfMatch && genreMatch && ratingMatch && textMatch;
       card.classList.toggle("hidden", !show);
@@ -257,7 +232,7 @@ const chip = (active: boolean) =>
 
     if (count) {
       const idle =
-        visible === total && !query && filters.shelf === "all" && filters.rating === "all" && filters.genre === "All";
+        visible === total && !query && shelfValue === "all" && ratingValue === "all" && genreValue === "All";
       count.textContent = idle
         ? `${total} ${total === 1 ? "book" : "books"}`
         : `Showing ${visible} of ${total}`;
@@ -266,15 +241,7 @@ const chip = (active: boolean) =>
 
   search?.addEventListener("input", apply);
   sort?.addEventListener("change", sortCards);
-  document.querySelectorAll<HTMLButtonElement>("[data-filter-group] button").forEach((button) => {
-    button.addEventListener("click", () => {
-      const group = button.closest("[data-filter-group]")?.getAttribute("data-filter-group");
-      const value = button.dataset.value ?? "all";
-      if (group === "shelf" || group === "rating" || group === "genre") {
-        filters[group] = value;
-        setChipState(group, value);
-        apply();
-      }
-    });
-  });
+  shelf?.addEventListener("change", apply);
+  rating?.addEventListener("change", apply);
+  genre?.addEventListener("change", apply);
 </script>

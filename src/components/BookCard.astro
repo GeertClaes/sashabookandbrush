@@ -2,6 +2,7 @@
 import AffiliateButtons from "./AffiliateButtons.astro";
 import CoverImage from "./CoverImage.astro";
 import StarRating from "./StarRating.astro";
+import { formatMonthYear } from "../lib/books";
 
 interface Props {
   title: string;
@@ -16,6 +17,7 @@ interface Props {
   dateRead?: string;
   dateAdded?: string;
   variant?: "grid" | "row";
+  href?: string;
 }
 
 const {
@@ -30,68 +32,74 @@ const {
   status = "read",
   dateRead,
   variant = "grid",
+  href,
 } = Astro.props;
 
 const isRow = variant === "row";
 const reading = status === "currently-reading";
 const genericGenre = genre === "Read" || genre === "Currently reading" || !genre;
 const label = reading ? "Currently reading" : genericGenre ? "" : genre;
-
-function formatMonthYear(value?: string) {
-  if (!value) return "";
-  const [year, month] = value.split("-");
-  if (!year || !month) return value;
-  const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${names[Number(month) - 1]} ${year}`;
-}
-
 const when = reading ? "Reading now" : dateRead ? `Read ${formatMonthYear(dateRead)}` : "";
+const Tag = href ? "a" : "article";
+const cardClass = [
+  "group relative block overflow-hidden rounded-xl border border-border bg-card text-left no-underline transition-all duration-300",
+  href &&
+    "cursor-pointer hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+  !href && "hover:-translate-y-0.5 hover:shadow-lg",
+  isRow && "p-4 sm:p-5",
+].filter(Boolean);
 ---
 
-<article
-  class:list={[
-    "group overflow-hidden rounded-lg border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
-    isRow && "flex flex-col gap-6 p-5 sm:flex-row",
-  ]}
->
+<Tag href={href} class:list={cardClass}>
   {
     isRow ? (
-      <>
+      <div class="flex flex-col gap-4 sm:flex-row sm:gap-6">
         <CoverImage
           cover={cover}
-          alt={`${title} by ${author}`}
-          class="h-48 w-32 shrink-0 rounded object-cover sm:h-40 sm:w-28"
+          alt=""
+          class="h-48 w-32 shrink-0 rounded-lg object-cover shadow-sm transition-transform duration-500 group-hover:scale-[1.02] sm:h-44 sm:w-28"
           width={128}
           height={192}
         />
-        <div class="flex min-w-0 flex-col justify-between py-1">
-          <div>
-            {label && (
-              <span class="mb-2 block text-xs font-medium uppercase tracking-widest text-accent">
-                {label}
+        <div class="flex min-w-0 flex-1 flex-col">
+          {label && (
+            <span class="mb-2 block text-xs font-medium uppercase tracking-widest text-accent">
+              {label}
+            </span>
+          )}
+          <h3 class="font-display text-xl font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+            {title}
+          </h3>
+          <p class="mt-1 text-sm text-muted-foreground">{author}</p>
+          {rating > 0 && (
+            <div class="mt-2">
+              <StarRating rating={rating} />
+            </div>
+          )}
+          {when && <p class="mt-2 text-xs text-muted-foreground">{when}</p>}
+          {note && (
+            <p class="mt-3 line-clamp-3 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed text-foreground">
+              {note}
+            </p>
+          )}
+          {href ? (
+            <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
+              {note ? "Read the full note" : "Book details"}
+              <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-0.5">
+                →
               </span>
-            )}
-            <h3 class="font-display mb-1 text-xl font-semibold leading-snug text-foreground">
-              {title}
-            </h3>
-            <p class="mb-3 text-sm text-muted-foreground">{author}</p>
-            {rating > 0 && <StarRating rating={rating} />}
-            {when && <p class="mt-2 text-xs text-muted-foreground">{when}</p>}
-            {note && (
-              <p class="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
-                {note}
-              </p>
-            )}
-          </div>
-          <AffiliateButtons bookshop={bookshop} amazon={amazon} />
+            </span>
+          ) : (
+            <AffiliateButtons bookshop={bookshop} amazon={amazon} />
+          )}
         </div>
-      </>
+      </div>
     ) : (
       <>
-        <div class="aspect-[2/3] overflow-hidden bg-muted">
+        <div class="aspect-2/3 overflow-hidden bg-muted">
           <CoverImage
             cover={cover}
-            alt={`${title} by ${author}`}
+            alt=""
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             width={300}
             height={450}
@@ -104,19 +112,28 @@ const when = reading ? "Reading now" : dateRead ? `Read ${formatMonthYear(dateRe
               {label}
             </span>
           )}
-          <h3 class="font-display mb-0.5 text-lg font-semibold leading-snug text-foreground">
+          <h3 class="font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
             {title}
           </h3>
-          <p class="mb-2 text-xs text-muted-foreground">{author}</p>
+          <p class="mt-0.5 mb-2 text-xs text-muted-foreground">{author}</p>
           {rating > 0 && <StarRating rating={rating} />}
           {note && (
             <p class="mt-3 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
               {note}
             </p>
           )}
-          <AffiliateButtons bookshop={bookshop} amazon={amazon} />
+          {href ? (
+            <span class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+              {note ? "Read the full note" : "Book details"}
+              <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-0.5">
+                →
+              </span>
+            </span>
+          ) : (
+            <AffiliateButtons bookshop={bookshop} amazon={amazon} />
+          )}
         </div>
       </>
     )
   }
-</article>
+</Tag>

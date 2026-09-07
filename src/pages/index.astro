@@ -5,6 +5,7 @@ import CoverImage from "../components/CoverImage.astro";
 import SupplyCard from "../components/SupplyCard.astro";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { bookHref } from "../lib/books";
 import { getCollection } from "astro:content";
 
 const books = await getCollection("books");
@@ -84,7 +85,7 @@ const featuredSupplies = (await getCollection("supplies"))
           </div>
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {currentlyReading.map((book) => (
-              <a href="/recommendations" class="group min-w-0">
+              <a href={bookHref(book.id)} class="group min-w-0">
                 <CoverImage
                   cover={book.data.cover}
                   alt={`${book.data.title} by ${book.data.author}`}
@@ -128,7 +129,7 @@ const featuredSupplies = (await getCollection("supplies"))
       <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
         {
           featured.map((book) => (
-            <BookCard {...book.data} />
+            <BookCard {...book.data} href={bookHref(book.id)} />
           ))
         }
       </div>
