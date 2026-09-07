@@ -85,15 +85,21 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 html,
 body {
   min-height: 100%;
+  max-width: 100%;
   background: var(--sbb-background);
   color: var(--sbb-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: clip;
 }
 
 h1,
@@ -101,6 +107,24 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
+  overflow-wrap: anywhere;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+input,
+textarea,
+select,
+button {
+  max-width: 100%;
+}
+
+input[type="search"] {
+  min-width: 0;
 }
 
 ::selection {

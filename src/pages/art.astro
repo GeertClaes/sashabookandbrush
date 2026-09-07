@@ -14,7 +14,7 @@ const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order -
     <div class="mx-auto max-w-5xl px-6 py-16 md:px-12">
       <div class="mb-12 max-w-2xl">
         <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{site.art.eyebrow}</p>
-        <h1 class="font-display mb-4 text-5xl font-semibold text-foreground">{site.art.headline}</h1>
+        <h1 class="font-display mb-4 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">{site.art.headline}</h1>
         <p class="leading-relaxed text-muted-foreground">{site.art.lede}</p>
       </div>
 
@@ -36,7 +36,7 @@ const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order -
           <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">
             {site.art.suppliesEyebrow}
           </p>
-          <h2 class="font-display mb-4 text-4xl font-semibold text-foreground">
+          <h2 class="font-display mb-4 text-3xl font-semibold leading-tight text-foreground md:text-4xl">
             {site.art.suppliesHeadline}
           </h2>
           <p class="leading-relaxed text-muted-foreground">{site.art.suppliesLede}</p>

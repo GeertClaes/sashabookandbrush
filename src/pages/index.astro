@@ -41,7 +41,7 @@ const featuredSupplies = (await getCollection("supplies"))
       <p class="mb-6 text-sm font-medium tracking-[0.25em] text-accent uppercase">
         {site.hero.eyebrow}
       </p>
-      <h1 class="font-display mb-6 max-w-2xl text-5xl leading-[1.05] font-semibold text-cream md:text-7xl">
+      <h1 class="font-display mb-6 max-w-2xl text-4xl leading-[1.05] font-semibold text-cream sm:text-5xl md:text-7xl">
         {site.hero.headline}<br />
         <em class="font-light italic">{site.hero.headlineItalic}</em>
       </h1>
@@ -79,8 +79,8 @@ const featuredSupplies = (await getCollection("supplies"))
           width="128"
           height="192"
         />
-        <div class="flex-1">
-          <h2 class="font-display mb-1 text-3xl font-semibold text-cream">{currentlyReading.title}</h2>
+        <div class="min-w-0 flex-1">
+          <h2 class="font-display mb-1 text-2xl font-semibold text-cream sm:text-3xl">{currentlyReading.title}</h2>
           <p class="mb-4 text-sage">{currentlyReading.author}</p>
           <p class="max-w-xl text-base leading-relaxed text-parchment italic">
             “{currentlyReading.thoughts}”
@@ -95,7 +95,7 @@ const featuredSupplies = (await getCollection("supplies"))
       <div class="mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Recent favourites</p>
-          <h2 class="font-display text-4xl font-semibold text-foreground">
+          <h2 class="font-display text-3xl font-semibold leading-tight text-foreground md:text-4xl">
             Reads I'm recommending<br /><em class="font-light italic">right now</em>
           </h2>
         </div>
@@ -123,7 +123,7 @@ const featuredSupplies = (await getCollection("supplies"))
           <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">
             {site.art.homeEyebrow}
           </p>
-          <h2 class="font-display text-4xl font-semibold text-foreground">
+          <h2 class="font-display text-3xl font-semibold leading-tight text-foreground md:text-4xl">
             {site.art.homeHeadline}<br />
             <em class="font-light italic">{site.art.homeHeadlineItalic}</em>
           </h2>

@@ -26,11 +26,11 @@ function isActive(href: string) {
   ]}
   data-transparent={transparent ? "true" : "false"}
 >
-  <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-6 md:px-12">
+  <div class="mx-auto flex h-16 max-w-5xl min-w-0 items-center justify-between gap-3 px-6 md:px-12">
     <a
       href="/"
       class:list={[
-        "font-display text-lg font-semibold tracking-tight",
+        "min-w-0 font-display text-base font-semibold tracking-tight sm:text-lg",
         transparent ? "text-cream" : "text-foreground",
       ]}
       data-logo
@@ -62,7 +62,7 @@ function isActive(href: string) {
       <ThemeToggle transparent={transparent} />
     </nav>
 
-    <div class="flex items-center gap-1 lg:hidden">
+    <div class="flex shrink-0 items-center gap-1 lg:hidden">
       <ThemeToggle transparent={transparent} />
       <button
         id="menu-toggle"

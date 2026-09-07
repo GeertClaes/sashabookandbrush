@@ -21,7 +21,7 @@ const nextUrl = new URL("/shop?thanks=1", Astro.site ?? Astro.url);
         thanks ? (
           <p class="text-sm text-secondary">You're on the list — thank you.</p>
         ) : formspreeId ? (
-          <form action={`https://formspree.io/f/${formspreeId}`} method="POST" class="flex gap-2">
+          <form action={`https://formspree.io/f/${formspreeId}`} method="POST" class="flex min-w-0 flex-col gap-2 sm:flex-row">
             <input type="hidden" name="_next" value={nextUrl.href} />
             <input type="hidden" name="_subject" value="Shop notify me" />
             <label class="sr-only" for="shop-email">Email</label>
@@ -31,7 +31,7 @@ const nextUrl = new URL("/shop?thanks=1", Astro.site ?? Astro.url);
               name="email"
               required
               placeholder="your@email.com"
-              class="flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+              class="min-w-0 w-full flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
             />
             <button
               type="submit"
