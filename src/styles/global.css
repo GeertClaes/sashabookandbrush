@@ -1,0 +1,126 @@
+@import "@fontsource-variable/fraunces/wght.css";
+@import "@fontsource-variable/fraunces/wght-italic.css";
+@import "@fontsource-variable/dm-sans/wght.css";
+@import "@fontsource-variable/dm-sans/wght-italic.css";
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --sbb-background: #f5efe4;
+  --sbb-foreground: #241408;
+  --sbb-card: #fbf7f0;
+  --sbb-primary: #8c3340;
+  --sbb-primary-foreground: #fbf7f0;
+  --sbb-secondary: #3d5246;
+  --sbb-secondary-foreground: #fbf7f0;
+  --sbb-muted: #e8ddd0;
+  --sbb-muted-foreground: #7a6652;
+  --sbb-accent: #a65c2e;
+  --sbb-border: #d6c9b6;
+  --sbb-ring: #8c3340;
+  --sbb-sage: #a8c4a2;
+  --sbb-cream: #fbf7f0;
+  --sbb-parchment: #d6c9b6;
+  --sbb-ink-soft: #7a6652;
+  --sbb-hero-overlay: #1a0d05;
+  --sbb-footer: #241408;
+  --sbb-footer-border: #3d2e22;
+  color-scheme: light;
+}
+
+.dark {
+  --sbb-background: #140c0a;
+  --sbb-foreground: #f3eadc;
+  --sbb-card: #1c1210;
+  --sbb-primary: #d4a574;
+  --sbb-primary-foreground: #1c100c;
+  --sbb-secondary: #3d5246;
+  --sbb-secondary-foreground: #fbf7f0;
+  --sbb-muted: #241614;
+  --sbb-muted-foreground: #c4b09a;
+  --sbb-accent: #e0a070;
+  --sbb-border: #3d2a24;
+  --sbb-ring: #d4a574;
+  --sbb-sage: #b5c9b0;
+  --sbb-cream: #fbf7f0;
+  --sbb-parchment: #d6c9b6;
+  --sbb-ink-soft: #b8a08c;
+  --sbb-hero-overlay: #0a0404;
+  --sbb-footer: #0c0806;
+  --sbb-footer-border: #3d2a24;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--sbb-background);
+  --color-foreground: var(--sbb-foreground);
+  --color-card: var(--sbb-card);
+  --color-card-foreground: var(--sbb-foreground);
+  --color-primary: var(--sbb-primary);
+  --color-primary-foreground: var(--sbb-primary-foreground);
+  --color-secondary: var(--sbb-secondary);
+  --color-secondary-foreground: var(--sbb-secondary-foreground);
+  --color-muted: var(--sbb-muted);
+  --color-muted-foreground: var(--sbb-muted-foreground);
+  --color-accent: var(--sbb-accent);
+  --color-accent-foreground: var(--sbb-primary-foreground);
+  --color-border: var(--sbb-border);
+  --color-ring: var(--sbb-ring);
+  --color-sage: var(--sbb-sage);
+  --color-cream: var(--sbb-cream);
+  --color-parchment: var(--sbb-parchment);
+  --color-ink-soft: var(--sbb-ink-soft);
+  --color-hero-overlay: var(--sbb-hero-overlay);
+  --color-footer: var(--sbb-footer);
+  --color-footer-border: var(--sbb-footer-border);
+
+  --font-display: "Fraunces Variable", Georgia, serif;
+  --font-sans: "DM Sans Variable", system-ui, sans-serif;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.5rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--sbb-background);
+  color: var(--sbb-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--sbb-primary) 28%, transparent);
+}
+
+a.bg-primary:hover,
+button.bg-primary:hover {
+  filter: brightness(1.08);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sbb-border);
+  border-radius: 3px;
+}

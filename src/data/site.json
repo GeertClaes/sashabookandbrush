@@ -1,0 +1,113 @@
+{
+  "name": "Sasha",
+  "brand": "sasha & brush",
+  "handle": "@sashabookandbrush",
+  "instagram": "https://instagram.com/sashabookandbrush",
+  "bookshop": "https://bookshop.org",
+  "description": "Romantasy recs, pretty editions, and paintings between chapters from @sashabookandbrush — an Aussie reading in Wales.",
+  "hero": {
+    "image": "/images/SashaHero.jpg",
+    "imageDark": "/images/SashaHeroDark.jpg",
+    "eyebrow": "@sashabookandbrush",
+    "headline": "Books & art,",
+    "headlineItalic": "all in one place.",
+    "lede": "Romantasy, special editions, and the paintings I make between chapters — from an Aussie in Wales who always has a Kindle nearby and a cat stealing the good blanket."
+  },
+  "nav": [
+    { "href": "/", "label": "Home" },
+    { "href": "/recommendations", "label": "Books" },
+    { "href": "/art", "label": "Art" },
+    { "href": "/about", "label": "About" },
+    { "href": "/work", "label": "Work with me" },
+    { "href": "/shop", "label": "Shop" }
+  ],
+  "about": {
+    "image": "/images/SashaHero.jpg",
+    "imageDark": "/images/SashaHeroDark.jpg",
+    "imageAlt": "Sasha's reading nook: a grey armchair, warm lamps, and floor-to-ceiling bookshelves",
+    "eyebrow": "About me",
+    "headline": "Hi, I'm Sasha.",
+    "headlineItalic": "I paint too.",
+    "paragraphs": [
+      "I'm a Bookstagrammer, painter, and mental health nurse — an Aussie living in Wales, documenting books and art in one place as @sashabookandbrush. This site is the quieter home for recommendations that don't have to fight the algorithm.",
+      "My shelves lean romantasy: Sarah J. Maas, Rebecca Yarros, Rebecca Ross, dragons, fae, and morally complicated people I would not survive standing next to. I also wander into contemporary and the odd literary title when I need air — Evelyn Hugo on a garden bench, DeLillo on the art desk between brushes.",
+      "When I'm not reading, I'm usually painting, rearranging the nook, or being supervised by Dobby, who has opinions about which blanket is his. The checkered Kindle case covered in stickers is a personality trait at this point.",
+      "I'm an ARC reader and a Rattle the Stars PR influencer, which means you'll see early copies and gifted titles flagged honestly. If I post it here, it's because I actually liked it — not because someone asked me to."
+    ]
+  },
+  "readingChallenge": {
+    "year": 2026,
+    "read": 39,
+    "goal": 52
+  },
+  "facts": [
+    { "label": "Based in", "value": "Wales" },
+    { "label": "Day job", "value": "Mental health nurse" },
+    { "label": "Paints", "value": "Acrylics" },
+    { "label": "Also", "value": "ARC reader" }
+  ],
+  "art": {
+    "eyebrow": "The studio",
+    "headline": "Paintings & the kit",
+    "lede": "The other half of the name. Work on the easel, and the paints, brushes, and paper that actually get used.",
+    "homeEyebrow": "On the easel",
+    "homeHeadline": "Books and a little paint",
+    "homeHeadlineItalic": "between chapters.",
+    "suppliesEyebrow": "On the desk",
+    "suppliesHeadline": "Tools I recommend",
+    "suppliesLede": "Same idea as the books: these are the supplies that earn a spot next to the TBR pile. Affiliate links help keep the studio stocked."
+  },
+  "recommendations": {
+    "eyebrow": "The library",
+    "headline": "All recommendations",
+    "lede": "Every book here is one I've actually read and rated. Search or filter when the shelf gets long — affiliate links help keep this site running."
+  },
+  "stats": [
+    { "label": "Instagram followers", "value": "3,060" },
+    { "label": "Goodreads books", "value": "543" },
+    { "label": "Ratings", "value": "276" },
+    { "label": "Written reviews", "value": "24" }
+  ],
+  "workIntro": "I partner with publishers, authors, and book-adjacent brands on honest romantasy and bookish-art content for a small, engaged reading community. ARC reviews, pretty photography, and the occasional painting in the frame.",
+  "offers": [
+    {
+      "title": "ARC Reviews",
+      "desc": "Honest reviews for advance copies — on Instagram and this site, flagged clearly as ARCs."
+    },
+    {
+      "title": "Paid Collaborations",
+      "desc": "Feed posts, Reels, and Stories. Your brief, my voice, no fake enthusiasm."
+    },
+    {
+      "title": "Gifted Reviews",
+      "desc": "Books and bookish products in exchange for organic coverage when they actually fit the grid."
+    },
+    {
+      "title": "Books + art",
+      "desc": "Flat lays, painted stills, and site features. The brush in the name is not decorative."
+    }
+  ],
+  "packages": [
+    {
+      "title": "Stories only",
+      "desc": "Instagram Stories coverage for a title or campaign."
+    },
+    {
+      "title": "Reel + Stories",
+      "desc": "A dedicated Reel plus supporting Stories."
+    },
+    {
+      "title": "Full review package",
+      "desc": "Feed post, Reel, Stories, and a write-up on this site."
+    }
+  ],
+  "credentials": {
+    "title": "PR influencer",
+    "org": "Rattle the Stars"
+  },
+  "shop": {
+    "eyebrow": "Coming soon",
+    "headline": "The Shop",
+    "lede": "Reading trackers, TBR templates, and maybe a print or two from the easel. Check back soon — or leave your email and I'll let you know when the first pieces are live."
+  }
+}

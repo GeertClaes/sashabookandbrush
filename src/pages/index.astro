@@ -1,0 +1,186 @@
+---
+import ArtCard from "../components/ArtCard.astro";
+import BookCard from "../components/BookCard.astro";
+import SupplyCard from "../components/SupplyCard.astro";
+import currentlyReading from "../data/currently-reading.json";
+import site from "../data/site.json";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const featured = (await getCollection("books"))
+  .filter((book) => book.data.featured)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const featuredArt = (await getCollection("art"))
+  .filter((piece) => piece.data.featured)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const featuredSupplies = (await getCollection("supplies"))
+  .filter((item) => item.data.featured)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout transparentHeader>
+  <section class="relative flex min-h-[85vh] items-center overflow-hidden">
+    <img
+      src={site.hero.image}
+      alt=""
+      class="absolute inset-0 h-full w-full object-cover object-center dark:hidden"
+      width="1600"
+      height="900"
+    />
+    <img
+      src={site.hero.imageDark}
+      alt=""
+      class="absolute inset-0 hidden h-full w-full object-cover object-center dark:block"
+      width="1600"
+      height="900"
+    />
+    <div class="absolute inset-0 bg-hero-overlay/60 dark:bg-hero-overlay/40"></div>
+    <div class="relative z-10 mx-auto max-w-5xl px-6 py-32 md:px-12">
+      <p class="mb-6 text-sm font-medium tracking-[0.25em] text-accent uppercase">
+        {site.hero.eyebrow}
+      </p>
+      <h1 class="font-display mb-6 max-w-2xl text-5xl leading-[1.05] font-semibold text-cream md:text-7xl">
+        {site.hero.headline}<br />
+        <em class="font-light italic">{site.hero.headlineItalic}</em>
+      </h1>
+      <p class="mb-10 max-w-lg text-lg leading-relaxed text-parchment">
+        {site.hero.lede}
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href="/recommendations"
+          class="rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          Browse books →
+        </a>
+        <a
+          href="/art"
+          class="rounded border border-parchment/50 px-6 py-3 text-sm font-medium text-parchment transition-colors hover:border-parchment"
+        >
+          See the art
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-secondary py-16">
+    <div class="mx-auto max-w-5xl px-6 md:px-12">
+      <div class="mb-8 flex items-center gap-3">
+        <span class="h-2 w-2 animate-pulse rounded-full bg-sage"></span>
+        <p class="text-sm font-medium tracking-widest text-sage uppercase">Currently reading</p>
+      </div>
+      <div class="flex flex-col items-start gap-8 md:flex-row">
+        <img
+          src={currentlyReading.cover}
+          alt={`${currentlyReading.title} by ${currentlyReading.author}`}
+          class="h-48 w-32 shrink-0 rounded object-cover shadow-xl"
+          width="128"
+          height="192"
+        />
+        <div class="flex-1">
+          <h2 class="font-display mb-1 text-3xl font-semibold text-cream">{currentlyReading.title}</h2>
+          <p class="mb-4 text-sage">{currentlyReading.author}</p>
+          <p class="max-w-xl text-base leading-relaxed text-parchment italic">
+            “{currentlyReading.thoughts}”
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-background py-20">
+    <div class="mx-auto max-w-5xl px-6 md:px-12">
+      <div class="mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Recent favourites</p>
+          <h2 class="font-display text-4xl font-semibold text-foreground">
+            Reads I'm recommending<br /><em class="font-light italic">right now</em>
+          </h2>
+        </div>
+        <a
+          href="/recommendations"
+          class="self-start text-sm font-medium text-primary underline-offset-4 transition-all hover:underline md:self-auto"
+        >
+          Browse all →
+        </a>
+      </div>
+      <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
+        {
+          featured.map((book) => (
+            <BookCard {...book.data} />
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-muted py-20">
+    <div class="mx-auto max-w-5xl px-6 md:px-12">
+      <div class="mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">
+            {site.art.homeEyebrow}
+          </p>
+          <h2 class="font-display text-4xl font-semibold text-foreground">
+            {site.art.homeHeadline}<br />
+            <em class="font-light italic">{site.art.homeHeadlineItalic}</em>
+          </h2>
+        </div>
+        <a
+          href="/art"
+          class="self-start text-sm font-medium text-primary underline-offset-4 transition-all hover:underline md:self-auto"
+        >
+          All art →
+        </a>
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2">
+        {
+          featuredArt.map((piece) => (
+            <ArtCard {...piece.data} />
+          ))
+        }
+      </div>
+      <div class="mt-12">
+        <div class="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <h3 class="font-display text-2xl font-semibold text-foreground">
+            {site.art.suppliesHeadline}
+          </h3>
+          <a
+            href="/art#supplies"
+            class="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Full kit →
+          </a>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          {
+            featuredSupplies.map((item) => (
+              <SupplyCard {...item.data} />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-background py-14">
+    <div class="mx-auto flex max-w-5xl flex-col justify-between gap-6 px-6 md:flex-row md:items-center md:px-12">
+      <div>
+        <h3 class="font-display mb-1 text-2xl font-semibold text-foreground">
+          Thinking about collaborating?
+        </h3>
+        <p class="text-sm text-muted-foreground">
+          I work with publishers, authors, and book-adjacent brands.
+        </p>
+      </div>
+      <a
+        href="/work"
+        class="shrink-0 rounded bg-primary px-6 py-3 text-sm font-medium whitespace-nowrap text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        Work with me →
+      </a>
+    </div>
+  </section>
+</BaseLayout>

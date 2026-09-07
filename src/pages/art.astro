@@ -1,0 +1,54 @@
+---
+import ArtCard from "../components/ArtCard.astro";
+import SupplyCard from "../components/SupplyCard.astro";
+import site from "../data/site.json";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const pieces = (await getCollection("art")).sort((a, b) => a.data.order - b.data.order);
+const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title="Art" description={site.art.lede}>
+  <div class="min-h-screen bg-background">
+    <div class="mx-auto max-w-5xl px-6 py-16 md:px-12">
+      <div class="mb-12 max-w-2xl">
+        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{site.art.eyebrow}</p>
+        <h1 class="font-display mb-4 text-5xl font-semibold text-foreground">{site.art.headline}</h1>
+        <p class="leading-relaxed text-muted-foreground">{site.art.lede}</p>
+      </div>
+
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          pieces.map((piece) => (
+            <ArtCard {...piece.data} />
+          ))
+        }
+      </div>
+
+      <p class="mt-8 mb-20 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        More paintings as they come off the easel. Until the photos are up, this is the work already
+        living on Instagram.
+      </p>
+
+      <div id="supplies" class="scroll-mt-24 border-t border-border pt-16">
+        <div class="mb-10 max-w-2xl">
+          <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">
+            {site.art.suppliesEyebrow}
+          </p>
+          <h2 class="font-display mb-4 text-4xl font-semibold text-foreground">
+            {site.art.suppliesHeadline}
+          </h2>
+          <p class="leading-relaxed text-muted-foreground">{site.art.suppliesLede}</p>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          {
+            supplies.map((item) => (
+              <SupplyCard {...item.data} />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

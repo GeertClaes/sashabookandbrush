@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450" role="img" aria-label="Cover coming soon">
+  <rect width="300" height="450" fill="#e8ddd0"/>
+  <rect class="dark-bg" width="300" height="450" fill="#241614" opacity="0"/>
+  <text x="150" y="230" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#7a6652">Cover soon</text>
+</svg>

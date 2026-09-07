@@ -1,0 +1,180 @@
+---
+import Logo from "./Logo.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+import site from "../data/site.json";
+
+interface Props {
+  transparent?: boolean;
+}
+
+const { transparent = false } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+
+function isActive(href: string) {
+  if (href === "/") return path === "/";
+  return path === href || path.startsWith(`${href}/`);
+}
+---
+
+<header
+  id="site-header"
+  class:list={[
+    "fixed top-0 right-0 left-0 z-50 transition-colors duration-300",
+    transparent
+      ? "bg-transparent"
+      : "border-b border-border bg-card/95 backdrop-blur-sm",
+  ]}
+  data-transparent={transparent ? "true" : "false"}
+>
+  <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-6 md:px-12">
+    <a
+      href="/"
+      class:list={[
+        "font-display text-lg font-semibold tracking-tight",
+        transparent ? "text-cream" : "text-foreground",
+      ]}
+      data-logo
+    >
+      <Logo />
+    </a>
+
+    <nav class="hidden items-center gap-5 lg:flex" aria-label="Primary">
+      {
+        site.nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "text-sm font-medium transition-colors",
+              isActive(item.href)
+                ? transparent
+                  ? "text-cream"
+                  : "text-primary"
+                : transparent
+                  ? "text-parchment hover:text-cream"
+                  : "text-muted-foreground hover:text-foreground",
+            ]}
+            aria-current={isActive(item.href) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <ThemeToggle transparent={transparent} />
+    </nav>
+
+    <div class="flex items-center gap-1 lg:hidden">
+      <ThemeToggle transparent={transparent} />
+      <button
+        id="menu-toggle"
+        type="button"
+        class:list={[
+          "p-2",
+          transparent ? "text-cream" : "text-foreground",
+        ]}
+        aria-label="Open menu"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+      >
+        <svg id="icon-open" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        <svg id="icon-close" class="hidden h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="mobile-menu" class="fixed inset-0 z-40 hidden flex-col bg-card pt-16 lg:hidden" hidden>
+  <nav class="flex flex-col gap-2 p-8" aria-label="Mobile">
+    {
+      site.nav.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            "font-display border-b border-border py-3 text-left text-2xl font-medium",
+            isActive(item.href) ? "text-primary" : "text-foreground",
+          ]}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
+
+<script>
+  const header = document.getElementById("site-header");
+  const toggle = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  const iconOpen = document.getElementById("icon-open");
+  const iconClose = document.getElementById("icon-close");
+  const logo = header?.querySelector("[data-logo]");
+  const transparent = header?.dataset.transparent === "true";
+
+  function setOpen(open: boolean) {
+    if (!toggle || !menu || !iconOpen || !iconClose || !header) return;
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    menu.classList.toggle("hidden", !open);
+    menu.classList.toggle("flex", open);
+    menu.hidden = !open;
+    iconOpen.classList.toggle("hidden", open);
+    iconClose.classList.toggle("hidden", !open);
+    document.body.style.overflow = open ? "hidden" : "";
+
+    if (transparent) {
+      header.classList.toggle("bg-transparent", !open);
+      header.classList.toggle("bg-card", open);
+      header.classList.toggle("border-b", open);
+      header.classList.toggle("border-border", open);
+      logo?.classList.toggle("text-cream", !open);
+      logo?.classList.toggle("text-foreground", open);
+      toggle.classList.toggle("text-cream", !open);
+      toggle.classList.toggle("text-foreground", open);
+      document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+        button.classList.toggle("text-cream", !open);
+        button.classList.toggle("hover:text-parchment", !open);
+        button.classList.toggle("text-foreground", open);
+        button.classList.toggle("hover:text-primary", open);
+      });
+    }
+  }
+
+  toggle?.addEventListener("click", () => {
+    const open = toggle.getAttribute("aria-expanded") !== "true";
+    setOpen(open);
+  });
+
+  function currentTheme() {
+    return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  }
+
+  function applyTheme(theme: "light" | "dark") {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
+    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+      button.setAttribute(
+        "aria-label",
+        theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
+      );
+    });
+  }
+
+  document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    button.setAttribute(
+      "aria-label",
+      currentTheme() === "dark" ? "Switch to light mode" : "Switch to dark mode",
+    );
+    button.addEventListener("click", () => {
+      applyTheme(currentTheme() === "dark" ? "light" : "dark");
+    });
+  });
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
+    if (!localStorage.getItem("theme")) {
+      applyTheme(event.matches ? "dark" : "light");
+    }
+  });
+</script>

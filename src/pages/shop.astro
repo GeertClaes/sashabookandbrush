@@ -1,0 +1,56 @@
+---
+import site from "../data/site.json";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const formspreeId = import.meta.env.PUBLIC_FORMSPREE_ID;
+const thanks = Astro.url.searchParams.has("thanks");
+const nextUrl = new URL("/shop?thanks=1", Astro.site ?? Astro.url);
+---
+
+<BaseLayout
+  title="Shop"
+  description="Reading trackers, TBR templates, and bookish printables — coming soon."
+>
+  <div class="flex min-h-[70vh] items-center justify-center bg-background">
+    <div class="mx-auto max-w-md px-6 py-20 text-center">
+      <p class="mb-6 text-5xl" aria-hidden="true">📚</p>
+      <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{site.shop.eyebrow}</p>
+      <h1 class="font-display mb-4 text-4xl font-semibold text-foreground">{site.shop.headline}</h1>
+      <p class="mb-8 leading-relaxed text-muted-foreground">{site.shop.lede}</p>
+      {
+        thanks ? (
+          <p class="text-sm text-secondary">You're on the list — thank you.</p>
+        ) : formspreeId ? (
+          <form action={`https://formspree.io/f/${formspreeId}`} method="POST" class="flex gap-2">
+            <input type="hidden" name="_next" value={nextUrl.href} />
+            <input type="hidden" name="_subject" value="Shop notify me" />
+            <label class="sr-only" for="shop-email">Email</label>
+            <input
+              id="shop-email"
+              type="email"
+              name="email"
+              required
+              placeholder="your@email.com"
+              class="flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+            />
+            <button
+              type="submit"
+              class="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium whitespace-nowrap text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              Notify me
+            </button>
+          </form>
+        ) : (
+          <a
+            href={site.instagram}
+            class="inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Follow along on Instagram
+          </a>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>

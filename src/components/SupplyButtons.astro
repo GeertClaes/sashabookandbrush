@@ -1,0 +1,31 @@
+---
+interface Props {
+  amazon: string;
+  shop?: string;
+  shopLabel?: string;
+}
+
+const { amazon, shop, shopLabel = "Shop" } = Astro.props;
+const affiliateRel = "sponsored noopener noreferrer";
+---
+
+<div class="mt-4 flex flex-wrap gap-2">
+  <a
+    href={amazon}
+    rel={affiliateRel}
+    class="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium bg-secondary text-secondary-foreground hover:opacity-90 transition-opacity"
+  >
+    Amazon
+  </a>
+  {
+    shop && (
+      <a
+        href={shop}
+        rel={affiliateRel}
+        class="inline-flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+      >
+        {shopLabel}
+      </a>
+    )
+  }
+</div>

@@ -1,0 +1,25 @@
+---
+import SupplyButtons from "./SupplyButtons.astro";
+
+interface Props {
+  title: string;
+  brand: string;
+  category: string;
+  note: string;
+  amazon: string;
+  shop?: string;
+  shopLabel?: string;
+}
+
+const { title, brand, category, note, amazon, shop, shopLabel } = Astro.props;
+---
+
+<article class="rounded-lg border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+  <span class="mb-2 block text-xs font-medium tracking-widest text-accent uppercase">
+    {category}
+  </span>
+  <h3 class="font-display mb-0.5 text-xl font-semibold leading-snug text-foreground">{title}</h3>
+  <p class="mb-3 text-sm text-muted-foreground">{brand}</p>
+  <p class="text-sm leading-relaxed text-foreground">{note}</p>
+  <SupplyButtons amazon={amazon} shop={shop} shopLabel={shopLabel} />
+</article>

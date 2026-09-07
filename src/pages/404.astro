@@ -1,0 +1,21 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Page not found" description="This page has wandered off the shelf.">
+  <div class="flex min-h-[70vh] items-center justify-center bg-background px-6 text-center">
+    <div>
+      <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">404</p>
+      <h1 class="font-display mb-4 text-4xl font-semibold text-foreground">
+        This page isn't on the shelf
+      </h1>
+      <p class="mb-8 text-muted-foreground">It may have been mis-shelved. Try the library instead.</p>
+      <a
+        href="/recommendations"
+        class="rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        Browse recommendations →
+      </a>
+    </div>
+  </div>
+</BaseLayout>
