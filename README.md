@@ -1,8 +1,10 @@
 # sashabookandbrush
 
-Personal site for [@sashabookandbrush](https://instagram.com/sashabookandbrush): books, art, affiliate links, and a simple work-with-me page.
+Personal site for [@sashabookandbrush](https://instagram.com/sashabookandbrush), live at [sashabookandbrush.com](https://sashabookandbrush.com): books, art, affiliate links, and a work-with-me page that points to Instagram.
 
-See [Plan.md](Plan.md) and [WebsiteBuildPlan.md](WebsiteBuildPlan.md) for the full project plan.
+**Goodreads is the diary; this site is the shop window.** She rates and logs progress on Goodreads. The site does not write back. The full TBR stays off the public Books page.
+
+See [Plan.md](Plan.md) for remaining go-live and account work, and [WebsiteBuildPlan.md](WebsiteBuildPlan.md) for what is already in the repo.
 
 ## Local development
 
@@ -50,9 +52,9 @@ dateRead: "2024-06-12"
 5. `status` is `read` or `currently-reading`. Use `order` only as a fallback; the Books page sorts by date, rating, title, and so on.
 6. Rebuild or refresh the dev server.
 
-Each book also gets a page at `/books/<filename>` (for example `/books/fourth-wing`) with the full note, ISBN, dates, and other Goodreads fields. Cards on Home and Books link there.
+Each book also gets a page at `/books/<filename>` (for example `/books/fourth-wing`) with the note, rating, publisher/year, added and read dates, a page-length phrase, rereads, ISBN, and buy buttons. Cards on Home and Books link there.
 
-Genres on the Recommendations page are generated from whatever is in these files.
+The Books page (`/recommendations`) has three views: a five-star wall, the full library (shelf, rating, genre, year, search), and series stacks. Genres are generated from these files. On small screens the view tabs are icon-only.
 
 ### Import from Goodreads
 
@@ -88,7 +90,7 @@ Then refresh the Books page. Shelf, rating, genre, year read, and sort are indep
 
 ### Library editor (`/admin`)
 
-Rate books on Goodreads. The site editor is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. It is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
+Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. Tabs are **Books**, **Art**, and **Tools**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
 
 On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` opens. Saves commit to GitHub; Pages rebuilds (usually about a minute). A CSV upload writes `data/export.csv`, then [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) runs `import-goodreads.mjs --skip-covers` and commits library files.
 
@@ -203,13 +205,16 @@ Do not also schedule a GitHub Action against the same hook.
 
 CSV can also be uploaded on `/admin`. That commits `data/export.csv`; GitHub Actions imports it with `--skip-covers` and Pages rebuilds again. New covers can be added in the editor afterwards, or run `node scripts/import-goodreads.mjs --missing-covers` locally.
 
-### Site copy, stats, and packages
+### Site copy and stats
 
 Edit `src/data/site.json` for:
 
 - Hero text, About bio, Art page copy
-- Instagram URL
+- Instagram URL and Goodreads profile
 - Shop placeholder copy
+- Follower / library stats on About
+
+`offers` and `packages` in that file are unused for now. `/work` is Instagram-only.
 
 ### Shop waitlist
 
@@ -217,7 +222,17 @@ Edit `src/data/site.json` for:
 2. Copy `.env.example` to `.env`.
 3. Set `PUBLIC_FORMSPREE_ID` to the form id (the part after `/f/`).
 
-Until that is set, the Shop page skips the email field. Collaborations go through Instagram (`/work`).
+Until that is set, Shop links to Instagram instead of an email field. Collaborations also go through Instagram (`/work`).
+
+### Favicon and share card
+
+The mark is a cream tile, navy book, gold italic **S**, and a diagonal brush (`public/favicon.svg`, `public/icon.svg`, `public/images/og.svg`). Cover and art placeholders use the same drawing.
+
+After editing those SVGs, regenerate the PNGs:
+
+```bash
+node scripts/render-brand-assets.mjs
+```
 
 ## Docker (home server)
 
@@ -225,10 +240,10 @@ Until that is set, the Shop page skips the email field. Collaborations go throug
 docker compose up --build -d
 ```
 
-The site is served on port **8080**. Point your domain (and Caddy/Traefik HTTPS) at that port when the domain is ready.
+The site is served on port **8080**. Production is Cloudflare Pages; this compose file is only a home-server fallback.
 
 ## Design
 
-Warm, bookish palette: cream background, burgundy primary, forest green secondary, rust accent. Headings use Fraunces; body uses DM Sans.
+Warm, bookish palette: cream background (`#F5EFE4`), burgundy primary, forest green secondary, rust accent. Headings use Fraunces; body uses DM Sans. Header and footer wordmark: `SashaBook&Brush`.
 
-The home hero and About photo use `public/images/SashaHero.jpg` in light mode and `public/images/SashaHeroDark.jpg` in dark mode.
+The favicon and share image use a navy book and gold **S** on a cream tile (see above). The home hero and About photo use `public/images/SashaHero.jpg` in light mode and `public/images/SashaHeroDark.jpg` in dark mode.

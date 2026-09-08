@@ -2,7 +2,7 @@
 
 **Owner:** Parent (tech, setup, maintenance)  
 **Creator:** Sasha (@sashabookandbrush)  
-**Status:** Site built locally; go-live and accounts still open  
+**Status:** Site live at sashabookandbrush.com; Access, rebuild Worker, and affiliate accounts still open  
 **Timeline:** 3–6 months  
 **Related:** [Website Build Plan](WebsiteBuildPlan.md) — stack, pages, and what is already in the repo
 
@@ -63,7 +63,7 @@ This is support work, not a takeover. Sasha remains the voice of the brand. Pare
 | A1 | Build a clean personal website | Parent | **Done in repo** (Astro). Live host is **Cloudflare Pages**, not the home server. Docker remains as an optional fallback. |
 | A2 | Domain `sashabookandbrush.com` | Parent | **Done.** Cloudflare registrar + Pages custom domain. |
 | A3 | Bookshop.org UK + Amazon Associates | Parent | **Not started** (`affiliates` IDs in `src/data/site.json` are empty) |
-| A4 | One-page media kit (PDF) | Parent | **Not started.** Work-with-me page exists on the site. |
+| A4 | One-page media kit (PDF) | Parent | **Not started.** `/work` exists and points to Instagram (no on-page packages). |
 | A5 | Website + affiliate links in Instagram bio | Parent + Sasha | **Not started** |
 
 **Media kit should highlight**
@@ -191,7 +191,7 @@ Revenue targets in section 2 are **outcomes**, not a requirement to call the bui
 
 ## 10. Remaining to-do (parent)
 
-Code is on GitHub and the custom domain is live. Remaining: rebuild Worker, `/admin` Access, affiliate accounts.
+Code is on GitHub and **[sashabookandbrush.com](https://sashabookandbrush.com)** is live. Remaining: rebuild Worker, `/admin` Access, affiliate accounts.
 
 How the site is meant to work: **Goodreads is the diary. The site is the shop window.** She rates and logs progress on Goodreads. The site does not write back. Full TBR stays off the public Books page.
 
@@ -199,7 +199,7 @@ How the site is meant to work: **Goodreads is the diary. The site is the shop wi
 
 - [x] Review local changes (library import, RSS sync, `/admin`, Pages Functions, rebuild Worker)
 - [x] Commit and push to `main`
-- [ ] Confirm Cloudflare Pages is building from this repo (`npm run build`, output `dist`) — site is serving at the domain
+- [x] Cloudflare Pages builds from this repo (`npm run build`, output `dist`); site is live at the domain
 
 ### B. Domain and Pages
 
@@ -241,7 +241,7 @@ Bookmark for Sasha later: `https://sashabookandbrush.com/admin` (not in the publ
 
 - [ ] Redeploy Pages after env vars
 - [ ] Sign in at `/admin` with Google; save a test note; confirm a GitHub commit and a Pages rebuild
-- [ ] Optional: Formspree id as `PUBLIC_FORMSPREE_ID` on Pages (Work / Shop contact)
+- [ ] Optional: Formspree id as `PUBLIC_FORMSPREE_ID` on Pages (Shop waitlist only; `/work` is Instagram)
 
 ### E. Affiliates and go-live (still needed for revenue)
 
@@ -250,7 +250,7 @@ Bookmark for Sasha later: `https://sashabookandbrush.com/admin` (not in the publ
 - [ ] Commit those IDs; confirm buy buttons on a book page and a featured home card
 - [ ] Media kit PDF (A4)
 - [ ] Instagram bio: site URL (and shop/affiliate once IDs exist)
-- [ ] Show Sasha `/admin`: notes, featured, covers, CSV drop. Ratings stay on Goodreads
+- [ ] Show Sasha `/admin`: notes, featured, covers, art, tools, CSV drop. Ratings stay on Goodreads
 - [ ] Pick a few home **featured** books with her (aim 4–9)
 
 Local editor without Access: `npm run admin`, then `/admin` on the dev server.
