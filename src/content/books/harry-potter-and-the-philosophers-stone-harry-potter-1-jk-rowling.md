@@ -5,8 +5,8 @@ cover: "harry-potter-and-the-philosophers-stone-harry-potter-1-jk-rowling.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781551927008
-isbn10: 1551927004
+isbn: "9781551927008"
+isbn10: "1551927004"
 featured: false
 order: 1032
 status: "read"

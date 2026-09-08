@@ -5,8 +5,8 @@ cover: "flawless-chestnut-springs-1-elsie-silver.jpg"
 note: ""
 rating: 3
 genre: "Read"
-isbn: 9781959285854
-isbn10: 1959285858
+isbn: "9781959285854"
+isbn10: "1959285858"
 featured: false
 order: 1106
 status: "read"

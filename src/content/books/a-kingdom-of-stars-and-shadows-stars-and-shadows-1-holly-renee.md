@@ -5,8 +5,8 @@ cover: "a-kingdom-of-stars-and-shadows-stars-and-shadows-1-holly-renee.jpg"
 note: ""
 rating: 3
 genre: "Read"
-isbn: 9781464249839
-isbn10: 1464249830
+isbn: "9781464249839"
+isbn10: "1464249830"
 featured: false
 order: 1161
 status: "read"

@@ -5,8 +5,8 @@ cover: "what-lies-between-us-john-marrs.jpg"
 note: ""
 rating: 4
 genre: "Read"
-isbn: 9781542017022
-isbn10: 1542017025
+isbn: "9781542017022"
+isbn10: "1542017025"
 featured: false
 order: 1135
 status: "read"

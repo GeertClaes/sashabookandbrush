@@ -5,8 +5,8 @@ cover: "the-never-king-vicious-lost-boys-1-nikki-st-crowe.jpg"
 note: ""
 rating: 3
 genre: "Read"
-isbn: 9781638934370
-isbn10: 1638934371
+isbn: "9781638934370"
+isbn10: "1638934371"
 featured: false
 order: 1139
 status: "read"

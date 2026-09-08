@@ -5,8 +5,8 @@ cover: "fever-dream-emerald-lake-1-elsie-silver.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781761635359
-isbn10: 1761635352
+isbn: "9781761635359"
+isbn10: "1761635352"
 featured: false
 order: 1011
 status: "read"

@@ -5,8 +5,8 @@ cover: "hopeless-chestnut-springs-5-elsie-silver.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781728297040
-isbn10: 1728297044
+isbn: "9781728297040"
+isbn10: "1728297044"
 featured: false
 order: 1090
 status: "read"

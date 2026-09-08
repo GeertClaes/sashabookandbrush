@@ -5,8 +5,8 @@ cover: "powerful-the-powerless-trilogy-15-lauren-roberts.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781665966320
-isbn10: 1665966327
+isbn: "9781665966320"
+isbn10: "1665966327"
 featured: false
 order: 1109
 status: "read"

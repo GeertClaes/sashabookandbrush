@@ -5,8 +5,8 @@ cover: "the-seven-year-slip-ashley-poston.jpg"
 note: ""
 rating: 4
 genre: "Read"
-isbn: 9780593336526
-isbn10: 0593336526
+isbn: "9780593336526"
+isbn10: "0593336526"
 featured: false
 order: 1070
 status: "read"

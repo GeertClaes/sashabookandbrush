@@ -5,8 +5,8 @@ cover: "throne-of-glass-throne-of-glass-1-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781526635297
-isbn10: 1526635291
+isbn: "9781526635297"
+isbn10: "1526635291"
 featured: false
 order: 1171
 status: "read"

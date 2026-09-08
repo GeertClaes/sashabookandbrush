@@ -5,8 +5,8 @@ cover: "caring-for-nigel-diary-of-a-wife-coping-with-her-husbands-dementia-eilee
 note: ""
 rating: 4
 genre: "Read"
-isbn: 9781492930709
-isbn10: 1492930709
+isbn: "9781492930709"
+isbn10: "1492930709"
 featured: false
 order: 1165
 status: "read"

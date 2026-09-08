@@ -5,8 +5,8 @@ cover: "the-assassins-blade-throne-of-glass-01-05-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781526635235
-isbn10: 1526635232
+isbn: "9781526635235"
+isbn10: "1526635232"
 featured: false
 order: 1170
 status: "read"

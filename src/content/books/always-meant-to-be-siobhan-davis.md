@@ -5,8 +5,8 @@ cover: "always-meant-to-be-siobhan-davis.jpg"
 note: "What the f did I just read"
 rating: 1
 genre: "Read"
-isbn: 9781959285427
-isbn10: 1959285424
+isbn: "9781959285427"
+isbn10: "1959285424"
 featured: false
 order: 1122
 status: "read"

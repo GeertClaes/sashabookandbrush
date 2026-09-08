@@ -5,8 +5,8 @@ cover: "a-game-of-fate-hades-saga-1-scarlett-st-clair.jpg"
 note: ""
 rating: 3
 genre: "Read"
-isbn: 9781735771915
-isbn10: 1735771910
+isbn: "9781735771915"
+isbn10: "1735771910"
 featured: false
 order: 1112
 status: "read"

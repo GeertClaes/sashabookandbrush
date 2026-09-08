@@ -5,8 +5,8 @@ cover: "a-game-of-retribution-hades-saga-2-scarlett-st-clair.jpg"
 note: ""
 rating: 3
 genre: "Read"
-isbn: 9781728264448
-isbn10: 1728264448
+isbn: "9781728264448"
+isbn10: "1728264448"
 featured: false
 order: 1111
 status: "read"

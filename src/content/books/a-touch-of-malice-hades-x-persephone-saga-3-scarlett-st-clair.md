@@ -5,8 +5,8 @@ cover: "a-touch-of-malice-hades-x-persephone-saga-3-scarlett-st-clair.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781728261676
-isbn10: 1728261678
+isbn: "9781728261676"
+isbn10: "1728261678"
 featured: false
 order: 1185
 status: "read"

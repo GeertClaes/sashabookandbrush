@@ -5,8 +5,8 @@ cover: "the-dark-one-vicious-lost-boys-2-nikki-st-crowe.jpg"
 note: ""
 rating: 3
 genre: "Read"
-isbn: 9781959344148
-isbn10: 1959344145
+isbn: "9781959344148"
+isbn10: "1959344145"
 featured: false
 order: 1138
 status: "read"

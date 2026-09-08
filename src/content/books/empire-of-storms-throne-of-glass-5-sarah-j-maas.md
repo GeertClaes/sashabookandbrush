@@ -5,8 +5,8 @@ cover: "empire-of-storms-throne-of-glass-5-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781547604364
-isbn10: 1547604360
+isbn: "9781547604364"
+isbn10: "1547604360"
 featured: false
 order: 1166
 status: "read"

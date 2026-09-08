@@ -5,8 +5,8 @@ cover: "a-touch-of-chaos-hades-x-persephone-saga-4-scarlett-st-clair.jpg"
 note: ""
 rating: 3
 genre: "Read"
-isbn: 9781464238871
-isbn10: 1464238871
+isbn: "9781464238871"
+isbn10: "1464238871"
 featured: false
 order: 1110
 status: "read"

@@ -5,8 +5,8 @@ cover: "battle-mage-peter-a-flannery.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9781739934132
-isbn10: 173993413X
+isbn: "9781739934132"
+isbn10: "173993413X"
 featured: false
 order: 1242
 status: "read"

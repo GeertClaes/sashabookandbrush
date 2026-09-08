@@ -5,8 +5,8 @@ cover: "a-touch-of-darkness-hades-x-persephone-1-scarlett-st-clair.jpg"
 note: ""
 rating: 5
 genre: "Read"
-isbn: 9780991132379
-isbn10: 0991132378
+isbn: "9780991132379"
+isbn10: "0991132378"
 featured: false
 order: 1187
 status: "read"

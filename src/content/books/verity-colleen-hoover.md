@@ -5,8 +5,8 @@ cover: "verity-colleen-hoover.jpg"
 note: ""
 rating: 4
 genre: "Read"
-isbn: 9781538742112
-isbn10: 153874211X
+isbn: "9781538742112"
+isbn10: "153874211X"
 featured: false
 order: 1206
 status: "read"
