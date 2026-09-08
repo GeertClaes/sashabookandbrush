@@ -222,16 +222,31 @@ const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : nu
                 <li>
                   <a
                     href={bookHref(entry.id)}
-                    class="block rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-foreground"
+                    class="flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-foreground"
                   >
-                    <p class="font-display font-semibold text-foreground">{entry.data.title}</p>
-                    <p class="mt-1 text-sm text-muted-foreground">
-                      {entry.data.status === "currently-reading"
-                        ? "Reading now"
-                        : entry.data.dateRead
-                          ? `Read ${formatFullDate(entry.data.dateRead)}`
-                          : entry.data.author}
-                    </p>
+                    <CoverImage
+                      cover={entry.data.cover}
+                      alt=""
+                      class="h-24 w-16 shrink-0 rounded object-cover shadow-sm"
+                      width={80}
+                      height={120}
+                      sizes="64px"
+                    />
+                    <div class="min-w-0">
+                      <p class="font-display font-semibold leading-snug text-foreground">{entry.data.title}</p>
+                      {entry.data.rating > 0 && (
+                        <div class="mt-1.5">
+                          <StarRating rating={entry.data.rating} />
+                        </div>
+                      )}
+                      <p class="mt-1 text-sm text-muted-foreground">
+                        {entry.data.status === "currently-reading"
+                          ? "Reading now"
+                          : entry.data.dateRead
+                            ? `Read ${formatFullDate(entry.data.dateRead)}`
+                            : entry.data.author}
+                      </p>
+                    </div>
                   </a>
                 </li>
               ))}
