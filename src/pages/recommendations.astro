@@ -65,7 +65,7 @@ const selectClass =
       </div>
 
       <div
-        class="mb-10 flex border-b border-border"
+        class="mb-6 flex border-b border-border sm:mb-10"
         role="tablist"
         aria-label="Library views"
       >
@@ -130,6 +130,7 @@ const selectClass =
       </div>
 
       <div id="panel-series" role="tabpanel" aria-labelledby="tab-series" data-view-panel="series" hidden>
+        <h2 class="font-display mb-3 text-2xl font-semibold text-foreground sm:hidden">Series</h2>
         {
           seriesGroups.length > 0 ? (
             <div class="space-y-10">
@@ -153,6 +154,7 @@ const selectClass =
       </div>
 
       <div id="panel-stars" role="tabpanel" aria-labelledby="tab-stars" data-view-panel="stars">
+        <h2 class="font-display mb-3 text-2xl font-semibold text-foreground sm:hidden">Five stars</h2>
         {
           fiveStars.length > 0 ? (
             <div>
@@ -168,6 +170,7 @@ const selectClass =
       </div>
 
       <div id="panel-library" role="tabpanel" aria-labelledby="tab-library" data-view-panel="library" hidden>
+      <h2 class="font-display mb-3 text-2xl font-semibold text-foreground sm:hidden">Library</h2>
       <div
         class="sticky top-16 z-30 mb-8 border-b border-border bg-background/95 py-3 backdrop-blur-sm"
         data-library-controls

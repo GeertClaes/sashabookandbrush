@@ -25,6 +25,15 @@ order: ${order}
 export async function onRequestPost(context) {
   try {
     const body = await readJson(context.request);
+    if (body.delete) {
+      const slug = safeSlug(body.slug);
+      const filePath = `src/content/supplies/${slug}.md`;
+      const existing = await tryGetTextFile(context.env, filePath);
+      if (!existing) return json({ error: "Tool not found" }, 404);
+      await commitFiles(context.env, `Admin: delete supply ${slug}`, [{ path: filePath, delete: true }]);
+      return json({ ok: true, slug, deleted: true });
+    }
+
     const title = String(body.title || "").trim();
     if (!title) return json({ error: "Title is required" }, 400);
 

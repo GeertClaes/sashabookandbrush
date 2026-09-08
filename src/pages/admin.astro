@@ -280,9 +280,18 @@ const stats = [
               <span data-art-drop-label>Drop a photo here, or click to choose</span>
             </button>
             <input type="file" data-art-image accept="image/jpeg,image/png,image/webp" class="hidden" />
-            <button type="button" data-art-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
-              Save painting
-            </button>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" data-art-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+                Save painting
+              </button>
+              <button
+                type="button"
+                data-art-delete
+                class="hidden rounded border border-border px-4 py-2 text-sm text-muted-foreground hover:border-primary hover:text-foreground"
+              >
+                Delete
+              </button>
+            </div>
           </section>
         </div>
 
@@ -371,9 +380,18 @@ const stats = [
                 />
               </label>
             </div>
-            <button type="button" data-supply-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
-              Save tool
-            </button>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" data-supply-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+                Save tool
+              </button>
+              <button
+                type="button"
+                data-supply-delete
+                class="hidden rounded border border-border px-4 py-2 text-sm text-muted-foreground hover:border-primary hover:text-foreground"
+              >
+                Delete
+              </button>
+            </div>
           </section>
         </div>
 
@@ -600,6 +618,7 @@ const stats = [
     document.querySelector("[data-art-note]").value = piece.note || "";
     document.querySelector("[data-art-featured]").checked = Boolean(piece.featured);
     document.querySelector("[data-art-order]").value = piece.order || 0;
+    document.querySelector("[data-art-delete]")?.classList.toggle("hidden", Boolean(piece.create) || !piece.slug);
     resetDrop("art", piece.image || "", piece.image ? "Drop a new photo to replace it" : "");
   }
 
@@ -615,6 +634,7 @@ const stats = [
     document.querySelector("[data-supply-amazon]").value = displayUrl(item.amazon);
     document.querySelector("[data-supply-shop]").value = item.shop || "";
     document.querySelector("[data-supply-shop-label]").value = item.shopLabel || "";
+    document.querySelector("[data-supply-delete]")?.classList.toggle("hidden", Boolean(item.create) || !item.slug);
   }
 
   async function boot() {
@@ -800,6 +820,7 @@ const stats = [
       });
       currentArt.slug = created.slug || currentArt.slug;
       currentArt.create = false;
+      document.querySelector("[data-art-delete]")?.classList.remove("hidden");
       const existing = artPieces.find((item) => item.slug === currentArt.slug);
       if (existing) Object.assign(existing, currentArt);
       else artPieces.push({ ...currentArt });
@@ -823,6 +844,30 @@ const stats = [
         status.textContent = isDev
           ? `Saved ${currentArt.title}. Refresh the site to see it.`
           : `Saved ${currentArt.title}. It will show on the site after the rebuild.`;
+      }
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    }
+  });
+
+  document.querySelector("[data-art-delete]")?.addEventListener("click", async () => {
+    if (!currentArt?.slug || currentArt.create) return;
+    const title = currentArt.title || currentArt.slug;
+    if (!confirm(`Delete "${title}"? It will leave the Art page after the next rebuild.`)) return;
+    try {
+      await call("/art", {
+        method: "POST",
+        body: JSON.stringify({ delete: true, slug: currentArt.slug }),
+      });
+      const index = artPieces.findIndex((item) => item.slug === currentArt.slug);
+      if (index >= 0) artPieces.splice(index, 1);
+      renderArtList();
+      artEditor?.classList.add("hidden");
+      currentArt = null;
+      if (status) {
+        status.textContent = isDev
+          ? `Deleted ${title}. Refresh the site to see it gone.`
+          : `Deleted ${title}. It will leave the site after the rebuild.`;
       }
     } catch (error) {
       if (status) status.textContent = error.message;
@@ -859,6 +904,7 @@ const stats = [
       });
       currentSupply.slug = created.slug || currentSupply.slug;
       currentSupply.create = false;
+      document.querySelector("[data-supply-delete]")?.classList.remove("hidden");
       const existing = supplies.find((item) => item.slug === currentSupply.slug);
       if (existing) Object.assign(existing, currentSupply);
       else supplies.push({ ...currentSupply });
@@ -868,6 +914,30 @@ const stats = [
         status.textContent = isDev
           ? `Saved ${currentSupply.title}. Refresh the site to see it.`
           : `Saved ${currentSupply.title}. It will show on the site after the rebuild.`;
+      }
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    }
+  });
+
+  document.querySelector("[data-supply-delete]")?.addEventListener("click", async () => {
+    if (!currentSupply?.slug || currentSupply.create) return;
+    const title = currentSupply.title || currentSupply.slug;
+    if (!confirm(`Delete "${title}"? It will leave the Art page after the next rebuild.`)) return;
+    try {
+      await call("/supply", {
+        method: "POST",
+        body: JSON.stringify({ delete: true, slug: currentSupply.slug }),
+      });
+      const index = supplies.findIndex((item) => item.slug === currentSupply.slug);
+      if (index >= 0) supplies.splice(index, 1);
+      renderSupplyList();
+      supplyEditor?.classList.add("hidden");
+      currentSupply = null;
+      if (status) {
+        status.textContent = isDev
+          ? `Deleted ${title}. Refresh the site to see it gone.`
+          : `Deleted ${title}. It will leave the site after the rebuild.`;
       }
     } catch (error) {
       if (status) status.textContent = error.message;

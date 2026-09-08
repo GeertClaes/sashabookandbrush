@@ -1,7 +1,38 @@
 import { applyYamlFields, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
-import { commitFiles, tryGetTextFile } from "./_lib/github.js";
+import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
 
 const MAX_NOTE = 8000;
+
+function yamlField(text, key) {
+  const match = String(text || "").match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
+  if (!match) return "";
+  let value = match[1].trim();
+  if (value.startsWith('"') && value.endsWith('"')) {
+    value = value.slice(1, -1).replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+  }
+  return value;
+}
+
+function artPhotoRepoPath(image) {
+  const value = String(image || "").trim();
+  const match = value.match(/^\/images\/art\/([a-z0-9._-]+)$/i);
+  return match ? `public/images/art/${match[1]}` : "";
+}
+
+async function deletePainting(env, slug) {
+  const filePath = `src/content/art/${slug}.md`;
+  const existing = await tryGetTextFile(env, filePath);
+  if (!existing) return json({ error: "Painting not found" }, 404);
+
+  const files = [{ path: filePath, delete: true }];
+  const photo = artPhotoRepoPath(yamlField(existing, "image"));
+  if (photo && (await fileExists(env, photo))) {
+    files.push({ path: photo, delete: true });
+  }
+
+  await commitFiles(env, `Admin: delete art ${slug}`, files);
+  return json({ ok: true, slug, deleted: true });
+}
 
 function artMarkdown({ title, medium, note, featured, order, image }) {
   const imageLine = image ? `image: ${yamlString(image)}\n` : "";
@@ -18,6 +49,11 @@ ${imageLine}---
 export async function onRequestPost(context) {
   try {
     const body = await readJson(context.request);
+    if (body.delete) {
+      const slug = safeSlug(body.slug);
+      return await deletePainting(context.env, slug);
+    }
+
     const title = String(body.title || "").trim();
     if (!title) return json({ error: "Title is required" }, 400);
 

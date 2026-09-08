@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -107,6 +107,20 @@ function slugFromTitle(title) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+async function removeFile(file) {
+  try {
+    await unlink(file);
+  } catch (error) {
+    if (error && error.code !== "ENOENT") throw error;
+  }
+}
+
+function artPhotoFile(image) {
+  const value = String(image || "").trim();
+  const match = value.match(/^\/images\/art\/([a-z0-9._-]+)$/i);
+  return match ? path.join(ART_IMAGES_DIR, match[1]) : "";
 }
 
 async function listBooks() {
@@ -219,6 +233,26 @@ const server = createServer(async (req, res) => {
 
     if (pathname === "/api/art" && req.method === "POST") {
       const body = JSON.parse((await readBody(req)) || "{}");
+      if (body.delete) {
+        const slug = path.basename(String(body.slug || ""));
+        if (!slug) {
+          json(res, 400, { error: "Missing name" });
+          return;
+        }
+        const file = path.join(ART_DIR, `${slug}.md`);
+        let existing = null;
+        try {
+          existing = await readFile(file, "utf8");
+        } catch {
+          json(res, 404, { error: "Painting not found" });
+          return;
+        }
+        const photo = artPhotoFile(frontField(existing, "image"));
+        await removeFile(file);
+        if (photo) await removeFile(photo);
+        json(res, 200, { ok: true, slug, deleted: true });
+        return;
+      }
       const title = String(body.title || "").trim();
       if (!title) {
         json(res, 400, { error: "Title is required" });
@@ -268,6 +302,22 @@ ${image ? `image: ${yamlString(image)}\n` : ""}---
 
     if (pathname === "/api/supply" && req.method === "POST") {
       const body = JSON.parse((await readBody(req)) || "{}");
+      if (body.delete) {
+        const slug = path.basename(String(body.slug || ""));
+        if (!slug) {
+          json(res, 400, { error: "Missing name" });
+          return;
+        }
+        const file = path.join(SUPPLIES_DIR, `${slug}.md`);
+        try {
+          await unlink(file);
+        } catch {
+          json(res, 404, { error: "Tool not found" });
+          return;
+        }
+        json(res, 200, { ok: true, slug, deleted: true });
+        return;
+      }
       const title = String(body.title || "").trim();
       if (!title) {
         json(res, 400, { error: "Title is required" });

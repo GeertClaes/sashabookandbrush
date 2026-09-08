@@ -52,6 +52,16 @@ export async function tryGetTextFile(env, filePath) {
   }
 }
 
+export async function fileExists(env, filePath) {
+  try {
+    await github(env, `/contents/${filePath}?ref=${encodeURIComponent(branch(env))}`);
+    return true;
+  } catch (error) {
+    if (error instanceof Error && /not found/i.test(error.message)) return false;
+    throw error;
+  }
+}
+
 export async function commitFiles(env, message, files) {
   const ref = await github(env, `/git/ref/heads/${branch(env)}`);
   const commitSha = ref.object.sha;
@@ -59,6 +69,15 @@ export async function commitFiles(env, message, files) {
 
   const treeItems = [];
   for (const file of files) {
+    if (file.delete) {
+      treeItems.push({
+        path: file.path,
+        mode: "100644",
+        type: "blob",
+        sha: null,
+      });
+      continue;
+    }
     const blob = await github(env, "/git/blobs", {
       method: "POST",
       body: JSON.stringify({
