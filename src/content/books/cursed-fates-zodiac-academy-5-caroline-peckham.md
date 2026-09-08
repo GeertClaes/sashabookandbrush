@@ -1,7 +1,7 @@
 ---
 title: "Cursed Fates (Zodiac Academy, #5)"
 author: "Caroline Peckham"
-cover: ""
+cover: "cursed-fates-zodiac-academy-5-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"

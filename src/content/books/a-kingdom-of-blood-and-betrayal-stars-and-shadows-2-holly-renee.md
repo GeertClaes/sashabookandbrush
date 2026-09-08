@@ -1,7 +1,7 @@
 ---
 title: "A Kingdom of Blood and Betrayal (Stars and Shadows, #2)"
 author: "Holly Renee"
-cover: ""
+cover: "a-kingdom-of-blood-and-betrayal-stars-and-shadows-2-holly-renee.jpg"
 note: ""
 rating: 3
 genre: "Read"

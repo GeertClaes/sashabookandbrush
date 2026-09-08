@@ -1,7 +1,7 @@
 ---
 title: "Dirty Little Secret"
 author: "Ivy Arnold"
-cover: ""
+cover: "dirty-little-secret-ivy-arnold.jpg"
 note: ""
 rating: 3
 genre: "Read"

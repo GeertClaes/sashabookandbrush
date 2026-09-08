@@ -1,7 +1,7 @@
 ---
 title: "Crooked Kingdom (Six of Crows, #2)"
 author: "Leigh Bardugo"
-cover: ""
+cover: "crooked-kingdom-six-of-crows-2-leigh-bardugo.jpg"
 note: "Well, the first one was really good… but this? MASTERPIECE.\nI’m emotionally wrecked."
 rating: 5
 genre: "Read"

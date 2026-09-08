@@ -1,7 +1,7 @@
 ---
 title: "Keep It in the Family"
 author: "John Marrs"
-cover: ""
+cover: "keep-it-in-the-family-john-marrs.jpg"
 note: ""
 rating: 3
 genre: "Read"

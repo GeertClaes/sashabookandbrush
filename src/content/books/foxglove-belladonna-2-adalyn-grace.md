@@ -1,7 +1,7 @@
 ---
 title: "Foxglove (Belladonna, #2)"
 author: "Adalyn  Grace"
-cover: ""
+cover: "foxglove-belladonna-2-adalyn-grace.jpg"
 note: ""
 rating: 4
 genre: "Read"

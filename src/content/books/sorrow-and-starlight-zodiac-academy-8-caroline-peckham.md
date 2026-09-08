@@ -1,7 +1,7 @@
 ---
 title: "Sorrow and Starlight (Zodiac Academy, #8)"
 author: "Caroline Peckham"
-cover: ""
+cover: "sorrow-and-starlight-zodiac-academy-8-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"

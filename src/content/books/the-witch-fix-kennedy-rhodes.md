@@ -1,7 +1,7 @@
 ---
 title: "The Witch Fix"
 author: "Kennedy Rhodes"
-cover: ""
+cover: "the-witch-fix-kennedy-rhodes.jpg"
 note: ""
 rating: 3
 genre: "Read"

@@ -1,7 +1,7 @@
 ---
 title: "The Kiss Curse (The Ex Hex, #2)"
 author: "Erin Sterling"
-cover: ""
+cover: "the-kiss-curse-the-ex-hex-2-erin-sterling.jpg"
 note: ""
 rating: 3
 genre: "Read"

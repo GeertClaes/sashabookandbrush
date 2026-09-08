@@ -1,7 +1,7 @@
 ---
 title: "That'll Teach Her"
 author: "Maz Evans"
-cover: ""
+cover: "thatll-teach-her-maz-evans.jpg"
 note: ""
 rating: 1
 genre: "Read"

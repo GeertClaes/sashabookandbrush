@@ -1,7 +1,7 @@
 ---
 title: "What I Wish People Knew About Dementia"
 author: "Wendy Mitchell"
-cover: ""
+cover: "what-i-wish-people-knew-about-dementia-wendy-mitchell.jpg"
 note: ""
 rating: 3
 genre: "Read"

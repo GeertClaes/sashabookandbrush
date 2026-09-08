@@ -1,7 +1,7 @@
 ---
 title: "Suckered (Rylie Cooper Mysteries #2)"
 author: "Stella Bixby"
-cover: ""
+cover: "suckered-rylie-cooper-mysteries-2-stella-bixby.jpg"
 note: ""
 rating: 3
 genre: "Read"

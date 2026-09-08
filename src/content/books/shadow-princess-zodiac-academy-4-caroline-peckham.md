@@ -1,7 +1,7 @@
 ---
 title: "Shadow Princess (Zodiac Academy, #4)"
 author: "Caroline Peckham"
-cover: ""
+cover: "shadow-princess-zodiac-academy-4-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"

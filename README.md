@@ -68,7 +68,7 @@ Copy-paste will not work for hundreds of books. Goodreads has an official CSV ex
 npm run import:goodreads
 ```
 
-That imports **read books with a rating of 1–5** plus anything on the **currently-reading** shelf (Goodreads allows more than one). TBR/`to-read` rows stay off the site. Existing Instagram picks keep their notes and covers; ISBN, dates, and shelf status are merged in.
+That imports **read books with a rating of 1–5** plus anything on the **currently-reading** shelf (Goodreads allows more than one). TBR/`to-read` rows stay off the site. Existing files are **merged**, not rewritten: notes, covers, `featured`, custom affiliate URLs, and curated slugs are kept. ISBN, dates, rating, and shelf status update from Goodreads.
 
 On Windows, extra flags after `npm run` can get eaten by npm. Prefer:
 
@@ -76,11 +76,49 @@ On Windows, extra flags after `npm run` can get eaten by npm. Prefer:
 npm run import:goodreads
 node scripts/import-goodreads.mjs --check
 node scripts/import-goodreads.mjs --skip-covers
+node scripts/import-goodreads.mjs --missing-covers
 node scripts/import-goodreads.mjs --min-rating=4
 node scripts/import-goodreads.mjs "C:\path\to\export.csv"
+npm run sync:goodreads
 ```
 
-Then refresh the Books page. Shelf, rating, genre, and sort are independent (like Goodreads). Covers are downloaded into `src/assets/covers/` so Astro can optimize them. Review HTML such as `<br/>` is turned into real line breaks.
+`npm run sync:goodreads` pulls public RSS (currently reading, progress, a short TBR) into `src/data/goodreads-live.json` without a CSV. Production uses the Cloudflare Worker cron below.
+
+Then refresh the Books page. Shelf, rating, genre, year read, and sort are independent. Covers are downloaded into `src/assets/covers/` so Astro can optimize them. Review HTML such as `<br/>` is turned into real line breaks.
+
+### Library editor (`/admin`)
+
+Rate books on Goodreads. The site editor is for a public note, a featured home card, a cover, or a CSV drop. It is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
+
+On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` opens. Saves commit to GitHub; Pages rebuilds (usually about a minute). A CSV upload writes `data/export.csv`, then [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) runs `import-goodreads.mjs --skip-covers` and commits library files.
+
+**One-time setup (Cloudflare Access + GitHub):**
+
+1. [Zero Trust](https://one.dash.cloudflare.com) → **Access** → **Applications** → Add **Self-hosted**.
+2. Domain `sashabookandbrush.com`, path `/admin*`. Repeat for the `*.pages.dev` hostname, or disable preview deployments so `/admin` is not public there.
+3. Identity provider: **Google**. Policy: allow Sasha’s Gmail and yours.
+4. Copy the application **AUD** tag and team domain (`your-team.cloudflareaccess.com`).
+5. Create a GitHub fine-grained token with **Contents: Read and write** on this repo. Repo **Settings → Actions → General → Workflow permissions** must allow Actions to write (for the CSV import workflow).
+6. In the Pages project → **Settings → Environment variables** (Production):
+
+| Variable | Value |
+| --- | --- |
+| `ADMIN_GITHUB_TOKEN` | that GitHub token |
+| `GITHUB_REPO` | `GeertClaes/sashabookandbrush` |
+| `GITHUB_BRANCH` | `main` |
+| `CF_ACCESS_TEAM_DOMAIN` | `your-team.cloudflareaccess.com` |
+| `CF_ACCESS_AUD` | Access application AUD |
+| `ADMIN_EMAILS` | comma-separated Google emails |
+
+API writes fail closed until Access and the GitHub token are set. Do not put `/admin` in the public nav.
+
+Locally:
+
+```bash
+npm run admin
+```
+
+Then open `/admin` on the dev server. Optional `ADMIN_PASSWORD` in `.env` (`PUBLIC_ADMIN_URL` only if the API is not on `http://127.0.0.1:8787`).
 
 ### Add or edit art
 
@@ -129,17 +167,39 @@ The sun/moon button in the header toggles light and dark. The choice is saved in
 
 ### Affiliate links
 
-- `bookshop` is the primary button on books (Bookshop.org).
-- `amazon` is the secondary button on books, and the primary button on art supplies.
-- Optional `shop` on supplies is for a specialist store.
-- All of these are marked as sponsored links in the HTML.
-- Leave them as `"#"` until the affiliate accounts are ready, then paste the real URLs.
+Buy buttons are built from ISBN plus IDs in `src/data/site.json`:
+
+- `affiliates.bookshopUkId` — Bookshop.org UK (primary)
+- `affiliates.amazonTag` — Amazon Associates tag (OneLink is configured on Amazon’s side)
+
+Leave those blank until the accounts exist; buttons hide when there is no ISBN and no override. Per-book `bookshop` / `amazon` URLs still win if they are real `https://` links (special editions). Buttons show on book pages and featured home cards, not on the full list.
 
 The footer already includes an affiliate disclosure.
 
 ### Currently reading
 
-This comes from Goodreads `currently-reading` on import — more than one book at a time is expected. Re-run `npm run import:goodreads` after a new export to refresh the home shelf. TBR stays off the public site.
+The home shelf and progress % come from public Goodreads RSS (`npm run sync:goodreads`). That also writes a short “Up next” TBR teaser. The full library (ratings, reviews, covers) still needs a CSV import.
+
+`npm run build` runs the RSS sync first, then Astro. If Goodreads is down, the last `src/data/goodreads-live.json` is kept so the deploy still works. On production, a Cloudflare Worker cron triggers that rebuild.
+
+### Cloudflare Pages
+
+The production site is static. RSS cannot update the live HTML unless Pages rebuilds. Use a **Cloudflare Worker cron**, not GitHub Actions — Pages has no built-in schedule, and Worker cron is more reliable than Actions `on.schedule`.
+
+1. Pages build command: `npm run build` (already includes the Goodreads RSS sync).
+2. **Pages → Settings → Builds → Deploy hooks** → add a hook for `main`. Copy the URL. Do not put it in the repo.
+3. Deploy [`workers/rebuild-pages/`](workers/rebuild-pages/) once (separate from the Pages site):
+
+```bash
+npx wrangler deploy --config workers/rebuild-pages/wrangler.toml
+npx wrangler secret put CLOUDFLARE_PAGES_DEPLOY_HOOK --config workers/rebuild-pages/wrangler.toml
+```
+
+That Worker runs every 6 hours UTC (`0 */6 * * *`). Each run POSTs the hook; Pages rebuilds and refreshes currently reading / progress / up next. Free Pages is 500 builds/month; 6-hour cron is about 120. For daily instead, change the cron in `wrangler.toml` to `0 6 * * *` and redeploy.
+
+Do not also schedule a GitHub Action against the same hook.
+
+CSV can also be uploaded on `/admin`. That commits `data/export.csv`; GitHub Actions imports it with `--skip-covers` and Pages rebuilds again. New covers can be added in the editor afterwards, or run `node scripts/import-goodreads.mjs --missing-covers` locally.
 
 ### Site copy, stats, and packages
 

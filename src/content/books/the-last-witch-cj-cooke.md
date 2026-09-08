@@ -1,7 +1,7 @@
 ---
 title: "The Last Witch"
 author: "C.J.  Cooke"
-cover: ""
+cover: "the-last-witch-cj-cooke.jpg"
 note: ""
 rating: 0
 genre: "Currently reading"

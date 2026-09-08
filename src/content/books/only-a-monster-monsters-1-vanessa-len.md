@@ -1,7 +1,7 @@
 ---
 title: "Only a Monster (Monsters, #1)"
 author: "Vanessa Len"
-cover: ""
+cover: "only-a-monster-monsters-1-vanessa-len.jpg"
 note: "Loved the concept of this book, really unique idea. Loved the characters. Great read!"
 rating: 4
 genre: "Read"

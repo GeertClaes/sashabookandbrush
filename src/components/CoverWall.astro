@@ -1,0 +1,39 @@
+---
+import CoverImage from "./CoverImage.astro";
+import { bookHref } from "../lib/books";
+
+interface Book {
+  id: string;
+  data: {
+    title: string;
+    author: string;
+    cover: string;
+  };
+}
+
+interface Props {
+  books: Book[];
+  sizes?: string;
+}
+
+const { books, sizes = "(min-width: 768px) 12vw, 25vw" } = Astro.props;
+---
+
+<ul class="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8">
+  {
+    books.map((book) => (
+      <li>
+        <a href={bookHref(book.id)} class="group block overflow-hidden rounded-md bg-muted shadow-sm">
+          <CoverImage
+            cover={book.data.cover}
+            alt={`${book.data.title} by ${book.data.author}`}
+            class="aspect-2/3 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            width={160}
+            height={240}
+            sizes={sizes}
+          />
+        </a>
+      </li>
+    ))
+  }
+</ul>

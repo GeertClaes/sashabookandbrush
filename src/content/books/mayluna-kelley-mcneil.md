@@ -1,7 +1,7 @@
 ---
 title: "Mayluna"
 author: "Kelley McNeil"
-cover: ""
+cover: "mayluna-kelley-mcneil.jpg"
 note: ""
 rating: 5
 genre: "Read"

@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/sync-goodreads.mjs --allow-fail && astro build",
     "preview": "astro preview",
-    "import:goodreads": "node scripts/import-goodreads.mjs"
+    "import:goodreads": "node scripts/import-goodreads.mjs",
+    "sync:goodreads": "node scripts/sync-goodreads.mjs",
+    "admin": "node scripts/admin-server.mjs"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.2.8",

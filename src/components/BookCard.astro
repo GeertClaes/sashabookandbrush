@@ -2,6 +2,7 @@
 import AffiliateButtons from "./AffiliateButtons.astro";
 import CoverImage from "./CoverImage.astro";
 import StarRating from "./StarRating.astro";
+import { affiliateLinks } from "../lib/affiliates";
 import { formatMonthYear } from "../lib/books";
 
 interface Props {
@@ -11,13 +12,16 @@ interface Props {
   note: string;
   rating: number;
   genre: string;
-  bookshop: string;
-  amazon: string;
+  bookshop?: string;
+  amazon?: string;
+  isbn?: string;
+  isbn10?: string;
   status?: "read" | "currently-reading";
   dateRead?: string;
   dateAdded?: string;
   variant?: "grid" | "row";
   href?: string;
+  showBuy?: boolean;
 }
 
 const {
@@ -29,10 +33,13 @@ const {
   genre,
   bookshop,
   amazon,
+  isbn,
+  isbn10,
   status = "read",
   dateRead,
   variant = "grid",
   href,
+  showBuy = false,
 } = Astro.props;
 
 const isRow = variant === "row";
@@ -40,17 +47,19 @@ const reading = status === "currently-reading";
 const genericGenre = genre === "Read" || genre === "Currently reading" || !genre;
 const label = reading ? "Currently reading" : genericGenre ? "" : genre;
 const when = reading ? "Reading now" : dateRead ? `Read ${formatMonthYear(dateRead)}` : "";
-const Tag = href ? "a" : "article";
+const buy = showBuy ? affiliateLinks({ isbn, isbn10, bookshop, amazon }) : { bookshop: "", amazon: "" };
+const wholeCardLink = Boolean(href) && !showBuy;
+const Tag = wholeCardLink ? "a" : "article";
 const cardClass = [
   "group relative block overflow-hidden rounded-xl border border-border bg-card text-left no-underline transition-all duration-300",
-  href &&
+  wholeCardLink &&
     "cursor-pointer hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-  !href && "hover:-translate-y-0.5 hover:shadow-lg",
+  !wholeCardLink && "hover:-translate-y-0.5 hover:shadow-lg",
   isRow && "p-4 sm:p-5",
 ].filter(Boolean);
 ---
 
-<Tag href={href} class:list={cardClass}>
+<Tag href={wholeCardLink ? href : undefined} class:list={cardClass}>
   {
     isRow ? (
       <div class="flex flex-col gap-4 sm:flex-row sm:gap-6">
@@ -82,57 +91,96 @@ const cardClass = [
               {note}
             </p>
           )}
-          {href ? (
+          {href && (
             <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
               {note ? "Read the full note" : "Book details"}
               <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-0.5">
                 →
               </span>
             </span>
-          ) : (
-            <AffiliateButtons bookshop={bookshop} amazon={amazon} />
           )}
         </div>
       </div>
     ) : (
       <>
-        <div class="aspect-2/3 overflow-hidden bg-muted">
-          <CoverImage
-            cover={cover}
-            alt=""
-            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            width={300}
-            height={450}
-            sizes="(min-width: 768px) 25vw, 50vw"
-          />
-        </div>
-        <div class="p-4">
-          {label && (
-            <span class="mb-1.5 block text-xs font-medium uppercase tracking-widest text-accent">
-              {label}
-            </span>
-          )}
-          <h3 class="font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
-            {title}
-          </h3>
-          <p class="mt-0.5 mb-2 text-xs text-muted-foreground">{author}</p>
-          {rating > 0 && <StarRating rating={rating} />}
-          {note && (
-            <p class="mt-3 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-              {note}
-            </p>
-          )}
-          {href ? (
-            <span class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-              {note ? "Read the full note" : "Book details"}
-              <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-0.5">
-                →
+        {href && showBuy ? (
+          <a href={href} class="block no-underline">
+            <div class="aspect-2/3 overflow-hidden bg-muted">
+              <CoverImage
+                cover={cover}
+                alt=""
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                width={300}
+                height={450}
+                sizes="(min-width: 768px) 25vw, 50vw"
+              />
+            </div>
+            <div class="p-4 pb-0">
+              {label && (
+                <span class="mb-1.5 block text-xs font-medium uppercase tracking-widest text-accent">
+                  {label}
+                </span>
+              )}
+              <h3 class="font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                {title}
+              </h3>
+              <p class="mt-0.5 mb-2 text-xs text-muted-foreground">{author}</p>
+              {rating > 0 && <StarRating rating={rating} />}
+              {note && (
+                <p class="mt-3 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                  {note}
+                </p>
+              )}
+              <span class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                {note ? "Read the full note" : "Book details"}
+                <span aria-hidden="true">→</span>
               </span>
-            </span>
-          ) : (
-            <AffiliateButtons bookshop={bookshop} amazon={amazon} />
-          )}
-        </div>
+            </div>
+          </a>
+        ) : (
+          <>
+            <div class="aspect-2/3 overflow-hidden bg-muted">
+              <CoverImage
+                cover={cover}
+                alt=""
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                width={300}
+                height={450}
+                sizes="(min-width: 768px) 25vw, 50vw"
+              />
+            </div>
+            <div class:list={[showBuy ? "p-4 pb-0" : "p-4"]}>
+              {label && (
+                <span class="mb-1.5 block text-xs font-medium uppercase tracking-widest text-accent">
+                  {label}
+                </span>
+              )}
+              <h3 class="font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                {title}
+              </h3>
+              <p class="mt-0.5 mb-2 text-xs text-muted-foreground">{author}</p>
+              {rating > 0 && <StarRating rating={rating} />}
+              {note && (
+                <p class="mt-3 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                  {note}
+                </p>
+              )}
+              {href && (
+                <span class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                  {note ? "Read the full note" : "Book details"}
+                  <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </span>
+              )}
+            </div>
+          </>
+        )}
+        {showBuy && (
+          <div class="px-4 pb-4">
+            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} />
+          </div>
+        )}
       </>
     )
   }

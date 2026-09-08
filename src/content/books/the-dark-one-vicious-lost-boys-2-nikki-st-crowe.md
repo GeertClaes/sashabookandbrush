@@ -1,7 +1,7 @@
 ---
 title: "The Dark One (Vicious Lost Boys, #2)"
 author: "Nikki St. Crowe"
-cover: ""
+cover: "the-dark-one-vicious-lost-boys-2-nikki-st-crowe.jpg"
 note: ""
 rating: 3
 genre: "Read"

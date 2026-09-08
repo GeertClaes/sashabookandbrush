@@ -1,105 +1,95 @@
 # Website Build Plan – sashabookandbrush
 
+**Status (Sep 2026):** Core site is built in the repo. Production host is **Cloudflare Pages**. Remaining work is go-live, Access, the rebuild Worker, and affiliate accounts — see [Plan.md §10](Plan.md).
+
 ## Project Overview
-Build a clean, fast, mobile-first personal website for Bookstagrammer @sashabookandbrush.
-Self-hosted on existing home server.
+Clean, fast, mobile-first personal site for Bookstagrammer @sashabookandbrush.
+
 Primary goals:
 - Professional home for her book recommendations
 - Easy affiliate monetization
 - Simple media kit / “Work with me” presence
 - Future-proof for digital products and email list
 
+**Operating principle:** Goodreads is the diary. The site is the shop window. She rates, logs progress, and reviews on Goodreads. The site does not write back. Affiliates are Amazon OneLink + Bookshop.org UK. The full TBR stays off the public Books page.
+
 Aesthetic direction:
-- Cozy, warm, bookish, slightly autumnal / dark academia lean
-- Soft neutrals, cream, warm browns, deep greens or muted burgundy accents
-- Clean typography, generous whitespace, high-quality book photography feel
-- Minimal and elegant (not cluttered)
+- Cozy, warm, bookish (cream, burgundy, forest)
+- Clean typography, generous whitespace
+- Book covers as the visual focus
 
-## Tech Stack Recommendation
-Preferred (in order):
-1. **Static site** (recommended for simplicity & speed)
-   - Astro or 11ty + Tailwind CSS
-   - Or plain HTML + Tailwind if keeping it extremely simple
-2. Alternative: WordPress in Docker (if she later wants easier self-editing)
+## Tech stack (as built)
 
-Requirements:
-- Fully responsive
-- Fast loading
-- HTTPS
-- Easy for parent to update content
-- Docker-friendly if possible
+- **Astro 5 + Tailwind 4**, static
+- Content: markdown in `src/content/` (`books`, `art`, `supplies`) plus `src/data/site.json`
+- Covers in `src/assets/covers/` (Astro image pipeline)
+- **Production:** Cloudflare Pages (`npm run build` → `dist`)
+- **RSS sync:** `scripts/sync-goodreads.mjs` runs at build time → `src/data/goodreads-live.json`
+- **CSV import:** merge-safe `scripts/import-goodreads.mjs` (keeps notes, covers, featured, affiliate overrides)
+- **Admin:** `/admin` (not in nav). Local: `npm run admin`. Production: Pages Functions commit via GitHub; Cloudflare Access + Google
+- **Scheduled rebuild:** Worker at `workers/rebuild-pages/` POSTs a Pages deploy hook (6 hours). Not GitHub Actions
+- **Optional:** Docker Compose on the home server (port 8080)
 
-## Site Structure (Pages)
+## Site structure
 
-### 1. Home
-- Hero section with her name/handle + short tagline (e.g. “Honest book recommendations & cozy reading moments”)
-- Featured / Currently Reading section
-- Recent Favourites (grid of 6–9 books with short notes + affiliate links)
-- Soft call-to-action to “Browse all recommendations” or “Work with me”
+| Page | Status |
+| --- | --- |
+| Home — hero, currently reading + progress, Up next TBR teaser, featured | **Built** |
+| Books `/recommendations` — year filter, series rows, five-star wall, search | **Built** |
+| Book detail `/books/<slug>` — note, rating, affiliates | **Built** |
+| Art | **Built** (content still thin) |
+| About — bio, Dobby, year chips, Goodreads | **Built** |
+| Work with me | **Built** (Formspree id still empty) |
+| Shop | **Placeholder** |
+| `/admin` | **Built**; live Google login not configured yet |
+| 404 | **Built** |
 
-### 2. Recommendations / Books
-- Filterable or categorized list (Horror, Romance, Fantasy, Book Club Reads, etc.)
-- Each book entry: cover image, title, author, short personal note, star rating (optional), affiliate buttons (Bookshop.org primary + Amazon)
+Optional later: blog, newsletter.
 
-### 3. About
-- Short personal bio
-- Photo of her (or aesthetic book flat-lay if she prefers privacy)
-- Mention of cat Dobby if she wants
-- Reading challenge progress (optional)
-- Link to Instagram
+## Key features
 
-### 4. Work With Me / Media Kit
-- Clear statement of what she offers (ARC reviews, paid collaborations, gifted, etc.)
-- Stats (followers, engagement if available)
-- Note that she is a PR Official Influencer with Rattle the Stars
-- Simple rate card or “Contact me for packages”
-- Contact form or email link
+| Feature | Status |
+| --- | --- |
+| Book cards, covers, notes, ratings | Done |
+| Affiliate buttons from ISBN + `site.json` IDs | Done; **IDs empty** until accounts exist |
+| Dark / light mode | Done |
+| SEO basics, canonical, OG | Done |
+| Umami analytics | Done |
+| Contact form (Formspree) | Wired; **id not set** |
+| Merge-safe Goodreads CSV | Done |
+| Live RSS (currently reading, %, short TBR) | Done at build; **Worker cron not deployed** |
+| Cloudflare Access `/admin` | Code in repo; **dashboard setup remaining** |
 
-### 5. Shop / Digital Products (future-ready)
-- Placeholder section for reading trackers, templates, etc.
-- Can start empty or with 1–2 products
+## Content
 
-### Optional later pages
-- Blog / Longer reviews
-- Newsletter signup
+- Library imported from Goodreads (user `141471789`, ~rated/read + currently reading)
+- Featured set and public notes still need Sasha’s eye (4–9 on home)
+- Hero / About photos: `public/images/SashaHero.jpg` and `SashaHeroDark.jpg`
 
-## Key Features to Include
-- Affiliate link support (easy to update)
-- Clean book card component (cover + title + note + buttons)
-- Mobile-first navigation
-- Simple contact form (Formspree or similar free option)
-- SEO basics (title, meta description, Open Graph)
-- Fast image optimization
-- Dark/light mode optional (nice-to-have)
-
-## Content Placeholders Needed
-- Short bio text
-- 8–12 current favourite books with short notes
-- Currently reading book
-- Profile/hero image
-- Any existing media kit text
-
-## Design Notes
-- Use a warm, readable serif for headings (e.g. Fraunces, Playfair Display, or similar)
-- Clean sans-serif for body
-- Soft shadows, rounded corners on cards
-- Plenty of breathing room
-- Book covers should be the visual focus
+## Design notes
+- Headings: Fraunces. Body: DM Sans
+- Soft shadows, rounded cards, covers first
+- Brand in header/footer: `SashaBook&Brush`
 
 ## Deployment
-- Self-hosted on existing home server
-- Prefer Docker Compose setup for easy management
-- Domain: [to be confirmed – e.g. sashabookandbrush.com]
-- Automatic HTTPS (Let’s Encrypt / Caddy / Traefik)
+
+- Domain: `sashabookandbrush.com`
+- Host: Cloudflare Pages, not the home server as primary
+- HTTPS via Cloudflare
+- Rebuilds: git push, admin saves, CSV import Action, and the 6-hour Worker cron
+- Docker Compose remains documented for a home fallback
 
 ## Deliverables
-1. Fully working static site
-2. Easy content update method (markdown files)
-3. Clear README with how to add new books and update affiliate links
-4. Mobile + desktop screenshots of key pages
 
-## Priority Order
-1. Home + Recommendations pages (core value)
-2. About + Work With Me
-3. Affiliate integration
-4. Polish, performance, and future Shop section
+1. Working static site — **done in repo**
+2. Easy updates — markdown + `/admin` + README — **done in repo**
+3. README for books, import, admin, Access, Worker — **done**
+4. Live domain, Access, Worker, affiliate IDs — **parent to-do** ([Plan.md §10](Plan.md))
+
+## Priority (original → now)
+
+1. Home + Recommendations — **done**
+2. About + Work with me — **done**
+3. Affiliate integration — **code done; accounts remaining**
+4. Polish, admin, Goodreads sync — **code done; Cloudflare/GitHub config remaining**
+5. Shop / digital products — later

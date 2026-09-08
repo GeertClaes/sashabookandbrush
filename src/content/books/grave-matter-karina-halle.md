@@ -1,7 +1,7 @@
 ---
 title: "Grave Matter"
 author: "Karina Halle"
-cover: ""
+cover: "grave-matter-karina-halle.jpg"
 note: ""
 rating: 3
 genre: "Read"

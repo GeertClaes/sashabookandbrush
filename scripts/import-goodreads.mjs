@@ -9,6 +9,8 @@ const BOOKS_DIR = path.join(ROOT, "src", "content", "books");
 const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
 const PLACEHOLDER = "";
 const USER_AGENT = "SashaBookAndBrush/1.0 (https://sashabookandbrush.com; cover cache)";
+const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
 const DEFAULT_NAMES = ["goodreads_library_export.csv", "export.csv"];
 const CURATED = new Set([
   "acotar.md",
@@ -24,10 +26,11 @@ const CURATED = new Set([
 ]);
 
 function parseArgs(argv) {
-  const args = { csv: null, minRating: 1, dryRun: false, skipCovers: false };
+  const args = { csv: null, minRating: 1, dryRun: false, skipCovers: false, missingCovers: false };
   for (const part of argv) {
     if (part === "--dry-run" || part === "--check") args.dryRun = true;
     else if (part === "--skip-covers") args.skipCovers = true;
+    else if (part === "--missing-covers") args.missingCovers = true;
     else if (part.startsWith("--min-rating=")) args.minRating = Number(part.slice(13));
     else if (!part.startsWith("-")) args.csv = path.resolve(part);
   }
@@ -214,13 +217,116 @@ async function curlFile(url, dest) {
   await execFileP(CURL, ["-L", "--fail", "-sS", "-A", USER_AGENT, "-o", dest, url], { timeout: 45000 });
 }
 
-async function curlText(url) {
+async function curlText(url, ua = USER_AGENT) {
   const { stdout } = await execFileP(
     CURL,
-    ["-L", "--fail", "-sS", "-A", USER_AGENT, url],
-    { encoding: "utf8", timeout: 30000, maxBuffer: 8_000_000 },
+    ["-L", "--fail", "-sS", "-A", ua, url],
+    { encoding: "utf8", timeout: 45000, maxBuffer: 8_000_000 },
   );
   return stdout;
+}
+
+function largerGoodreadsCover(url) {
+  if (!url) return url;
+  if (/nophoto|no-cover|nocover/i.test(url)) return "";
+  return url
+    .replace("http://", "https://")
+    .replace(/\._[A-Z]{2}\d+_(?=\.)/g, "._SX800_");
+}
+
+async function goodreadsCoverUrl(id) {
+  if (!id) return null;
+  try {
+    const html = await curlText(`https://www.goodreads.com/book/show/${id}`, BROWSER_UA);
+    const og =
+      html.match(/property="og:image"\s+content="([^"]+)"/i) ||
+      html.match(/content="([^"]+)"\s+property="og:image"/i);
+    let url = og?.[1] || "";
+    if (!url) {
+      const img = html.match(
+        /https:\/\/[^"'\s]+compressed\.photo\.goodreads\.com\/books\/[^"'\s]+\.(?:jpg|jpeg|png|webp)/i,
+      );
+      url = img?.[0] || "";
+    }
+    url = largerGoodreadsCover(url);
+    return url || null;
+  } catch {
+    return null;
+  }
+}
+
+function unescapeYaml(value) {
+  return String(value)
+    .replace(/\\n/g, "\n")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, "\\");
+}
+
+function frontField(text, key) {
+  const match = text.match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
+  if (!match) return "";
+  let value = match[1].trim();
+  if (value === "true" || value === "false") return value;
+  if (/^-?\d+$/.test(value)) return value;
+  if (value.startsWith('"') && value.endsWith('"')) {
+    return unescapeYaml(value.slice(1, -1));
+  }
+  return value;
+}
+
+function parseFrontmatter(text) {
+  const block = text.match(/^---\n([\s\S]*?)\n---/);
+  if (!block) return {};
+  const data = {};
+  for (const line of block[1].split("\n")) {
+    const idx = line.indexOf(":");
+    if (idx === -1) continue;
+    const key = line.slice(0, idx).trim();
+    data[key] = frontField(`---\n${line}\n---`, key);
+  }
+  return data;
+}
+
+function isRealUrl(value) {
+  return /^https?:\/\//i.test(String(value || "").trim());
+}
+
+function pickNote(siteNote, goodreadsNote) {
+  const site = String(siteNote || "").trim();
+  const incoming = String(goodreadsNote || "").trim();
+  if (!site) return incoming;
+  if (!incoming) return site;
+  if (site === incoming) return site;
+  if (site.length >= incoming.length) return site;
+  return incoming;
+}
+
+function genericGenre(value) {
+  return !value || value === "Read" || value === "Currently reading";
+}
+
+function upsertField(text, key, line) {
+  if (new RegExp(`^${key}:`, "m").test(text)) {
+    return text.replace(new RegExp(`^${key}:.*$`, "m"), line);
+  }
+  return text.replace(/\n---\s*$/, `\n${line}\n---`);
+}
+
+async function loadExistingLibrary() {
+  const names = (await readdir(BOOKS_DIR)).filter((name) => name.endsWith(".md"));
+  const byId = new Map();
+  const byTitle = new Map();
+  const files = [];
+  for (const name of names) {
+    const file = path.join(BOOKS_DIR, name);
+    const text = await readFile(file, "utf8");
+    const data = parseFrontmatter(text);
+    const rec = { file, name, slug: path.basename(name, ".md"), data };
+    files.push(rec);
+    if (data.goodreadsId) byId.set(String(data.goodreadsId), rec);
+    if (data.title) byTitle.set(normalizeTitle(data.title), rec);
+  }
+  return { byId, byTitle, files };
 }
 
 async function trySaveImage(url, destBase) {
@@ -292,17 +398,34 @@ async function existingLocalCover(slug) {
   return null;
 }
 
-async function downloadCover({ isbn, title, author, slug }) {
+async function downloadCover({ isbn, title, author, slug, goodreadsId, preferGoodreads = false }) {
   const cached = await existingLocalCover(slug);
   if (cached) return cached;
 
   const destBase = path.join(COVERS_DIR, slug);
+
+  async function fromGoodreads() {
+    const url = await goodreadsCoverUrl(goodreadsId);
+    if (!url) return null;
+    return trySaveImage(url, destBase);
+  }
+
+  if (preferGoodreads) {
+    const saved = await fromGoodreads();
+    if (saved) return saved;
+  }
+
   if (isbn) {
     const fromIsbn = await trySaveImage(
       `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`,
       destBase,
     );
     if (fromIsbn) return fromIsbn;
+  }
+
+  if (!preferGoodreads) {
+    const saved = await fromGoodreads();
+    if (saved) return saved;
   }
 
   const fromSearch = await openLibrarySearchCover(title, author);
@@ -318,6 +441,64 @@ async function downloadCover({ isbn, title, author, slug }) {
   }
 
   return PLACEHOLDER;
+}
+
+async function fillMissingCovers() {
+  await mkdir(COVERS_DIR, { recursive: true });
+  const names = (await readdir(BOOKS_DIR)).filter((name) => name.endsWith(".md"));
+  const missing = [];
+  for (const name of names) {
+    const file = path.join(BOOKS_DIR, name);
+    const text = await readFile(file, "utf8");
+    const cover = frontField(text, "cover");
+    const slug = path.basename(name, ".md");
+    const cached = await existingLocalCover(slug);
+    if (cover && cached && (cover === cached || cover.endsWith(`/${cached}`))) continue;
+    if (cached && (!cover || cover.startsWith("/"))) {
+      const updated = text.replace(/^cover:.*$/m, `cover: ${yamlString(cached)}`);
+      await writeFile(file, updated.endsWith("\n") ? updated : `${updated}\n`, "utf8");
+      missing.push({ file, name, slug, text: updated, title: frontField(updated, "title"), already: cached });
+      continue;
+    }
+    missing.push({
+      file,
+      name,
+      slug,
+      text,
+      title: frontField(text, "title"),
+      author: frontField(text, "author"),
+      isbn: frontField(text, "isbn"),
+      goodreadsId: frontField(text, "goodreadsId"),
+      already: null,
+    });
+  }
+
+  const toFetch = missing.filter((book) => !book.already);
+  console.log(`Missing covers: ${toFetch.length}. Checking Goodreads…`);
+
+  let saved = 0;
+  let stillMissing = 0;
+  await mapLimit(toFetch, 2, async (book, index) => {
+    const cover = await downloadCover({ ...book, preferGoodreads: true });
+    if (cover) {
+      const updated = book.text.replace(/^cover:.*$/m, `cover: ${yamlString(cover)}`);
+      await writeFile(book.file, updated.endsWith("\n") ? updated : `${updated}\n`, "utf8");
+      saved += 1;
+      console.log(`  got ${book.title}`);
+    } else {
+      stillMissing += 1;
+      console.log(`  no cover for ${book.title}`);
+    }
+    if ((index + 1) % 10 === 0 || index + 1 === toFetch.length) {
+      console.log(`Covers ${index + 1}/${toFetch.length}`);
+    }
+    await sleep(250);
+  });
+
+  const relinked = missing.filter((book) => book.already).length;
+  console.log(
+    `Goodreads cover pass: saved ${saved}, already on disk ${relinked}, still missing ${stillMissing}.`,
+  );
 }
 
 function extraYaml(book) {
@@ -352,22 +533,49 @@ ${extraYaml(book).join("\n")}
 `;
 }
 
-async function mergeIntoCurated(file, book) {
+async function mergeIntoExisting(file, book, existing = {}) {
   let text = await readFile(file, "utf8");
-  const fields = extraYaml(book);
-  if (book.cover) fields.unshift(`cover: ${yamlString(book.cover)}`);
+  const skip = new Set();
+  if (existing.cover) skip.add("cover");
+  if (existing.featured === "true" || existing.featured === true) {
+    skip.add("featured");
+    skip.add("order");
+  }
+  if (CURATED.has(path.basename(file))) skip.add("order");
+  if (isRealUrl(existing.bookshop)) skip.add("bookshop");
+  if (isRealUrl(existing.amazon)) skip.add("amazon");
+  if (!genericGenre(existing.genre)) skip.add("genre");
+
+  const note = pickNote(existing.note, book.note);
+  const fields = [
+    `title: ${yamlString(book.title)}`,
+    `author: ${yamlString(book.author)}`,
+    book.cover ? `cover: ${yamlString(book.cover)}` : null,
+    `note: ${yamlString(note)}`,
+    `rating: ${book.rating}`,
+    `genre: ${yamlString(book.genre)}`,
+    `bookshop: ${yamlString(existing.bookshop || book.bookshop || "#")}`,
+    `amazon: ${yamlString(existing.amazon || book.amazon || "#")}`,
+    `featured: ${existing.featured === "true" || existing.featured === true ? "true" : "false"}`,
+    `order: ${book.order}`,
+    ...extraYaml(book),
+  ].filter(Boolean);
+
   for (const line of fields) {
     const key = line.split(":")[0];
-    if (new RegExp(`^${key}:`, "m").test(text)) {
-      text = text.replace(new RegExp(`^${key}:.*$`, "m"), line);
-    } else {
-      text = text.replace(/\n---\s*$/, `\n${line}\n---`);
-    }
+    if (skip.has(key)) continue;
+    text = upsertField(text, key, line);
   }
   await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
 }
 
 const args = parseArgs(process.argv.slice(2));
+
+if (args.missingCovers) {
+  await fillMissingCovers();
+  process.exit(0);
+}
+
 const csvPath = await resolveCsv(args.csv);
 
 if (!(await exists(csvPath))) {
@@ -386,19 +594,12 @@ const col = (row, name) => row[index[name]] ?? "";
 await mkdir(BOOKS_DIR, { recursive: true });
 await mkdir(COVERS_DIR, { recursive: true });
 
-const curatedByTitle = new Map();
-for (const name of CURATED) {
-  const file = path.join(BOOKS_DIR, name);
-  if (!(await exists(file))) continue;
-  const text = await readFile(file, "utf8");
-  const match = text.match(/^title:\s*"((?:\\.|[^"])*)"/m);
-  if (match) curatedByTitle.set(normalizeTitle(match[1].replace(/\\"/g, '"')), file);
-}
+const library = await loadExistingLibrary();
 
 const seen = new Set();
 const toWrite = [];
 let ignored = 0;
-let curated = 0;
+let merged = 0;
 let duplicates = 0;
 
 for (const row of rows) {
@@ -429,6 +630,8 @@ for (const row of rows) {
   const isbn10 = cleanIsbn(col(row, "ISBN"));
   const isbn = isbn13.length === 13 ? isbn13 : isbn10 || isbn13;
   const status = isReading ? "currently-reading" : "read";
+  const goodreadsId = col(row, "Book Id").trim();
+  const existing = (goodreadsId && library.byId.get(goodreadsId)) || library.byTitle.get(key) || null;
   const book = {
     title,
     author,
@@ -440,7 +643,7 @@ for (const row of rows) {
     status,
     isbn,
     isbn10: isbn10.length === 10 ? isbn10 : "",
-    goodreadsId: col(row, "Book Id").trim(),
+    goodreadsId,
     dateRead: parseGoodreadsDate(col(row, "Date Read")),
     dateAdded: parseGoodreadsDate(col(row, "Date Added")),
     pages: Number(col(row, "Number of Pages")) || 0,
@@ -448,30 +651,12 @@ for (const row of rows) {
     originalYear: parseYear(col(row, "Original Publication Year")),
     publisher: col(row, "Publisher").trim(),
     readCount: Number(col(row, "Read Count")) || 0,
-    slug: slugify(`${title}-${author}`),
-    curatedFile: curatedByTitle.get(key) || null,
+    slug: existing?.slug || slugify(`${title}-${author}`),
+    existingFile: existing?.file || null,
+    existingData: existing?.data || null,
   };
 
-  if (book.curatedFile) {
-    curated += 1;
-    book.slug = path.basename(book.curatedFile, ".md");
-    if (!args.dryRun) {
-      book.cover = args.skipCovers ? (await existingLocalCover(book.slug)) || "" : await downloadCover(book);
-      await mergeIntoCurated(book.curatedFile, book);
-    }
-    continue;
-  }
-
   toWrite.push(book);
-}
-
-if (!args.dryRun) {
-  const existing = await readdir(BOOKS_DIR);
-  for (const name of existing) {
-    if (name.endsWith(".md") && !CURATED.has(name)) {
-      await unlink(path.join(BOOKS_DIR, name));
-    }
-  }
 }
 
 toWrite.sort((a, b) => {
@@ -482,9 +667,12 @@ toWrite.forEach((book, i) => {
   book.order = book.status === "currently-reading" ? i : 1000 + i;
 });
 
+const newCount = toWrite.filter((book) => !book.existingFile).length;
+const mergeCount = toWrite.length - newCount;
+
 if (args.dryRun) {
   console.log(
-    `Dry run from ${path.relative(ROOT, csvPath)}: would import ${toWrite.length} books, update ${curated} existing picks, skip ${duplicates} duplicate titles, ignore ${ignored} unread/unrated.`,
+    `Dry run from ${path.relative(ROOT, csvPath)}: would merge ${mergeCount} existing books, add ${newCount} new, skip ${duplicates} duplicate titles, ignore ${ignored} unread/unrated. Existing files are kept.`,
   );
   process.exit(0);
 }
@@ -493,8 +681,9 @@ let coversSaved = 0;
 let coversMissing = 0;
 
 await mapLimit(toWrite, 4, async (book, index) => {
+  const cached = await existingLocalCover(book.slug);
   if (args.skipCovers) {
-    book.cover = PLACEHOLDER;
+    book.cover = cached || book.existingData?.cover || PLACEHOLDER;
   } else {
     book.cover = await downloadCover(book);
     if (book.cover === PLACEHOLDER) coversMissing += 1;
@@ -504,9 +693,14 @@ await mapLimit(toWrite, 4, async (book, index) => {
     }
     await sleep(80);
   }
-  await writeFile(path.join(BOOKS_DIR, `${book.slug}.md`), bookMarkdown(book), "utf8");
+  if (book.existingFile) {
+    merged += 1;
+    await mergeIntoExisting(book.existingFile, book, book.existingData);
+  } else {
+    await writeFile(path.join(BOOKS_DIR, `${book.slug}.md`), bookMarkdown(book), "utf8");
+  }
 });
 
 console.log(
-  `Imported ${toWrite.length} books from ${path.relative(ROOT, csvPath)}. Updated ${curated} existing picks with ISBN/dates/status. Skipped ${duplicates} duplicate titles. Ignored ${ignored} TBR/unrated. Covers saved: ${coversSaved}. Still using placeholder: ${coversMissing}.`,
+  `Imported from ${path.relative(ROOT, csvPath)}: merged ${merged} existing books, added ${toWrite.length - merged} new. Skipped ${duplicates} duplicate titles. Ignored ${ignored} TBR/unrated. Covers saved: ${coversSaved}. Still using placeholder: ${coversMissing}. Existing notes, covers, featured flags, and custom affiliate URLs were kept.`,
 );

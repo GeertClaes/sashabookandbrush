@@ -1,7 +1,7 @@
 ---
 title: "Bungled (Rylie Cooper Mysteries #6)"
 author: "Stella Bixby"
-cover: ""
+cover: "bungled-rylie-cooper-mysteries-6-stella-bixby.jpg"
 note: ""
 rating: 3
 genre: "Read"

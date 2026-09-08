@@ -1,0 +1,8 @@
+name = "sashabookandbrush-rebuild"
+main = "index.js"
+compatibility_date = "2026-09-08"
+workers_dev = false
+
+# Every 6 hours UTC. Daily instead: "0 6 * * *"
+[triggers]
+crons = ["0 */6 * * *"]

@@ -1,7 +1,7 @@
 ---
 title: "The Ex Vows"
 author: "Jessica  Joyce"
-cover: ""
+cover: "the-ex-vows-jessica-joyce.jpg"
 note: ""
 rating: 4
 genre: "Read"

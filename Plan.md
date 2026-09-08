@@ -2,9 +2,9 @@
 
 **Owner:** Parent (tech, setup, maintenance)  
 **Creator:** Sasha (@sashabookandbrush)  
-**Status:** Planning  
+**Status:** Site built locally; go-live and accounts still open  
 **Timeline:** 3–6 months  
-**Related:** [Website Build Plan](WebsiteBuildPlan.md)
+**Related:** [Website Build Plan](WebsiteBuildPlan.md) — stack, pages, and what is already in the repo
 
 ---
 
@@ -60,11 +60,11 @@ This is support work, not a takeover. Sasha remains the voice of the brand. Pare
 
 | # | Task | Owner | Status |
 | --- | --- | --- | --- |
-| A1 | Build and host a clean personal website on the home server | Parent | Not started |
-| A2 | Buy a clean domain (e.g. `sashabookandbrush.com`) and point it to the server | Parent | Not started |
-| A3 | Set up Bookshop.org + Amazon Associates affiliate accounts | Parent | Not started |
-| A4 | Create a one-page media kit (PDF) | Parent | Not started |
-| A5 | Add the website + affiliate links to her Instagram bio (Linktree or direct) | Parent + Sasha | Not started |
+| A1 | Build a clean personal website | Parent | **Done in repo** (Astro). Live host is **Cloudflare Pages**, not the home server. Docker remains as an optional fallback. |
+| A2 | Domain `sashabookandbrush.com` | Parent | **Chosen.** Still needs DNS + Pages custom domain if not already pointing. |
+| A3 | Bookshop.org UK + Amazon Associates | Parent | **Not started** (`affiliates` IDs in `src/data/site.json` are empty) |
+| A4 | One-page media kit (PDF) | Parent | **Not started.** Work-with-me page exists on the site. |
+| A5 | Website + affiliate links in Instagram bio | Parent + Sasha | **Not started** |
 
 **Media kit should highlight**
 
@@ -146,9 +146,9 @@ Dates are flexible. The point is sequence, not a hard calendar.
 | --- | --- |
 | Pressure kills the fun | Parent never posts or DMs brands unless asked; celebrate small wins |
 | Affiliate disclosure / FTC | Disclose affiliate links on site and in posts from day one |
-| Home-server downtime | Docker + HTTPS; keep a simple rollback; accept “good enough” uptime |
-| Content waiting on Sasha | Ship the site with placeholders; update when she sends books/photos |
-| Scope creep (blog, shop, email) | Website priority: Home + Recommendations first (see Website Build Plan) |
+| Home-server downtime | Production is Cloudflare Pages. Docker on the home server is optional. |
+| Content waiting on Sasha | Library is imported from Goodreads. She adds notes/featured/covers on `/admin` (or you do). |
+| Scope creep (blog, shop, email) | Core pages are live in the repo. Shop is a placeholder. |
 
 ---
 
@@ -156,21 +156,22 @@ Dates are flexible. The point is sequence, not a hard calendar.
 
 | Item | Notes |
 | --- | --- |
-| Domain | ~$10–20/year |
+| Domain | `sashabookandbrush.com` — ~$10–20/year |
+| Hosting | **Cloudflare Pages** (free tier). Home Docker is optional. |
 | Canva Pro | Optional, if useful for media kit / graphics |
-| Hosting | Existing home server — no extra cost expected |
 | Gumroad / Etsy / ConvertKit | Free tiers first |
 
 ---
 
 ## 8. Open decisions
 
-- [ ] Final domain name
+- [x] Final domain name — `sashabookandbrush.com`
+- [x] Hero / About photos — nook photos (`SashaHero.jpg` / `SashaHeroDark.jpg`)
+- [x] Dobby — mentioned in the About copy
 - [ ] Bio link: direct site vs Linktree
-- [ ] Whether cat Dobby appears on the About page
-- [ ] Photo vs book flat-lay for hero / About
 - [ ] Gumroad vs Etsy for first digital products
 - [ ] Exact collab package names and rates (Sasha decides)
+- [ ] Affiliate IDs once Bookshop UK + Amazon Associates exist
 
 ---
 
@@ -181,7 +182,75 @@ The setup phase is done when all of the following are true:
 1. Website is live on a real domain, HTTPS, mobile-friendly
 2. Affiliate accounts exist and links appear on the site and in her bio
 3. One-page media kit PDF is ready to send
-4. Parent has a documented way to add books and update links
-5. Sasha can ignore the tech and just create
+4. Parent has a documented way to add books and update links (`/admin` + README)
+5. Sasha can ignore the tech and just create (rate on Goodreads; optional `/admin` for notes)
 
 Revenue targets in section 2 are **outcomes**, not a requirement to call the build done.
+
+---
+
+## 10. Remaining to-do (parent)
+
+Code in the working copy is **not committed or pushed** yet. Cloudflare Access, the rebuild Worker, and affiliate accounts are **dashboard / account work** — they cannot be finished from the repo alone.
+
+How the site is meant to work: **Goodreads is the diary. The site is the shop window.** She rates and logs progress on Goodreads. The site does not write back. Full TBR stays off the public Books page.
+
+### A. Get the code onto GitHub
+
+- [ ] Review local changes (library import, RSS sync, `/admin`, Pages Functions, rebuild Worker)
+- [ ] Commit and push to `main` (ask in chat if you want this done for you)
+- [ ] Confirm Cloudflare Pages is building from this repo (`npm run build`, output `dist`)
+
+### B. Domain and Pages
+
+- [ ] Point `sashabookandbrush.com` DNS at the Pages project (if not already)
+- [ ] Confirm HTTPS and a successful production deploy
+- [ ] **Pages → Settings → Builds → Deploy hooks** → hook for `main`. Copy the URL; do not put it in the repo
+
+### C. 6-hour Goodreads RSS sync (Cloudflare, not GitHub)
+
+Each Pages build already runs `sync-goodreads.mjs`. A Worker cron just triggers the rebuild.
+
+- [ ] `npx wrangler deploy --config workers/rebuild-pages/wrangler.toml`
+- [ ] `npx wrangler secret put CLOUDFLARE_PAGES_DEPLOY_HOOK --config workers/rebuild-pages/wrangler.toml`
+- [ ] Trigger the hook once by hand (or wait for the first cron) and check home: currently reading, progress, “Up next”
+- [ ] Optional: switch cron to daily (`0 6 * * *` in `wrangler.toml`) if 6-hourly is more rebuilds than you want  
+- [ ] Do **not** add a GitHub Actions schedule against the same hook
+
+### D. Live `/admin` behind Google (Cloudflare Access)
+
+Bookmark for Sasha later: `https://sashabookandbrush.com/admin` (not in the public nav).
+
+- [ ] [Zero Trust](https://one.dash.cloudflare.com) → Access → Applications → Self-hosted
+- [ ] Domain `sashabookandbrush.com`, path `/admin*`
+- [ ] Same policy on the `*.pages.dev` hostname, **or** disable preview deployments
+- [ ] Identity: **Google**. Allow Sasha’s Gmail and yours
+- [ ] Copy **AUD** and team domain (`your-team.cloudflareaccess.com`)
+- [ ] GitHub fine-grained PAT: **Contents: Read and write** on `GeertClaes/sashabookandbrush`
+- [ ] Repo **Settings → Actions → General → Workflow permissions → Read and write** (CSV import commits back)
+- [ ] Pages **production** environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `ADMIN_GITHUB_TOKEN` | that PAT |
+| `GITHUB_REPO` | `GeertClaes/sashabookandbrush` |
+| `GITHUB_BRANCH` | `main` |
+| `CF_ACCESS_TEAM_DOMAIN` | team domain |
+| `CF_ACCESS_AUD` | Access AUD |
+| `ADMIN_EMAILS` | comma-separated Google emails |
+
+- [ ] Redeploy Pages after env vars
+- [ ] Sign in at `/admin` with Google; save a test note; confirm a GitHub commit and a Pages rebuild
+- [ ] Optional: Formspree id as `PUBLIC_FORMSPREE_ID` on Pages (Work / Shop contact)
+
+### E. Affiliates and go-live (still needed for revenue)
+
+- [ ] Bookshop.org UK affiliate ID → `affiliates.bookshopUkId` in `src/data/site.json`
+- [ ] Amazon Associates tag + OneLink → `affiliates.amazonTag`
+- [ ] Commit those IDs; confirm buy buttons on a book page and a featured home card
+- [ ] Media kit PDF (A4)
+- [ ] Instagram bio: site URL (and shop/affiliate once IDs exist)
+- [ ] Show Sasha `/admin`: notes, featured, covers, CSV drop. Ratings stay on Goodreads
+- [ ] Pick a few home **featured** books with her (aim 4–9)
+
+Local editor without Access: `npm run admin`, then `/admin` on the dev server.

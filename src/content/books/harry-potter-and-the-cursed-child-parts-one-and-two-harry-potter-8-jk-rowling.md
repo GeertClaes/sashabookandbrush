@@ -1,7 +1,7 @@
 ---
 title: "Harry Potter and the Cursed Child: Parts One and Two (Harry Potter, #8)"
 author: "J.K. Rowling"
-cover: ""
+cover: "harry-potter-and-the-cursed-child-parts-one-and-two-harry-potter-8-jk-rowling.jpg"
 note: ""
 rating: 3
 genre: "Read"

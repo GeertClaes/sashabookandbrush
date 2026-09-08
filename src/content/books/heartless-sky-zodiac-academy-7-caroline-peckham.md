@@ -1,7 +1,7 @@
 ---
 title: "Heartless Sky (Zodiac Academy, #7)"
 author: "Caroline Peckham"
-cover: ""
+cover: "heartless-sky-zodiac-academy-7-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"

@@ -1,7 +1,7 @@
 ---
 title: "The Good Lie"
 author: "A.R. Torre"
-cover: ""
+cover: "the-good-lie-ar-torre.jpg"
 note: ""
 rating: 4
 genre: "Read"

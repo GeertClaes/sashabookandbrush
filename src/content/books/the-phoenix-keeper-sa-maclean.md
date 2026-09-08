@@ -1,7 +1,7 @@
 ---
 title: "The Phoenix Keeper"
 author: "S.A. MacLean"
-cover: ""
+cover: "the-phoenix-keeper-sa-maclean.jpg"
 note: ""
 rating: 4
 genre: "Read"

@@ -1,7 +1,7 @@
 ---
 title: "Fever Dream (Emerald Lake, #1)"
 author: "Elsie Silver"
-cover: ""
+cover: "fever-dream-emerald-lake-1-elsie-silver.jpg"
 note: ""
 rating: 5
 genre: "Read"

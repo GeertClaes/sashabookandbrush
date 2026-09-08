@@ -3,7 +3,16 @@
   "brand": "sasha & brush",
   "handle": "@sashabookandbrush",
   "instagram": "https://instagram.com/sashabookandbrush",
-  "bookshop": "https://bookshop.org",
+  "bookshop": "https://uk.bookshop.org",
+  "goodreads": {
+    "userId": "141471789",
+    "profile": "https://www.goodreads.com/user/show/141471789-sasha-horwood",
+    "tbr": "https://www.goodreads.com/review/list/141471789?shelf=to-read"
+  },
+  "affiliates": {
+    "amazonTag": "",
+    "bookshopUkId": ""
+  },
   "description": "Romantasy recs, pretty editions, and paintings between chapters from @sashabookandbrush — an Aussie reading in Wales.",
   "hero": {
     "image": "/images/SashaHero.jpg",

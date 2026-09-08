@@ -1,7 +1,7 @@
 ---
 title: "Funny Story"
 author: "Emily Henry"
-cover: ""
+cover: "funny-story-emily-henry.jpg"
 note: ""
 rating: 3
 genre: "Read"

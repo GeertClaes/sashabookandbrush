@@ -1,0 +1,36 @@
+name: Import Goodreads CSV
+
+on:
+  push:
+    paths:
+      - "data/export.csv"
+  workflow_dispatch:
+
+concurrency:
+  group: import-goodreads
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Import library
+        run: node scripts/import-goodreads.mjs --skip-covers
+      - name: Commit library updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/books src/assets/covers
+          if git diff --cached --quiet; then
+            echo "No library changes"
+            exit 0
+          fi
+          git commit -m "Import Goodreads library updates"
+          git push

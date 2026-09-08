@@ -1,7 +1,7 @@
 ---
 title: "Soul Searching (Sweetwater Peak, #1)"
 author: "Lyla Sage"
-cover: ""
+cover: "soul-searching-sweetwater-peak-1-lyla-sage.jpg"
 note: ""
 rating: 3
 genre: "Read"

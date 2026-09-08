@@ -1,7 +1,7 @@
 ---
 title: "In a Thousand Different Ways"
 author: "Cecelia Ahern"
-cover: ""
+cover: "in-a-thousand-different-ways-cecelia-ahern.jpg"
 note: ""
 rating: 3
 genre: "Read"

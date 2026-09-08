@@ -1,7 +1,7 @@
 ---
 title: "The Secret Paris Ingredient"
 author: "M.H. Cali"
-cover: ""
+cover: "the-secret-paris-ingredient-mh-cali.jpg"
 note: ""
 rating: 0
 genre: "Currently reading"

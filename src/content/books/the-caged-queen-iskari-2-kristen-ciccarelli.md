@@ -1,7 +1,7 @@
 ---
 title: "The Caged Queen (Iskari, #2)"
 author: "Kristen Ciccarelli"
-cover: ""
+cover: "the-caged-queen-iskari-2-kristen-ciccarelli.jpg"
 note: ""
 rating: 5
 genre: "Read"

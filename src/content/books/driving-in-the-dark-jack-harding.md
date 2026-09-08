@@ -1,7 +1,7 @@
 ---
 title: "Driving in the Dark"
 author: "Jack  Harding"
-cover: ""
+cover: "driving-in-the-dark-jack-harding.jpg"
 note: ""
 rating: 4
 genre: "Read"

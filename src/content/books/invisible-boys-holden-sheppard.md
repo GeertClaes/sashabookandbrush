@@ -1,7 +1,7 @@
 ---
 title: "Invisible Boys"
 author: "Holden Sheppard"
-cover: ""
+cover: "invisible-boys-holden-sheppard.jpg"
 note: ""
 rating: 5
 genre: "Read"

@@ -1,7 +1,7 @@
 ---
 title: "Beyond the Veil (Zodiac Academy, #8.5)"
 author: "Caroline Peckham"
-cover: ""
+cover: "beyond-the-veil-zodiac-academy-85-caroline-peckham.jpg"
 note: ""
 rating: 3
 genre: "Read"

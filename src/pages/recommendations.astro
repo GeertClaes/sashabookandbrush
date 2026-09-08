@@ -1,8 +1,10 @@
 ---
 import BookCard from "../components/BookCard.astro";
+import CoverWall from "../components/CoverWall.astro";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { bookHref } from "../lib/books";
+import { groupSeries } from "../lib/series";
 import { getCollection } from "astro:content";
 
 const books = (await getCollection("books")).sort((a, b) => {
@@ -13,6 +15,11 @@ const books = (await getCollection("books")).sort((a, b) => {
   const bDate = b.data.status === "currently-reading" ? b.data.dateAdded : b.data.dateRead || b.data.dateAdded;
   return (bDate || "").localeCompare(aDate || "");
 });
+const fiveStars = books.filter((book) => book.data.rating === 5);
+const seriesGroups = groupSeries(books, 3).slice(0, 6);
+const years = [...new Set(books.map((book) => book.data.dateRead?.slice(0, 4)).filter(Boolean) as string[])].sort(
+  (a, b) => b.localeCompare(a),
+);
 const shelves = [
   { id: "all", label: "All" },
   { id: "currently-reading", label: "Reading now" },
@@ -56,6 +63,35 @@ const selectClass =
           {site.recommendations.lede}
         </p>
       </div>
+
+      {
+        seriesGroups.length > 0 && (
+          <section class="mb-10">
+            <h2 class="font-display mb-5 text-2xl font-semibold text-foreground">Series on the shelf</h2>
+            <div class="space-y-8">
+              {seriesGroups.map((group) => (
+                <div>
+                  <div class="mb-3 flex items-baseline justify-between gap-3">
+                    <h3 class="font-display text-lg font-semibold text-foreground">{group.name}</h3>
+                    <p class="text-xs text-muted-foreground">{group.books.length} on the site</p>
+                  </div>
+                  <CoverWall books={group.books} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        fiveStars.length > 0 && (
+          <section class="mb-10">
+            <h2 class="font-display mb-2 text-2xl font-semibold text-foreground">Five-star wall</h2>
+            <p class="mb-5 text-sm text-muted-foreground">The ones that earned the full set.</p>
+            <CoverWall books={fiveStars} />
+          </section>
+        )
+      }
 
       <div
         class="sticky top-16 z-30 mb-8 border-b border-border bg-background/95 py-3 backdrop-blur-sm"
@@ -101,7 +137,7 @@ const selectClass =
           </label>
         </div>
 
-        <div class="mt-2 grid grid-cols-3 gap-2">
+        <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <label>
             <span class="sr-only">Shelf</span>
             <select id="book-shelf" class={selectClass}>
@@ -126,6 +162,13 @@ const selectClass =
               }
             </select>
           </label>
+          <label>
+            <span class="sr-only">Year read</span>
+            <select id="book-year" class={selectClass}>
+              <option value="all">Any year</option>
+              {years.map((year) => <option value={year}>Read in {year}</option>)}
+            </select>
+          </label>
         </div>
 
         <p class="mt-2 text-xs text-muted-foreground" data-result-count>
@@ -147,6 +190,7 @@ const selectClass =
               data-sort-rating={String(book.data.rating)}
               data-sort-year={String(book.data.yearPublished || book.data.originalYear || "")}
               data-sort-pages={String(book.data.pages || "")}
+              data-read-year={book.data.dateRead?.slice(0, 4) || ""}
               data-book-search={`${book.data.title} ${book.data.author} ${book.data.genre} ${book.data.note} ${book.data.isbn || ""} ${book.data.publisher || ""}`.toLowerCase()}
             >
               <BookCard {...book.data} href={bookHref(book.id)} variant="row" />
@@ -168,6 +212,7 @@ const selectClass =
   const shelf = document.querySelector<HTMLSelectElement>("#book-shelf");
   const rating = document.querySelector<HTMLSelectElement>("#book-rating");
   const genre = document.querySelector<HTMLSelectElement>("#book-genre");
+  const year = document.querySelector<HTMLSelectElement>("#book-year");
   const list = document.querySelector<HTMLElement>("[data-book-list]");
   const cards = document.querySelectorAll<HTMLElement>("[data-book-search]");
   const empty = document.querySelector<HTMLElement>("[data-empty]");
@@ -210,11 +255,13 @@ const selectClass =
     const shelfValue = shelf?.value ?? "all";
     const ratingValue = rating?.value ?? "all";
     const genreValue = genre?.value ?? "All";
+    const yearValue = year?.value ?? "all";
     let visible = 0;
 
     cards.forEach((card) => {
       const shelfMatch = shelfValue === "all" || card.dataset.bookStatus === shelfValue;
       const genreMatch = genreValue === "All" || card.dataset.bookGenre === genreValue;
+      const yearMatch = yearValue === "all" || card.dataset.readYear === yearValue;
       const stars = Number(card.dataset.sortRating || 0);
       const ratingMatch =
         ratingValue === "all" ||
@@ -223,7 +270,7 @@ const selectClass =
         (ratingValue === "4" && stars >= 4) ||
         (ratingValue === "3" && stars >= 3);
       const textMatch = !query || (card.dataset.bookSearch ?? "").includes(query);
-      const show = shelfMatch && genreMatch && ratingMatch && textMatch;
+      const show = shelfMatch && genreMatch && ratingMatch && textMatch && yearMatch;
       card.classList.toggle("hidden", !show);
       if (show) visible += 1;
     });
@@ -232,7 +279,12 @@ const selectClass =
 
     if (count) {
       const idle =
-        visible === total && !query && shelfValue === "all" && ratingValue === "all" && genreValue === "All";
+        visible === total &&
+        !query &&
+        shelfValue === "all" &&
+        ratingValue === "all" &&
+        genreValue === "All" &&
+        yearValue === "all";
       count.textContent = idle
         ? `${total} ${total === 1 ? "book" : "books"}`
         : `Showing ${visible} of ${total}`;
@@ -244,4 +296,12 @@ const selectClass =
   shelf?.addEventListener("change", apply);
   rating?.addEventListener("change", apply);
   genre?.addEventListener("change", apply);
+  year?.addEventListener("change", apply);
+
+  const params = new URLSearchParams(window.location.search);
+  const yearParam = params.get("year");
+  if (yearParam && year) {
+    year.value = yearParam;
+    apply();
+  }
 </script>

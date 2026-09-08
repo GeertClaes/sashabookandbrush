@@ -1,7 +1,7 @@
 ---
 title: "The Reckoning (Zodiac Academy, #3)"
 author: "Caroline Peckham"
-cover: ""
+cover: "the-reckoning-zodiac-academy-3-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"

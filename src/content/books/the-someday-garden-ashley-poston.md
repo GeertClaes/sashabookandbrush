@@ -1,7 +1,7 @@
 ---
 title: "The Someday Garden"
 author: "Ashley Poston"
-cover: ""
+cover: "the-someday-garden-ashley-poston.jpg"
 note: ""
 rating: 3
 genre: "Read"

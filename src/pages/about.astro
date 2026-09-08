@@ -1,9 +1,17 @@
 ---
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
-const { about, facts, readingChallenge, instagram, handle } = site;
+const { about, facts, readingChallenge, instagram, handle, goodreads } = site;
 const percent = Math.round((readingChallenge.read / readingChallenge.goal) * 100);
+const years = [
+  ...new Set(
+    (await getCollection("books"))
+      .map((book) => book.data.dateRead?.slice(0, 4))
+      .filter(Boolean) as string[],
+  ),
+].sort((a, b) => b.localeCompare(a));
 ---
 
 <BaseLayout
@@ -72,6 +80,20 @@ const percent = Math.round((readingChallenge.read / readingChallenge.goal) * 100
               <div class="h-full rounded-full bg-secondary" style={`width: ${percent}%`}></div>
             </div>
             <p class="mt-2 text-xs text-muted-foreground">{percent}% — tracked on Goodreads</p>
+            {
+              years.length > 0 && (
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {years.map((year) => (
+                    <a
+                      href={`/recommendations?year=${year}`}
+                      class="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                    >
+                      {year}
+                    </a>
+                  ))}
+                </div>
+              )
+            }
           </div>
 
           <div class="mt-4 grid grid-cols-2 gap-3">
@@ -87,7 +109,7 @@ const percent = Math.round((readingChallenge.read / readingChallenge.goal) * 100
             }
           </div>
 
-          <div class="mt-8">
+          <div class="mt-8 flex flex-wrap gap-3">
             <a
               href={instagram}
               target="_blank"
@@ -95,6 +117,14 @@ const percent = Math.round((readingChallenge.read / readingChallenge.goal) * 100
               class="inline-flex items-center gap-2 rounded border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
             >
               Follow on Instagram →
+            </a>
+            <a
+              href={goodreads.profile}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Goodreads →
             </a>
           </div>
         </div>

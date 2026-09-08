@@ -1,7 +1,7 @@
 ---
 title: "Till Death Do Us Part (The Asylum Confession Files #3)"
 author: "Jack Steen"
-cover: ""
+cover: "till-death-do-us-part-the-asylum-confession-files-3-jack-steen.jpg"
 note: ""
 rating: 2
 genre: "Read"

@@ -1,7 +1,7 @@
 ---
 title: "The Sky Weaver (Iskari, #3)"
 author: "Kristen Ciccarelli"
-cover: ""
+cover: "the-sky-weaver-iskari-3-kristen-ciccarelli.jpg"
 note: ""
 rating: 5
 genre: "Read"

@@ -1,7 +1,7 @@
 ---
 title: "The Housemaid's Secret (The Housemaid, #2)"
 author: "Freida McFadden"
-cover: ""
+cover: "the-housemaids-secret-the-housemaid-2-freida-mcfadden.jpg"
 note: ""
 rating: 3
 genre: "Read"

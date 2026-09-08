@@ -1,7 +1,7 @@
 ---
 title: "The Sirens"
 author: "Emilia Hart"
-cover: ""
+cover: "the-sirens-emilia-hart.jpg"
 note: ""
 rating: 4
 genre: "Read"

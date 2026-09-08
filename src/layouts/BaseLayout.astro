@@ -8,12 +8,14 @@ interface Props {
   title?: string;
   description?: string;
   transparentHeader?: boolean;
+  noindex?: boolean;
 }
 
 const {
   title,
   description = site.description,
   transparentHeader = false,
+  noindex = false,
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${site.brand}` : `${site.brand} · ${site.handle}`;
@@ -27,6 +29,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta property="og:type" content="website" />

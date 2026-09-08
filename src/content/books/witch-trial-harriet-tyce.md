@@ -1,7 +1,7 @@
 ---
 title: "Witch Trial"
 author: "Harriet Tyce"
-cover: ""
+cover: "witch-trial-harriet-tyce.jpg"
 note: ""
 rating: 3
 genre: "Read"

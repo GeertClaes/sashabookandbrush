@@ -1,7 +1,7 @@
 ---
 title: "Fated Throne (Zodiac Academy, #6)"
 author: "Caroline Peckham"
-cover: ""
+cover: "fated-throne-zodiac-academy-6-caroline-peckham.jpg"
 note: ""
 rating: 4
 genre: "Read"

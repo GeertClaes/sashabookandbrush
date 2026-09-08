@@ -1,7 +1,7 @@
 ---
 title: "A Forbidden Fate (A Forbidden Fate Series)"
 author: "Kaven Hirning"
-cover: ""
+cover: "a-forbidden-fate-a-forbidden-fate-series-kaven-hirning.jpg"
 note: ""
 rating: 4
 genre: "Read"

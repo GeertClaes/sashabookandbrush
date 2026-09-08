@@ -1,7 +1,7 @@
 ---
 title: "The Echo of Old Books"
 author: "Barbara  Davis"
-cover: ""
+cover: "the-echo-of-old-books-barbara-davis.webp"
 note: ""
 rating: 4
 genre: "Read"

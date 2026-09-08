@@ -1,7 +1,7 @@
 ---
 title: "Ruthless Fae (Zodiac Academy, #2)"
 author: "Caroline Peckham"
-cover: ""
+cover: "ruthless-fae-zodiac-academy-2-caroline-peckham.jpg"
 note: ""
 rating: 4
 genre: "Read"

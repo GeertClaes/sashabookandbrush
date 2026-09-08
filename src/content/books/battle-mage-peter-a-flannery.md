@@ -1,7 +1,7 @@
 ---
 title: "Battle Mage"
 author: "Peter A. Flannery"
-cover: ""
+cover: "battle-mage-peter-a-flannery.jpg"
 note: ""
 rating: 5
 genre: "Read"

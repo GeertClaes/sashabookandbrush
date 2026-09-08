@@ -1,7 +1,7 @@
 ---
 title: "Caring For Nigel: Diary of a Wife Coping With Her Husband's Dementia"
 author: "Eileen Murray"
-cover: ""
+cover: "caring-for-nigel-diary-of-a-wife-coping-with-her-husbands-dementia-eileen-murray.jpg"
 note: ""
 rating: 4
 genre: "Read"

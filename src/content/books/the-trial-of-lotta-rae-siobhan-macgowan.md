@@ -1,7 +1,7 @@
 ---
 title: "The Trial of Lotta Rae"
 author: "Siobhan MacGowan"
-cover: ""
+cover: "the-trial-of-lotta-rae-siobhan-macgowan.jpg"
 note: ""
 rating: 4
 genre: "Read"

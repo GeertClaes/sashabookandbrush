@@ -3,9 +3,11 @@ import ArtCard from "../components/ArtCard.astro";
 import BookCard from "../components/BookCard.astro";
 import CoverImage from "../components/CoverImage.astro";
 import SupplyCard from "../components/SupplyCard.astro";
+import live from "../data/goodreads-live.json";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { bookHref } from "../lib/books";
+import { liveProgress } from "../lib/live";
 import { getCollection } from "astro:content";
 
 const books = await getCollection("books");
@@ -17,6 +19,19 @@ const featured = books
 const currentlyReading = books
   .filter((book) => book.data.status === "currently-reading")
   .sort((a, b) => (b.data.dateAdded || "").localeCompare(a.data.dateAdded || ""));
+
+const byGoodreadsId = new Map(books.filter((book) => book.data.goodreadsId).map((book) => [book.data.goodreadsId, book]));
+const byTitle = new Map(books.map((book) => [book.data.title.toLowerCase(), book]));
+const upNext = (live.upNext || []).slice(0, 8).map((item) => {
+  const local = (item.goodreadsId && byGoodreadsId.get(item.goodreadsId)) || byTitle.get(item.title.toLowerCase());
+  return {
+    title: item.title,
+    author: item.author,
+    href: local ? bookHref(local.id) : `https://www.goodreads.com/book/show/${item.goodreadsId}`,
+    cover: local?.data.cover || "",
+    local: Boolean(local),
+  };
+});
 
 const featuredArt = (await getCollection("art"))
   .filter((piece) => piece.data.featured)
@@ -84,27 +99,82 @@ const featuredSupplies = (await getCollection("supplies"))
             </p>
           </div>
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {currentlyReading.map((book) => (
-              <a href={bookHref(book.id)} class="group min-w-0">
-                <CoverImage
-                  cover={book.data.cover}
-                  alt={`${book.data.title} by ${book.data.author}`}
-                  class="mb-3 h-48 w-32 rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-52 sm:w-36"
-                  width={144}
-                  height={208}
-                />
-                <h2 class="font-display text-lg font-semibold leading-snug text-cream">
-                  {book.data.title}
-                </h2>
-                <p class="mt-1 text-sm text-sage">{book.data.author}</p>
-                {book.data.note && (
-                  <p class="mt-3 line-clamp-4 text-sm leading-relaxed text-parchment italic">
-                    “{book.data.note}”
-                  </p>
-                )}
-              </a>
-            ))}
+            {currentlyReading.map((book) => {
+              const progress = liveProgress(live, book.data.title, book.data.goodreadsId);
+              return (
+                <a href={bookHref(book.id)} class="group min-w-0">
+                  <CoverImage
+                    cover={book.data.cover}
+                    alt={`${book.data.title} by ${book.data.author}`}
+                    class="mb-3 h-48 w-32 rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-52 sm:w-36"
+                    width={144}
+                    height={208}
+                  />
+                  <h2 class="font-display text-lg font-semibold leading-snug text-cream">
+                    {book.data.title}
+                  </h2>
+                  <p class="mt-1 text-sm text-sage">{book.data.author}</p>
+                  {typeof progress === "number" && (
+                    <div class="mt-3 max-w-36">
+                      <div class="h-1.5 overflow-hidden rounded-full bg-cream/20">
+                        <div class="h-full rounded-full bg-sage" style={`width: ${progress}%`}></div>
+                      </div>
+                      <p class="mt-1 text-xs text-sage">{progress}%</p>
+                    </div>
+                  )}
+                  {book.data.note && (
+                    <p class="mt-3 line-clamp-4 text-sm leading-relaxed text-parchment italic">
+                      “{book.data.note}”
+                    </p>
+                  )}
+                </a>
+              );
+            })}
           </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    upNext.length > 0 && (
+      <section class="bg-secondary/80 py-12">
+        <div class="mx-auto max-w-5xl px-6 md:px-12">
+          <div class="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <p class="mb-2 text-xs font-medium tracking-widest text-sage uppercase">Up next</p>
+              <h2 class="font-display text-2xl font-semibold text-cream">Recently added to the TBR</h2>
+            </div>
+            <a
+              href={site.goodreads.tbr}
+              class="text-sm font-medium text-sage underline-offset-4 hover:underline"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Full TBR on Goodreads →
+            </a>
+          </div>
+          <ul class="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
+            {upNext.map((book) => (
+              <li>
+                <a href={book.href} class="group block min-w-0" rel={book.local ? undefined : "noopener noreferrer"} target={book.local ? undefined : "_blank"}>
+                  {book.cover ? (
+                    <CoverImage
+                      cover={book.cover}
+                      alt=""
+                      class="mb-2 aspect-2/3 w-full rounded object-cover shadow-md"
+                      width={120}
+                      height={180}
+                    />
+                  ) : (
+                    <div class="mb-2 aspect-2/3 rounded bg-hero-overlay/40" aria-hidden="true"></div>
+                  )}
+                  <p class="font-display line-clamp-2 text-sm font-semibold leading-snug text-cream">{book.title}</p>
+                  <p class="mt-1 line-clamp-1 text-xs text-sage">{book.author}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     )
@@ -129,7 +199,7 @@ const featuredSupplies = (await getCollection("supplies"))
       <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
         {
           featured.map((book) => (
-            <BookCard {...book.data} href={bookHref(book.id)} />
+            <BookCard {...book.data} href={bookHref(book.id)} showBuy />
           ))
         }
       </div>

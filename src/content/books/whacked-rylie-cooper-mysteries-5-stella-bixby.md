@@ -1,7 +1,7 @@
 ---
 title: "Whacked (Rylie Cooper Mysteries #5)"
 author: "Stella Bixby"
-cover: ""
+cover: "whacked-rylie-cooper-mysteries-5-stella-bixby.jpg"
 note: ""
 rating: 4
 genre: "Read"

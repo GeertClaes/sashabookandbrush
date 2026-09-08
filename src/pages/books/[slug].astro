@@ -2,8 +2,11 @@
 import AffiliateButtons from "../../components/AffiliateButtons.astro";
 import CoverImage from "../../components/CoverImage.astro";
 import StarRating from "../../components/StarRating.astro";
+import live from "../../data/goodreads-live.json";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { affiliateLinks } from "../../lib/affiliates";
 import { bookHref, formatFullDate } from "../../lib/books";
+import { liveProgress } from "../../lib/live";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
@@ -41,6 +44,8 @@ const moreByAuthor = (await getCollection("books"))
   .filter((entry) => entry.id !== book.id && entry.data.author === data.author)
   .sort((a, b) => (b.data.dateRead || b.data.dateAdded || "").localeCompare(a.data.dateRead || a.data.dateAdded || ""))
   .slice(0, 4);
+const buy = affiliateLinks(data);
+const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : null;
 ---
 
 <BaseLayout title={data.title} description={description}>
@@ -80,6 +85,16 @@ const moreByAuthor = (await getCollection("books"))
             )
           }
           {reading && <p class="mt-3 text-sm text-accent">On the currently-reading shelf</p>}
+          {
+            typeof progress === "number" && (
+              <div class="mt-4 max-w-xs">
+                <div class="h-2 overflow-hidden rounded-full bg-muted">
+                  <div class="h-full rounded-full bg-secondary" style={`width: ${progress}%`}></div>
+                </div>
+                <p class="mt-1 text-xs text-muted-foreground">{progress}% on Goodreads</p>
+              </div>
+            )
+          }
 
           {
             facts.length > 0 && (
@@ -95,7 +110,7 @@ const moreByAuthor = (await getCollection("books"))
           }
 
           <div class="mt-8">
-            <AffiliateButtons bookshop={data.bookshop} amazon={data.amazon} />
+            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} />
           </div>
 
           {

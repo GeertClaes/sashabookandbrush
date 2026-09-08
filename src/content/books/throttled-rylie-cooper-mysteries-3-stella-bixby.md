@@ -1,7 +1,7 @@
 ---
 title: "Throttled (Rylie Cooper Mysteries #3)"
 author: "Stella Bixby"
-cover: ""
+cover: "throttled-rylie-cooper-mysteries-3-stella-bixby.jpg"
 note: ""
 rating: 4
 genre: "Read"

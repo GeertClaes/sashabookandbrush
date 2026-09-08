@@ -1,7 +1,7 @@
 ---
 title: "The Hobbit, or There and Back Again"
 author: "J.R.R. Tolkien"
-cover: ""
+cover: "the-hobbit-or-there-and-back-again-jrr-tolkien.jpg"
 note: ""
 rating: 5
 genre: "Read"

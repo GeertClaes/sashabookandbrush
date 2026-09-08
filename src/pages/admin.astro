@@ -1,0 +1,286 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const isDev = import.meta.env.DEV;
+const api = isDev ? import.meta.env.PUBLIC_ADMIN_URL || "http://127.0.0.1:8787" : "";
+const catalog = (await getCollection("books"))
+  .map((book) => ({
+    slug: book.id,
+    title: book.data.title,
+    author: book.data.author,
+    note: book.data.note || "",
+    featured: Boolean(book.data.featured),
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<BaseLayout
+  title="Library editor"
+  description="Private editor for notes, featured books, covers, and Goodreads CSV."
+  noindex={true}
+>
+  <div class="min-h-screen bg-background">
+    <div class="mx-auto max-w-3xl px-6 py-16 md:px-12">
+      <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Private</p>
+      <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Library editor</h1>
+      <p class="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        Rate and log progress on Goodreads. Use this page for a public note, a home-page feature, a cover, or a new
+        library export.
+        {
+          isDev ? (
+            <>
+              {" "}
+              Locally, also run <code class="text-foreground">npm run admin</code>.
+            </>
+          ) : (
+            <> Cloudflare will ask you to sign in with Google before this page opens.</>
+          )
+        }
+      </p>
+
+      <p data-status class="mb-6 text-sm text-muted-foreground">Checking the editor…</p>
+
+      {
+        isDev && (
+          <form data-login class="mb-10 hidden rounded-xl border border-border bg-card p-5">
+            <label class="block text-sm font-medium text-foreground">
+              Password
+              <input
+                type="password"
+                name="password"
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2"
+              />
+            </label>
+            <button type="submit" class="mt-4 rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+              Sign in
+            </button>
+          </form>
+        )
+      }
+
+      <div data-app class="hidden space-y-10">
+        <section class="rounded-xl border border-border bg-card p-5">
+          <h2 class="font-display mb-3 text-xl font-semibold text-foreground">Find a book</h2>
+          <input
+            type="search"
+            data-search
+            placeholder="Title or author"
+            class="mb-4 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          />
+          <ul data-results class="space-y-2 text-sm"></ul>
+        </section>
+
+        <section data-editor class="hidden rounded-xl border border-border bg-card p-5">
+          <h2 class="font-display mb-1 text-xl font-semibold text-foreground" data-edit-title></h2>
+          <p class="mb-4 text-sm text-muted-foreground" data-edit-author></p>
+          <label class="mb-4 block text-sm font-medium text-foreground">
+            Public note
+            <textarea data-note rows="8" class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            ></textarea>
+          </label>
+          <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" data-featured />
+            Feature on the home page
+          </label>
+          <label class="mb-4 block text-sm font-medium text-foreground">
+            Cover image
+            <input type="file" data-cover accept="image/jpeg,image/png,image/webp" class="mt-2 block text-sm" />
+          </label>
+          <button type="button" data-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+            Save note
+          </button>
+        </section>
+
+        <section class="rounded-xl border border-border bg-card p-5">
+          <h2 class="font-display mb-3 text-xl font-semibold text-foreground">Goodreads CSV</h2>
+          <p class="mb-4 text-sm text-muted-foreground">
+            Export from Goodreads, then drop the file here. Existing notes, covers, and featured flags are kept. On the
+            live site, ratings update after GitHub imports the file and Cloudflare rebuilds.
+          </p>
+          <input type="file" data-csv accept=".csv" class="mb-4 block text-sm" />
+          <button type="button" data-import class="rounded border border-border px-4 py-2 text-sm">
+            Import CSV
+          </button>
+          <pre data-log class="mt-4 overflow-x-auto text-xs text-muted-foreground"></pre>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline type="application/json" id="book-catalog" set:html={JSON.stringify(catalog).replace(/</g, "\\u003c")} />
+
+  <script define:vars={{ api, isDev }}>
+  const status = document.querySelector("[data-status]");
+  const login = document.querySelector("[data-login]");
+  const app = document.querySelector("[data-app]");
+  const results = document.querySelector("[data-results]");
+  const editor = document.querySelector("[data-editor]");
+  const books = JSON.parse(document.getElementById("book-catalog")?.textContent || "[]");
+  let current = null;
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function toBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+  }
+
+  async function call(path, options = {}) {
+    const response = await fetch(`${api}/admin/api${path}`, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      ...options,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    return data;
+  }
+
+  function showApp(email) {
+    login?.classList.add("hidden");
+    app?.classList.remove("hidden");
+    if (!status) return;
+    if (email && email !== "local") {
+      status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
+    } else if (isDev) {
+      status.textContent = "Editor is connected on this computer.";
+    } else {
+      status.textContent = "Editor is connected. Saves go live after the site rebuilds (usually a minute).";
+    }
+  }
+
+  async function boot() {
+    try {
+      const health = await call("/health");
+      if (isDev) {
+        try {
+          await call("/books?q=");
+        } catch {
+          login?.classList.remove("hidden");
+          if (status) status.textContent = "Sign in to edit notes and upload a Goodreads export.";
+          return;
+        }
+      }
+      showApp(health.email);
+    } catch {
+      if (isDev) {
+        if (status) {
+          status.textContent =
+            "The editor API is not running. On this computer: npm run admin — then refresh.";
+        }
+        return;
+      }
+      if (status) {
+        status.textContent =
+          "Could not reach the editor. Finish Google sign-in if Cloudflare asked, or check that Access and GitHub are configured.";
+      }
+    }
+  }
+
+  login?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const password = new FormData(login).get("password") || "";
+    try {
+      await call("/login", { method: "POST", body: JSON.stringify({ password }) });
+      showApp("local");
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    }
+  });
+
+  document.querySelector("[data-search]")?.addEventListener("input", (event) => {
+    const q = event.target.value.trim().toLowerCase();
+    if (!results) return;
+    if (q.length < 2) {
+      results.innerHTML = "";
+      return;
+    }
+    const matches = books
+      .filter((book) => `${book.title} ${book.author} ${book.slug}`.toLowerCase().includes(q))
+      .slice(0, 40);
+    results.innerHTML = matches
+      .map(
+        (book) =>
+          `<li><button type="button" class="w-full rounded-lg border border-border px-3 py-2 text-left hover:border-primary" data-slug="${escapeHtml(book.slug)}">${escapeHtml(book.title)} <span class="text-muted-foreground">· ${escapeHtml(book.author)}</span></button></li>`,
+      )
+      .join("");
+  });
+
+  results?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-slug]");
+    if (!button) return;
+    current = books.find((book) => book.slug === button.dataset.slug);
+    if (!current) return;
+    editor?.classList.remove("hidden");
+    document.querySelector("[data-edit-title]").textContent = current.title;
+    document.querySelector("[data-edit-author]").textContent = current.author;
+    document.querySelector("[data-note]").value = current.note;
+    document.querySelector("[data-featured]").checked = current.featured;
+  });
+
+  document.querySelector("[data-save]")?.addEventListener("click", async () => {
+    if (!current) return;
+    try {
+      current.note = document.querySelector("[data-note]").value;
+      current.featured = document.querySelector("[data-featured]").checked;
+      await call("/book", {
+        method: "POST",
+        body: JSON.stringify({
+          slug: current.slug,
+          note: current.note,
+          featured: current.featured,
+        }),
+      });
+      const file = document.querySelector("[data-cover]").files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          throw new Error("Cover is too large (2 MB max)");
+        }
+        const contentBase64 = toBase64(await file.arrayBuffer());
+        await call("/cover", {
+          method: "POST",
+          body: JSON.stringify({ slug: current.slug, filename: file.name, contentBase64 }),
+        });
+        document.querySelector("[data-cover]").value = "";
+      }
+      if (status) {
+        status.textContent = isDev
+          ? `Saved ${current.title}. Refresh the site to see it.`
+          : `Saved ${current.title}. It will show on the site after the rebuild.`;
+      }
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    }
+  });
+
+  document.querySelector("[data-import]")?.addEventListener("click", async () => {
+    const file = document.querySelector("[data-csv]").files[0];
+    const log = document.querySelector("[data-log]");
+    if (!file) return;
+    try {
+      const contentBase64 = toBase64(await file.arrayBuffer());
+      if (log) log.textContent = "Importing…";
+      const data = await call("/csv", {
+        method: "POST",
+        body: JSON.stringify({ filename: file.name, contentBase64 }),
+      });
+      if (log) log.textContent = data.log || "Done.";
+    } catch (error) {
+      if (log) log.textContent = error.message;
+    }
+  });
+
+  boot();
+</script>
+</BaseLayout>

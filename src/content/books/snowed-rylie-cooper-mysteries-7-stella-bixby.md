@@ -1,7 +1,7 @@
 ---
 title: "Snowed (Rylie Cooper Mysteries #7)"
 author: "Stella Bixby"
-cover: ""
+cover: "snowed-rylie-cooper-mysteries-7-stella-bixby.jpg"
 note: ""
 rating: 3
 genre: "Read"
