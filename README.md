@@ -88,7 +88,7 @@ Then refresh the Books page. Shelf, rating, genre, year read, and sort are indep
 
 ### Library editor (`/admin`)
 
-Rate books on Goodreads. The site editor is for a public note, a featured home card, a cover, or a CSV drop. It is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
+Rate books on Goodreads. The site editor is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. It is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
 
 On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` opens. Saves commit to GitHub; Pages rebuilds (usually about a minute). A CSV upload writes `data/export.csv`, then [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) runs `import-goodreads.mjs --skip-covers` and commits library files.
 
@@ -136,10 +136,12 @@ order: 1
 ---
 ```
 
-3. Put the photo in `public/images/art/` and point `image` at that path. Leave `image` out until you have one — the card will show the title on a blank panel.
+3. Put the photo in `public/images/art/` and point `image` at that path. Leave `image` out until you have one — the card uses a branded placeholder until the photo is up.
 4. Set `featured: true` to show it on the home page.
 
 ### Add or edit art supplies
+
+The usual way is **Studio editor → Tools** at `/admin` (title, brand, category, note, affiliate links, featured, order). You can still edit files directly:
 
 1. Create a file in `src/content/supplies/` (one markdown file per item).
 2. Fill in the frontmatter:
@@ -206,17 +208,16 @@ CSV can also be uploaded on `/admin`. That commits `data/export.csv`; GitHub Act
 Edit `src/data/site.json` for:
 
 - Hero text, About bio, Art page copy
-- Work-with-me stats, offers, and packages
 - Instagram URL
 - Shop placeholder copy
 
-### Contact form
+### Shop waitlist
 
 1. Create a form at [Formspree](https://formspree.io).
 2. Copy `.env.example` to `.env`.
 3. Set `PUBLIC_FORMSPREE_ID` to the form id (the part after `/f/`).
 
-Until that is set, the Work page points people to Instagram instead of a dead form.
+Until that is set, the Shop page skips the email field. Collaborations go through Instagram (`/work`).
 
 ## Docker (home server)
 

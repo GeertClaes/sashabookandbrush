@@ -2,6 +2,7 @@
 import ArtCard from "../components/ArtCard.astro";
 import BookCard from "../components/BookCard.astro";
 import CoverImage from "../components/CoverImage.astro";
+import MediaPlaceholder from "../components/MediaPlaceholder.astro";
 import SupplyCard from "../components/SupplyCard.astro";
 import live from "../data/goodreads-live.json";
 import site from "../data/site.json";
@@ -179,7 +180,12 @@ const featuredSupplies = (await getCollection("supplies"))
                       referrerpolicy="no-referrer"
                     />
                   ) : (
-                    <div class="mb-2 aspect-2/3 rounded bg-hero-overlay/40" aria-hidden="true"></div>
+                    <MediaPlaceholder
+                      kind="book"
+                      class="mb-2 aspect-2/3 w-full rounded shadow-md"
+                      width={120}
+                      height={180}
+                    />
                   )}
                   <p class="font-display line-clamp-2 text-sm font-semibold leading-snug text-cream">{book.title}</p>
                   <p class="mt-1 line-clamp-1 text-xs text-sage">{book.author}</p>
@@ -274,7 +280,7 @@ const featuredSupplies = (await getCollection("supplies"))
           Thinking about collaborating?
         </h3>
         <p class="text-sm text-muted-foreground">
-          I work with publishers, authors, and book-adjacent brands.
+          The best way to reach me is Instagram.
         </p>
       </div>
       <a

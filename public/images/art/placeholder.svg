@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450" width="300" height="450" role="img" aria-label="Cover coming soon">
-  <rect width="300" height="450" fill="#F5EFE4"/>
-  <rect x="18" y="18" width="264" height="414" rx="10" fill="none" stroke="#D6C9B6" stroke-width="2"/>
-  <g transform="translate(78 148) scale(4.5)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500" role="img" aria-label="Artwork photo coming soon">
+  <rect width="400" height="500" fill="#F5EFE4"/>
+  <rect x="22" y="22" width="356" height="456" rx="12" fill="none" stroke="#D6C9B6" stroke-width="2"/>
+  <g transform="translate(118 168) scale(5.1)">
     <rect x="6" y="8" width="14.5" height="17" rx="1.8" fill="#8C3340"/>
     <rect x="6" y="8" width="3.4" height="17" rx="1.6" fill="#3D5246"/>
     <g transform="rotate(-40 22.5 16)">

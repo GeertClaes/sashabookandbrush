@@ -14,13 +14,17 @@
     "bookshopUkId": ""
   },
   "description": "Romantasy recs, pretty editions, and paintings between chapters from @sashabookandbrush — an Aussie reading in Wales.",
+  "share": {
+    "image": "/images/og-default.png",
+    "imageAlt": "SashaBook&Brush — books and art, all in one place."
+  },
   "hero": {
     "image": "/images/SashaHero.jpg",
     "imageDark": "/images/SashaHeroDark.jpg",
     "eyebrow": "@sashabookandbrush",
     "headline": "Books & art,",
     "headlineItalic": "all in one place.",
-    "lede": "Romantasy, special editions, and the paintings I make between chapters — from an Aussie in Wales who always has a Kindle nearby and a cat stealing the good blanket."
+    "lede": "Romantasy, special editions, and the paintings I make between chapters — from an Aussie in Wales who always has a book or Kindle nearby and a cat stealing the good blanket."
   },
   "nav": [
     { "href": "/", "label": "Home" },

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SashaBook and Brush">
+  <rect width="512" height="512" fill="#8C3340"/>
+  <g transform="translate(96 88) scale(10)">
+    <rect x="6" y="8" width="14.5" height="17" rx="1.8" fill="#FBF7F0"/>
+    <rect x="6" y="8" width="3.4" height="17" rx="1.6" fill="#3D5246"/>
+    <g transform="rotate(-40 22.5 16)">
+      <rect x="21.3" y="11" width="2.5" height="13.5" rx="1.25" fill="#FBF7F0"/>
+      <rect x="20.8" y="9.4" width="3.5" height="2.6" rx="0.5" fill="#D4A574"/>
+      <ellipse cx="22.55" cy="7.3" rx="2.2" ry="2.7" fill="#F5EFE4"/>
+    </g>
+  </g>
+</svg>

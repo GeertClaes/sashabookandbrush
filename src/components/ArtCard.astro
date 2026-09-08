@@ -1,4 +1,6 @@
 ---
+import MediaPlaceholder from "./MediaPlaceholder.astro";
+
 interface Props {
   title: string;
   medium: string;
@@ -10,9 +12,9 @@ const { title, medium, image, note } = Astro.props;
 ---
 
 <article class="group overflow-hidden rounded-lg border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-  {
-    image ? (
-      <div class="aspect-[4/5] overflow-hidden bg-muted">
+  <div class="aspect-[4/5] overflow-hidden bg-muted">
+    {
+      image ? (
         <img
           src={image}
           alt={title}
@@ -20,11 +22,17 @@ const { title, medium, image, note } = Astro.props;
           width="600"
           height="750"
         />
-      </div>
-    ) : (
-      <div class="aspect-[4/5] bg-muted" aria-hidden="true"></div>
-    )
-  }
+      ) : (
+        <MediaPlaceholder
+          kind="art"
+          class="h-full w-full transition-transform duration-500 group-hover:scale-105"
+          label={`${title} — photo coming soon`}
+          width={400}
+          height={500}
+        />
+      )
+    }
+  </div>
   <div class="p-4">
     <span class="mb-1.5 block text-xs font-medium tracking-widest text-accent uppercase">
       {medium}

@@ -7,6 +7,8 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  imageAlt?: string;
   transparentHeader?: boolean;
   noindex?: boolean;
 }
@@ -14,12 +16,15 @@ interface Props {
 const {
   title,
   description = site.description,
+  image = site.share.image,
+  imageAlt = site.share.imageAlt,
   transparentHeader = false,
   noindex = false,
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${site.brand}` : `${site.brand} · ${site.handle}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const shareImage = new URL(image, Astro.site);
 ---
 
 <!doctype html>
@@ -32,12 +37,26 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#8c3340" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1c1210" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={"SashaBook&Brush"} />
+    <meta property="og:locale" content="en_GB" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL(site.hero.image, Astro.site)} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={shareImage} />
+    <meta name="twitter:image:alt" content={imageAlt} />
     <script is:inline>
       (function () {
         try {

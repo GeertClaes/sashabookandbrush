@@ -1,0 +1,30 @@
+---
+import MediaPlaceholder from "./MediaPlaceholder.astro";
+
+interface Props {
+  kind?: "book" | "art";
+  class?: string;
+  label?: string;
+  width?: number;
+  height?: number;
+}
+
+const {
+  kind = "book",
+  class: className = "",
+  label = "",
+  width = kind === "art" ? 400 : 300,
+  height = kind === "art" ? 500 : 450,
+} = Astro.props;
+const src = kind === "art" ? "/images/art/placeholder.svg" : "/images/covers/placeholder.svg";
+---
+
+<img
+  src={src}
+  alt={label}
+  class:list={["bg-[#f5efe4] object-cover", className]}
+  width={width}
+  height={height}
+  loading="lazy"
+  decoding="async"
+/>

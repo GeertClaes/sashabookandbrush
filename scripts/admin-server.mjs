@@ -29,6 +29,7 @@ try {
 }
 const BOOKS_DIR = path.join(ROOT, "src", "content", "books");
 const ART_DIR = path.join(ROOT, "src", "content", "art");
+const SUPPLIES_DIR = path.join(ROOT, "src", "content", "supplies");
 const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
 const ART_IMAGES_DIR = path.join(ROOT, "public", "images", "art");
 const DATA_DIR = path.join(ROOT, "data");
@@ -260,6 +261,68 @@ ${image ? `image: ${yamlString(image)}\n` : ""}---
         text = applyYamlFields(text, updates);
       }
       await mkdir(ART_DIR, { recursive: true });
+      await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+      json(res, 200, { ok: true, slug });
+      return;
+    }
+
+    if (pathname === "/api/supply" && req.method === "POST") {
+      const body = JSON.parse((await readBody(req)) || "{}");
+      const title = String(body.title || "").trim();
+      if (!title) {
+        json(res, 400, { error: "Title is required" });
+        return;
+      }
+      const slug = path.basename(body.slug || slugFromTitle(title));
+      const file = path.join(SUPPLIES_DIR, `${slug}.md`);
+      let existing = null;
+      try {
+        existing = await readFile(file, "utf8");
+      } catch {
+        existing = null;
+      }
+      if (body.create && existing) {
+        json(res, 409, { error: "A tool with that name already exists" });
+        return;
+      }
+      if (!body.create && !existing) {
+        json(res, 404, { error: "Tool not found" });
+        return;
+      }
+      const brand = String(body.brand || "").trim();
+      const category = String(body.category || "Studio").trim() || "Studio";
+      const note = typeof body.note === "string" ? body.note : "";
+      const amazon = affiliateValue(body.amazon);
+      const shop = String(body.shop || "").trim();
+      const shopLabel = String(body.shopLabel || "").trim();
+      const featured = Boolean(body.featured);
+      const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
+      let text = existing;
+      if (!text) {
+        text = `---
+title: ${yamlString(title)}
+brand: ${yamlString(brand)}
+category: ${yamlString(category)}
+note: ${yamlString(note)}
+amazon: ${yamlString(amazon)}
+${shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : ""}featured: ${featured}
+order: ${order}
+---
+`;
+      } else {
+        text = applyYamlFields(text, {
+          title,
+          brand,
+          category,
+          note,
+          amazon,
+          shop,
+          shopLabel,
+          featured,
+          order,
+        });
+      }
+      await mkdir(SUPPLIES_DIR, { recursive: true });
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       json(res, 200, { ok: true, slug });
       return;

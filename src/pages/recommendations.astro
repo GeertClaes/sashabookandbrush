@@ -65,7 +65,7 @@ const selectClass =
       </div>
 
       <div
-        class="mb-10 flex flex-wrap gap-x-8 gap-y-2 border-b border-border"
+        class="mb-10 flex border-b border-border"
         role="tablist"
         aria-label="Library views"
       >
@@ -75,11 +75,15 @@ const selectClass =
           id="tab-stars"
           aria-controls="panel-stars"
           aria-selected="true"
+          aria-label={`Five stars, ${fiveStars.length} books`}
           data-view="stars"
-          class="relative -mb-px border-b-2 border-primary pb-3 font-display text-lg text-foreground"
+          class="relative -mb-px flex min-w-0 flex-1 items-center justify-center gap-2 border-b-2 border-primary px-2 pb-3 font-display text-lg text-foreground sm:flex-none sm:justify-start sm:pr-8 sm:pl-0"
         >
-          Five stars
-          <span class="ml-2 font-sans text-xs font-normal text-muted-foreground">{fiveStars.length}</span>
+          <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.6l2.7 5.6 6.2.9-4.5 4.3 1.1 6.1L12 16.7 6.5 19.5l1.1-6.1L3.1 9.1l6.2-.9L12 2.6z"></path>
+          </svg>
+          <span class="hidden sm:inline">Five stars</span>
+          <span class="hidden font-sans text-xs font-normal text-muted-foreground sm:inline">{fiveStars.length}</span>
         </button>
         <button
           type="button"
@@ -87,11 +91,20 @@ const selectClass =
           id="tab-library"
           aria-controls="panel-library"
           aria-selected="false"
+          aria-label={`Library, ${total} books`}
           data-view="library"
-          class="relative -mb-px border-b-2 border-transparent pb-3 font-display text-lg text-muted-foreground hover:text-foreground"
+          class="relative -mb-px flex min-w-0 flex-1 items-center justify-center gap-2 border-b-2 border-transparent px-2 pb-3 font-display text-lg text-muted-foreground hover:text-foreground sm:flex-none sm:justify-start sm:pr-8 sm:pl-0"
         >
-          Library
-          <span class="ml-2 font-sans text-xs font-normal text-muted-foreground">{total}</span>
+          <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.75"
+              d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 016.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"
+            ></path>
+          </svg>
+          <span class="hidden sm:inline">Library</span>
+          <span class="hidden font-sans text-xs font-normal text-muted-foreground sm:inline">{total}</span>
         </button>
         <button
           type="button"
@@ -99,11 +112,20 @@ const selectClass =
           id="tab-series"
           aria-controls="panel-series"
           aria-selected="false"
+          aria-label={`Series, ${seriesGroups.length} series`}
           data-view="series"
-          class="relative -mb-px border-b-2 border-transparent pb-3 font-display text-lg text-muted-foreground hover:text-foreground"
+          class="relative -mb-px flex min-w-0 flex-1 items-center justify-center gap-2 border-b-2 border-transparent px-2 pb-3 font-display text-lg text-muted-foreground hover:text-foreground sm:flex-none sm:justify-start sm:pr-8 sm:pl-0"
         >
-          Series
-          <span class="ml-2 font-sans text-xs font-normal text-muted-foreground">{seriesGroups.length}</span>
+          <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.75"
+              d="M6 7V6a2 2 0 012-2h8a2 2 0 012 2v1M6 7a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2M6 7h12"
+            ></path>
+          </svg>
+          <span class="hidden sm:inline">Series</span>
+          <span class="hidden font-sans text-xs font-normal text-muted-foreground sm:inline">{seriesGroups.length}</span>
         </button>
       </div>
 

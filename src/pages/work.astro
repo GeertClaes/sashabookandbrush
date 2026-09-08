@@ -1,170 +1,35 @@
 ---
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
-
-const formspreeId = import.meta.env.PUBLIC_FORMSPREE_ID;
-const thanks = Astro.url.searchParams.has("thanks");
-const nextUrl = new URL("/work?thanks=1", Astro.site ?? Astro.url);
 ---
 
 <BaseLayout
   title="Work with me"
-  description="Collaborations, ARC reviews, and packages for publishers, authors, and book-adjacent brands."
+  description={`The best way to reach ${site.handle} about collaborations is Instagram.`}
 >
   <div class="min-h-screen bg-background">
     <div class="mx-auto max-w-5xl px-6 py-16 md:px-12">
-      <div class="mb-16 max-w-2xl">
+      <div class="max-w-xl">
         <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Collaborations</p>
-        <h1 class="font-display mb-5 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">Work with me</h1>
-        <p class="text-base leading-relaxed text-muted-foreground">
-          {site.workIntro}
+        <h1 class="font-display mb-5 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
+          Work with me
+        </h1>
+        <p class="mb-8 text-base leading-relaxed text-muted-foreground">
+          Publishers, authors, and bookish brands — DM me on Instagram. That's the inbox I actually see.
         </p>
-      </div>
-
-      <div class="mb-16 grid gap-12 md:grid-cols-2">
-        <div>
-          <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">What I offer</h2>
-          <div class="space-y-4">
-            {
-              site.offers.map((item) => (
-                <div class="flex gap-4 rounded-lg border border-border bg-card p-4">
-                  <div class="w-1 shrink-0 self-stretch rounded-full bg-primary"></div>
-                  <div>
-                    <h3 class="mb-1 text-sm font-semibold text-foreground">{item.title}</h3>
-                    <p class="text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-
-        <div>
-          <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">By the numbers</h2>
-          <div class="mb-6 grid grid-cols-2 gap-4">
-            {
-              site.stats.map((stat) => (
-                <div class="rounded-lg border border-border bg-card p-4">
-                  <div class="font-display mb-1 text-2xl font-semibold text-primary">{stat.value}</div>
-                  <div class="text-xs text-muted-foreground">{stat.label}</div>
-                </div>
-              ))
-            }
-          </div>
-
-          <div class="rounded-lg bg-secondary p-4">
-            <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sage/20">
-                <svg class="h-5 w-5 text-sage" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                  ></path>
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-cream">{site.credentials.title}</p>
-                <p class="text-xs text-sage">{site.credentials.org}</p>
-              </div>
-            </div>
-          </div>
-
-          <p class="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Rate card available on request. Packages below are a starting point — I'm happy to
-            tailor them to your campaign.
-          </p>
-        </div>
-      </div>
-
-      <div class="mb-16">
-        <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">Packages</h2>
-        <div class="grid gap-4 md:grid-cols-3">
-          {
-            site.packages.map((item) => (
-              <div class="rounded-lg border border-border bg-card p-5">
-                <h3 class="mb-2 font-semibold text-foreground">{item.title}</h3>
-                <p class="text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-
-      <div class="max-w-lg border-t border-border pt-12">
-        <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">Get in touch</h2>
-        {
-          thanks ? (
-            <div class="rounded-lg border border-border bg-card p-6 text-center">
-              <p class="font-display mb-2 text-xl text-secondary">Thank you!</p>
-              <p class="text-sm text-muted-foreground">I'll be in touch within a few days.</p>
-            </div>
-          ) : formspreeId ? (
-            <form action={`https://formspree.io/f/${formspreeId}`} method="POST" class="space-y-4">
-              <input type="hidden" name="_next" value={nextUrl.href} />
-              <div>
-                <label for="name" class="mb-1.5 block text-sm font-medium text-foreground">
-                  Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  name="name"
-                  required
-                  placeholder="Your name"
-                  class="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground transition-shadow focus:ring-2 focus:ring-ring focus:outline-none"
-                />
-              </div>
-              <div>
-                <label for="email" class="mb-1.5 block text-sm font-medium text-foreground">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  required
-                  placeholder="your@email.com"
-                  class="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground transition-shadow focus:ring-2 focus:ring-ring focus:outline-none"
-                />
-              </div>
-              <div>
-                <label for="message" class="mb-1.5 block text-sm font-medium text-foreground">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows="5"
-                  placeholder="Tell me about your project, the book, or what you have in mind..."
-                  class="w-full resize-none rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground transition-shadow focus:ring-2 focus:ring-ring focus:outline-none"
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                class="w-full rounded-lg bg-primary py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                Send message →
-              </button>
-            </form>
-          ) : (
-            <p class="leading-relaxed text-muted-foreground">
-              The contact form will go live once Formspree is connected. Until then, the best way
-              to reach me is{" "}
-              <a
-                href={site.instagram}
-                class="text-primary underline-offset-4 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Instagram
-              </a>
-              .
-            </p>
-          )
-        }
+        <a
+          href={site.instagram}
+          class="inline-flex items-center gap-2 rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+            ></path>
+          </svg>
+          Message {site.handle}
+        </a>
       </div>
     </div>
   </div>

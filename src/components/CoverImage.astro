@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import MediaPlaceholder from "./MediaPlaceholder.astro";
 
 interface Props {
   cover: string;
@@ -18,7 +19,7 @@ const modules = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true },
 );
 const filename = (cover || "").split("/").pop() || "";
-const match = Object.entries(modules).find(([key]) => key.endsWith(`/${filename}`));
+const match = filename ? Object.entries(modules).find(([key]) => key.endsWith(`/${filename}`)) : undefined;
 const image = match?.[1].default;
 ---
 
@@ -33,11 +34,6 @@ const image = match?.[1].default;
       class={className}
     />
   ) : (
-    <div
-      class:list={["bg-muted", className]}
-      role={alt ? "img" : undefined}
-      aria-label={alt || undefined}
-      aria-hidden={alt ? undefined : "true"}
-    ></div>
+    <MediaPlaceholder kind="book" class={className} label={alt} width={width} height={height} />
   )
 }

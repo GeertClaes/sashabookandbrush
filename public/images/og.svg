@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="SashaBook and Brush">
+  <rect width="1200" height="630" fill="#F5EFE4"/>
+  <rect width="470" height="630" fill="#8C3340"/>
+  <g transform="translate(86 156) scale(9.2)">
+    <rect x="6" y="8" width="14.5" height="17" rx="1.8" fill="#FBF7F0"/>
+    <rect x="6" y="8" width="3.4" height="17" rx="1.6" fill="#3D5246"/>
+    <g transform="rotate(-40 22.5 16)">
+      <rect x="21.3" y="11" width="2.5" height="13.5" rx="1.25" fill="#FBF7F0"/>
+      <rect x="20.8" y="9.4" width="3.5" height="2.6" rx="0.5" fill="#D4A574"/>
+      <ellipse cx="22.55" cy="7.3" rx="2.2" ry="2.7" fill="#F5EFE4"/>
+    </g>
+  </g>
+  <text x="540" y="228" font-family="Georgia, Times New Roman, serif" font-size="22" font-weight="600" letter-spacing="6" fill="#A65C2E">@SASHABOOKANDBRUSH</text>
+  <text x="540" y="330" font-family="Georgia, Times New Roman, serif" font-size="56" font-weight="700" fill="#241408">
+    <tspan fill="#A65C2E">Sasha</tspan>Book<tspan font-style="italic" font-weight="400" fill="#A65C2E">&amp;</tspan>Brush
+  </text>
+  <text x="540" y="402" font-family="Georgia, Times New Roman, serif" font-size="32" font-style="italic" fill="#7A6652">Books &amp; art, all in one place.</text>
+  <rect x="540" y="448" width="72" height="4" rx="2" fill="#3D5246"/>
+  <text x="540" y="510" font-family="Georgia, Times New Roman, serif" font-size="22" fill="#7A6652">Romantasy recs, pretty editions, and paintings between chapters.</text>
+</svg>

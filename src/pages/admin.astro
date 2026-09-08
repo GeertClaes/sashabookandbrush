@@ -32,6 +32,20 @@ const art = (await getCollection("art"))
     order: piece.data.order || 0,
   }))
   .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+const supplies = (await getCollection("supplies"))
+  .map((item) => ({
+    slug: item.id,
+    title: item.data.title,
+    brand: item.data.brand,
+    category: item.data.category,
+    note: item.data.note || "",
+    amazon: item.data.amazon === "#" ? "" : item.data.amazon || "",
+    shop: item.data.shop || "",
+    shopLabel: item.data.shopLabel || "",
+    featured: Boolean(item.data.featured),
+    order: item.data.order || 0,
+  }))
+  .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
 const syncedAt = live.updated
   ? new Date(live.updated).toLocaleString("en-GB", {
@@ -47,12 +61,13 @@ const stats = [
   { label: "Books on site", value: String(books.length) },
   { label: "Featured books", value: String(books.filter((book) => book.featured).length) },
   { label: "Paintings", value: String(art.length) },
+  { label: "Tools", value: String(supplies.length) },
 ];
 ---
 
 <BaseLayout
   title="Library editor"
-  description="Private editor for books and art."
+  description="Private editor for books, art, and tools."
   noindex={true}
 >
   <div class="min-h-screen bg-background">
@@ -60,8 +75,8 @@ const stats = [
       <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Private</p>
       <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Studio editor</h1>
       <p class="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        Ratings and progress stay on Goodreads. Use this page for public notes, covers, featured pieces, and
-        paintings.
+        Ratings and progress stay on Goodreads. Use this page for public notes, covers, featured pieces,
+        paintings, and the tools on Art.
         {
           isDev ? (
             <>
@@ -109,7 +124,7 @@ const stats = [
       }
 
       <div data-app class="hidden space-y-8">
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button
             type="button"
             data-tab="book"
@@ -123,6 +138,13 @@ const stats = [
             class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
           >
             Art
+          </button>
+          <button
+            type="button"
+            data-tab="supply"
+            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
+          >
+            Tools
           </button>
         </div>
 
@@ -264,6 +286,97 @@ const stats = [
           </section>
         </div>
 
+        <div data-panel="supply" class="hidden space-y-8">
+          <section class="rounded-xl border border-border bg-card p-5">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <h2 class="font-display text-xl font-semibold text-foreground">Tools I recommend</h2>
+              <button
+                type="button"
+                data-supply-new
+                class="rounded border border-border px-3 py-1.5 text-sm"
+              >
+                New tool
+              </button>
+            </div>
+            <p class="mb-4 text-sm text-muted-foreground">
+              These appear on the Art page. Featured tools also show on Home.
+            </p>
+            <ul data-supply-list class="space-y-2 text-sm"></ul>
+          </section>
+
+          <section data-supply-editor class="hidden rounded-xl border border-border bg-card p-5">
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Title
+              <input data-supply-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            </label>
+            <div class="mb-4 grid gap-4 sm:grid-cols-2">
+              <label class="block text-sm font-medium text-foreground">
+                Brand
+                <input data-supply-brand class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+              </label>
+              <label class="block text-sm font-medium text-foreground">
+                Category
+                <input
+                  data-supply-category
+                  placeholder="Paint, Brushes, Paper…"
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Note
+              <textarea
+                data-supply-note
+                rows="5"
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              ></textarea>
+            </label>
+            <div class="mb-4 grid gap-4 sm:grid-cols-2">
+              <label class="flex items-center gap-2 text-sm text-foreground">
+                <input type="checkbox" data-supply-featured />
+                Feature on the home page
+              </label>
+              <label class="block text-sm font-medium text-foreground">
+                Order
+                <input
+                  type="number"
+                  data-supply-order
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Amazon URL
+              <input
+                data-supply-amazon
+                placeholder="Leave blank until you have an affiliate link"
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <div class="mb-4 grid gap-4 sm:grid-cols-2">
+              <label class="block text-sm font-medium text-foreground">
+                Other shop URL
+                <input
+                  data-supply-shop
+                  placeholder="Jackson's, Cass Art…"
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+              <label class="block text-sm font-medium text-foreground">
+                Shop button label
+                <input
+                  data-supply-shop-label
+                  placeholder="Jackson's"
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+            <button type="button" data-supply-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+              Save tool
+            </button>
+          </section>
+        </div>
+
         <details class="rounded-xl border border-border bg-card px-5 py-4 text-sm">
           <summary class="cursor-pointer font-medium text-muted-foreground">
             Advanced: import a Goodreads CSV
@@ -284,6 +397,7 @@ const stats = [
 
   <script is:inline type="application/json" id="book-catalog" set:html={JSON.stringify(books).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="art-catalog" set:html={JSON.stringify(art).replace(/</g, "\\u003c")} />
+  <script is:inline type="application/json" id="supply-catalog" set:html={JSON.stringify(supplies).replace(/</g, "\\u003c")} />
 
   <script define:vars={{ api, isDev }}>
   const status = document.querySelector("[data-status]");
@@ -293,10 +407,14 @@ const stats = [
   const bookEditor = document.querySelector("[data-book-editor]");
   const artEditor = document.querySelector("[data-art-editor]");
   const artList = document.querySelector("[data-art-list]");
+  const supplyEditor = document.querySelector("[data-supply-editor]");
+  const supplyList = document.querySelector("[data-supply-list]");
   const books = JSON.parse(document.getElementById("book-catalog")?.textContent || "[]");
   const artPieces = JSON.parse(document.getElementById("art-catalog")?.textContent || "[]");
+  const supplies = JSON.parse(document.getElementById("supply-catalog")?.textContent || "[]");
   let currentBook = null;
   let currentArt = null;
+  let currentSupply = null;
   let previewUrls = { book: "", art: "" };
 
   function escapeHtml(value) {
@@ -343,6 +461,7 @@ const stats = [
     login?.classList.add("hidden");
     app?.classList.remove("hidden");
     renderArtList();
+    renderSupplyList();
     if (!status) return;
     if (email && email !== "local") {
       status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
@@ -441,6 +560,20 @@ const stats = [
       .join("");
   }
 
+  function renderSupplyList() {
+    if (!supplyList) return;
+    if (!supplies.length) {
+      supplyList.innerHTML = `<li class="text-muted-foreground">No tools yet.</li>`;
+      return;
+    }
+    supplyList.innerHTML = supplies
+      .map(
+        (item) =>
+          `<li><button type="button" class="w-full rounded-lg border border-border px-3 py-2 text-left hover:border-primary" data-supply-slug="${escapeHtml(item.slug)}">${escapeHtml(item.title)} <span class="text-muted-foreground">· ${escapeHtml(item.brand)}</span></button></li>`,
+      )
+      .join("");
+  }
+
   function fillBook(book) {
     currentBook = book;
     bookEditor?.classList.remove("hidden");
@@ -468,6 +601,20 @@ const stats = [
     document.querySelector("[data-art-featured]").checked = Boolean(piece.featured);
     document.querySelector("[data-art-order]").value = piece.order || 0;
     resetDrop("art", piece.image || "", piece.image ? "Drop a new photo to replace it" : "");
+  }
+
+  function fillSupply(item) {
+    currentSupply = item;
+    supplyEditor?.classList.remove("hidden");
+    document.querySelector("[data-supply-title]").value = item.title || "";
+    document.querySelector("[data-supply-brand]").value = item.brand || "";
+    document.querySelector("[data-supply-category]").value = item.category || "";
+    document.querySelector("[data-supply-note]").value = item.note || "";
+    document.querySelector("[data-supply-featured]").checked = Boolean(item.featured);
+    document.querySelector("[data-supply-order]").value = item.order || 0;
+    document.querySelector("[data-supply-amazon]").value = displayUrl(item.amazon);
+    document.querySelector("[data-supply-shop]").value = item.shop || "";
+    document.querySelector("[data-supply-shop-label]").value = item.shopLabel || "";
   }
 
   async function boot() {
@@ -556,6 +703,31 @@ const stats = [
       create: true,
     });
     document.querySelector("[data-art-title]")?.focus();
+  });
+
+  supplyList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-supply-slug]");
+    if (!button) return;
+    const item = supplies.find((entry) => entry.slug === button.dataset.supplySlug);
+    if (item) fillSupply({ ...item, create: false });
+  });
+
+  document.querySelector("[data-supply-new]")?.addEventListener("click", () => {
+    const nextOrder = supplies.reduce((max, item) => Math.max(max, Number(item.order) || 0), 0) + 1;
+    fillSupply({
+      slug: "",
+      title: "",
+      brand: "",
+      category: "",
+      note: "",
+      amazon: "",
+      shop: "",
+      shopLabel: "",
+      featured: false,
+      order: nextOrder,
+      create: true,
+    });
+    document.querySelector("[data-supply-title]")?.focus();
   });
 
   document.querySelector("[data-book-save]")?.addEventListener("click", async () => {
@@ -651,6 +823,51 @@ const stats = [
         status.textContent = isDev
           ? `Saved ${currentArt.title}. Refresh the site to see it.`
           : `Saved ${currentArt.title}. It will show on the site after the rebuild.`;
+      }
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    }
+  });
+
+  document.querySelector("[data-supply-save]")?.addEventListener("click", async () => {
+    if (!currentSupply) return;
+    try {
+      currentSupply.title = document.querySelector("[data-supply-title]").value;
+      currentSupply.brand = document.querySelector("[data-supply-brand]").value;
+      currentSupply.category = document.querySelector("[data-supply-category]").value;
+      currentSupply.note = document.querySelector("[data-supply-note]").value;
+      currentSupply.featured = document.querySelector("[data-supply-featured]").checked;
+      currentSupply.order = Number(document.querySelector("[data-supply-order]").value || 0);
+      currentSupply.amazon = document.querySelector("[data-supply-amazon]").value;
+      currentSupply.shop = document.querySelector("[data-supply-shop]").value;
+      currentSupply.shopLabel = document.querySelector("[data-supply-shop-label]").value;
+      const created = await call("/supply", {
+        method: "POST",
+        body: JSON.stringify({
+          create: Boolean(currentSupply.create),
+          slug: currentSupply.slug,
+          title: currentSupply.title,
+          brand: currentSupply.brand,
+          category: currentSupply.category,
+          note: currentSupply.note,
+          featured: currentSupply.featured,
+          order: currentSupply.order,
+          amazon: currentSupply.amazon,
+          shop: currentSupply.shop,
+          shopLabel: currentSupply.shopLabel,
+        }),
+      });
+      currentSupply.slug = created.slug || currentSupply.slug;
+      currentSupply.create = false;
+      const existing = supplies.find((item) => item.slug === currentSupply.slug);
+      if (existing) Object.assign(existing, currentSupply);
+      else supplies.push({ ...currentSupply });
+      supplies.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+      renderSupplyList();
+      if (status) {
+        status.textContent = isDev
+          ? `Saved ${currentSupply.title}. Refresh the site to see it.`
+          : `Saved ${currentSupply.title}. It will show on the site after the rebuild.`;
       }
     } catch (error) {
       if (status) status.textContent = error.message;

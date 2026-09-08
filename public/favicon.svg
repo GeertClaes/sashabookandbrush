@@ -1,4 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="sasha and brush">
-  <rect width="32" height="32" rx="6" fill="#F5EFE4"/>
-  <text x="16" y="22" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="18" fill="#7C2D2D">s</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="SashaBook and Brush">
+  <rect class="tile" width="32" height="32" rx="7" fill="#8C3340"/>
+  <g transform="translate(-2.2 -2) scale(1.16)">
+    <rect class="book" x="6" y="8" width="14.5" height="17" rx="1.8" fill="#FBF7F0"/>
+    <rect class="spine" x="6" y="8" width="3.6" height="17" rx="1.6" fill="#3D5246"/>
+    <g transform="rotate(-40 22.5 16)">
+      <rect class="handle" x="21.1" y="10.5" width="2.8" height="14" rx="1.4" fill="#FBF7F0"/>
+      <rect class="ferrule" x="20.6" y="8.8" width="3.8" height="2.8" rx="0.5" fill="#D4A574"/>
+      <ellipse class="bristles" cx="22.5" cy="6.6" rx="2.4" ry="2.9" fill="#F5EFE4"/>
+    </g>
+  </g>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #1c1210; }
+      .book { fill: #f3eadc; }
+      .spine { fill: #d4a574; }
+      .handle { fill: #f3eadc; }
+      .ferrule { fill: #e0a070; }
+      .bristles { fill: #8c3340; }
+    }
+  </style>
 </svg>
