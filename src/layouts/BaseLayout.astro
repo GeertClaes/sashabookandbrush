@@ -68,11 +68,37 @@ const shareImage = new URL(image, Astro.site);
         } catch (_) {}
       })();
     </script>
-    <script
-      is:inline
-      defer
-      src="https://analytics.kwokah.com/script.js"
-      data-website-id="5e18d8a9-27f1-49f3-9827-83081b9d5fec"></script>
+    {
+      !noindex && (
+        <>
+          <script is:inline>
+            window.umamiBeforeSend = function (_type, payload) {
+              try {
+                if (navigator.webdriver) return false;
+                if (window.callPhantom || window._phantom || window.__nightmare) return false;
+                const ua = navigator.userAgent || "";
+                if (!ua) return false;
+                if (
+                  /HeadlessChrome|PhantomJS|Puppeteer|Playwright|Bytespider|GPTBot|CCBot|ClaudeBot|Google-Extended|PetalBot|SemrushBot|AhrefsBot|DotBot|MJ12bot|YandexBot|bingbot|Googlebot|Baiduspider|DuckDuckBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|Discordbot|Applebot|Amazonbot|ChatGPT|OAI-SearchBot|Perplexity|YouBot|meta-externalagent/i.test(
+                    ua,
+                  )
+                ) {
+                  return false;
+                }
+              } catch (_) {}
+              return payload;
+            };
+          </script>
+          <script
+            is:inline
+            defer
+            src="https://analytics.kwokah.com/script.js"
+            data-website-id="5e18d8a9-27f1-49f3-9827-83081b9d5fec"
+            data-domains="sashabookandbrush.com"
+            data-before-send="umamiBeforeSend"></script>
+        </>
+      )
+    }
   </head>
   <body class="flex min-h-screen max-w-full flex-col overflow-x-clip bg-background text-foreground">
     <a

@@ -1,3 +1,42 @@
+# Search engines may crawl the public site. The studio editor stays private.
+
 User-agent: *
+Allow: /
 Disallow: /admin
 Disallow: /admin/
+
+# Training / scraper bots. Googlebot and Bingbot are unaffected.
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+Sitemap: https://sashabookandbrush.com/sitemap-index.xml
