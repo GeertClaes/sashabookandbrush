@@ -43,6 +43,15 @@ export async function getTextFile(env, filePath) {
   return new TextDecoder().decode(bytes);
 }
 
+export async function tryGetTextFile(env, filePath) {
+  try {
+    return await getTextFile(env, filePath);
+  } catch (error) {
+    if (error instanceof Error && /not found/i.test(error.message)) return null;
+    throw error;
+  }
+}
+
 export async function commitFiles(env, message, files) {
   const ref = await github(env, `/git/ref/heads/${branch(env)}`);
   const commitSha = ref.object.sha;

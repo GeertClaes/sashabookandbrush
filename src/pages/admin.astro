@@ -1,32 +1,67 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import live from "../data/goodreads-live.json";
 import { getCollection } from "astro:content";
 
 const isDev = import.meta.env.DEV;
 const api = isDev ? import.meta.env.PUBLIC_ADMIN_URL || "http://127.0.0.1:8787" : "";
-const catalog = (await getCollection("books"))
+const books = (await getCollection("books"))
   .map((book) => ({
     slug: book.id,
     title: book.data.title,
     author: book.data.author,
     note: book.data.note || "",
     featured: Boolean(book.data.featured),
+    cover: book.data.cover || "",
+    genre: book.data.genre || "",
+    bookshop: book.data.bookshop === "#" ? "" : book.data.bookshop || "",
+    amazon: book.data.amazon === "#" ? "" : book.data.amazon || "",
+    rating: book.data.rating || 0,
+    status: book.data.status || "read",
+    dateRead: book.data.dateRead || "",
   }))
   .sort((a, b) => a.title.localeCompare(b.title));
+const art = (await getCollection("art"))
+  .map((piece) => ({
+    slug: piece.id,
+    title: piece.data.title,
+    medium: piece.data.medium,
+    note: piece.data.note || "",
+    featured: Boolean(piece.data.featured),
+    image: piece.data.image || "",
+    order: piece.data.order || 0,
+  }))
+  .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+
+const syncedAt = live.updated
+  ? new Date(live.updated).toLocaleString("en-GB", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Europe/London",
+    })
+  : "never";
+const stats = [
+  { label: "Goodreads RSS", value: syncedAt },
+  { label: "Currently reading", value: String(live.currentlyReading?.length || 0) },
+  { label: "TBR teaser", value: String(live.upNext?.length || 0) },
+  { label: "Books on site", value: String(books.length) },
+  { label: "Featured books", value: String(books.filter((book) => book.featured).length) },
+  { label: "Paintings", value: String(art.length) },
+];
 ---
 
 <BaseLayout
   title="Library editor"
-  description="Private editor for notes, featured books, covers, and Goodreads CSV."
+  description="Private editor for books and art."
   noindex={true}
 >
   <div class="min-h-screen bg-background">
     <div class="mx-auto max-w-3xl px-6 py-16 md:px-12">
       <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Private</p>
-      <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Library editor</h1>
+      <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Studio editor</h1>
       <p class="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        Rate and log progress on Goodreads. Use this page for a public note, a home-page feature, a cover, or a new
-        library export.
+        Ratings and progress stay on Goodreads. Use this page for public notes, covers, featured pieces, and
+        paintings.
         {
           isDev ? (
             <>
@@ -34,9 +69,23 @@ const catalog = (await getCollection("books"))
               Locally, also run <code class="text-foreground">npm run admin</code>.
             </>
           ) : (
-            <> Cloudflare will ask you to sign in with Google before this page opens.</>
+            <> Sign in with Google if Cloudflare asks.</>
           )
         }
+      </p>
+
+      <dl class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {
+          stats.map((item) => (
+            <div class="rounded-xl border border-border bg-card px-4 py-3">
+              <dt class="text-xs tracking-widest text-muted-foreground uppercase">{item.label}</dt>
+              <dd class="font-display mt-1 text-lg font-semibold text-foreground">{item.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="mb-6 text-xs text-muted-foreground">
+        RSS stats refresh when the site rebuilds (about every 6 hours). Saves appear after the next deploy.
       </p>
 
       <p data-status class="mb-6 text-sm text-muted-foreground">Checking the editor…</p>
@@ -59,65 +108,196 @@ const catalog = (await getCollection("books"))
         )
       }
 
-      <div data-app class="hidden space-y-10">
-        <section class="rounded-xl border border-border bg-card p-5">
-          <h2 class="font-display mb-3 text-xl font-semibold text-foreground">Find a book</h2>
-          <input
-            type="search"
-            data-search
-            placeholder="Title or author"
-            class="mb-4 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-          />
-          <ul data-results class="space-y-2 text-sm"></ul>
-        </section>
-
-        <section data-editor class="hidden rounded-xl border border-border bg-card p-5">
-          <h2 class="font-display mb-1 text-xl font-semibold text-foreground" data-edit-title></h2>
-          <p class="mb-4 text-sm text-muted-foreground" data-edit-author></p>
-          <label class="mb-4 block text-sm font-medium text-foreground">
-            Public note
-            <textarea data-note rows="8" class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            ></textarea>
-          </label>
-          <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
-            <input type="checkbox" data-featured />
-            Feature on the home page
-          </label>
-          <label class="mb-4 block text-sm font-medium text-foreground">
-            Cover image
-            <input type="file" data-cover accept="image/jpeg,image/png,image/webp" class="mt-2 block text-sm" />
-          </label>
-          <button type="button" data-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
-            Save note
+      <div data-app class="hidden space-y-8">
+        <div class="flex gap-2">
+          <button
+            type="button"
+            data-tab="book"
+            class="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground"
+          >
+            Books
           </button>
-        </section>
+          <button
+            type="button"
+            data-tab="art"
+            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
+          >
+            Art
+          </button>
+        </div>
 
-        <section class="rounded-xl border border-border bg-card p-5">
-          <h2 class="font-display mb-3 text-xl font-semibold text-foreground">Goodreads CSV</h2>
-          <p class="mb-4 text-sm text-muted-foreground">
-            Export from Goodreads, then drop the file here. Existing notes, covers, and featured flags are kept. On the
-            live site, ratings update after GitHub imports the file and Cloudflare rebuilds.
+        <div data-panel="book" class="space-y-8">
+          <section class="rounded-xl border border-border bg-card p-5">
+            <h2 class="font-display mb-3 text-xl font-semibold text-foreground">Find a book</h2>
+            <input
+              type="search"
+              data-search
+              placeholder="Title or author"
+              class="mb-4 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            />
+            <ul data-results class="space-y-2 text-sm"></ul>
+          </section>
+
+          <section data-book-editor class="hidden rounded-xl border border-border bg-card p-5">
+            <p data-book-meta class="mb-4 text-xs text-muted-foreground"></p>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Title
+              <input data-book-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            </label>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Author
+              <input data-book-author class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            </label>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Genre on the site
+              <input data-book-genre class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            </label>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Public note
+              <textarea
+                data-book-note
+                rows="6"
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              ></textarea>
+            </label>
+            <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" data-book-featured />
+              Feature on the home page
+            </label>
+            <div class="mb-4 grid gap-4 sm:grid-cols-2">
+              <label class="block text-sm font-medium text-foreground">
+                Bookshop.org URL
+                <input
+                  data-book-bookshop
+                  placeholder="Leave blank to use ISBN"
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+              <label class="block text-sm font-medium text-foreground">
+                Amazon URL
+                <input
+                  data-book-amazon
+                  placeholder="Leave blank to use ISBN"
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+            <p class="mb-2 text-sm font-medium text-foreground">Cover</p>
+            <button
+              type="button"
+              data-book-drop
+              class="mb-4 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary"
+            >
+              <img data-book-preview class="hidden max-h-40 rounded object-cover shadow" alt="" />
+              <span data-book-drop-label>Drop a cover here, or click to choose a photo</span>
+            </button>
+            <input type="file" data-book-cover accept="image/jpeg,image/png,image/webp" class="hidden" />
+            <button type="button" data-book-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+              Save book
+            </button>
+          </section>
+        </div>
+
+        <div data-panel="art" class="hidden space-y-8">
+          <section class="rounded-xl border border-border bg-card p-5">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <h2 class="font-display text-xl font-semibold text-foreground">Paintings</h2>
+              <button
+                type="button"
+                data-art-new
+                class="rounded border border-border px-3 py-1.5 text-sm"
+              >
+                New painting
+              </button>
+            </div>
+            <ul data-art-list class="space-y-2 text-sm"></ul>
+          </section>
+
+          <section data-art-editor class="hidden rounded-xl border border-border bg-card p-5">
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Title
+              <input data-art-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            </label>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Medium
+              <input
+                data-art-medium
+                placeholder="Acrylic"
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label class="mb-4 block text-sm font-medium text-foreground">
+              Note
+              <textarea
+                data-art-note
+                rows="5"
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              ></textarea>
+            </label>
+            <div class="mb-4 grid gap-4 sm:grid-cols-2">
+              <label class="flex items-center gap-2 text-sm text-foreground">
+                <input type="checkbox" data-art-featured />
+                Feature on the home page
+              </label>
+              <label class="block text-sm font-medium text-foreground">
+                Order
+                <input
+                  type="number"
+                  data-art-order
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+            <p class="mb-2 text-sm font-medium text-foreground">Photo</p>
+            <button
+              type="button"
+              data-art-drop
+              class="mb-4 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary"
+            >
+              <img data-art-preview class="hidden max-h-48 rounded object-cover shadow" alt="" />
+              <span data-art-drop-label>Drop a photo here, or click to choose</span>
+            </button>
+            <input type="file" data-art-image accept="image/jpeg,image/png,image/webp" class="hidden" />
+            <button type="button" data-art-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+              Save painting
+            </button>
+          </section>
+        </div>
+
+        <details class="rounded-xl border border-border bg-card px-5 py-4 text-sm">
+          <summary class="cursor-pointer font-medium text-muted-foreground">
+            Advanced: import a Goodreads CSV
+          </summary>
+          <p class="mt-3 text-muted-foreground">
+            Only needed when ratings or new finished books should land on the site. Notes, covers, and featured
+            flags are kept.
           </p>
-          <input type="file" data-csv accept=".csv" class="mb-4 block text-sm" />
-          <button type="button" data-import class="rounded border border-border px-4 py-2 text-sm">
+          <input type="file" data-csv accept=".csv" class="mt-4 block text-sm" />
+          <button type="button" data-import class="mt-3 rounded border border-border px-4 py-2 text-sm">
             Import CSV
           </button>
-          <pre data-log class="mt-4 overflow-x-auto text-xs text-muted-foreground"></pre>
-        </section>
+          <pre data-log class="mt-3 overflow-x-auto text-xs text-muted-foreground"></pre>
+        </details>
       </div>
     </div>
   </div>
 
-  <script is:inline type="application/json" id="book-catalog" set:html={JSON.stringify(catalog).replace(/</g, "\\u003c")} />
+  <script is:inline type="application/json" id="book-catalog" set:html={JSON.stringify(books).replace(/</g, "\\u003c")} />
+  <script is:inline type="application/json" id="art-catalog" set:html={JSON.stringify(art).replace(/</g, "\\u003c")} />
 
   <script define:vars={{ api, isDev }}>
   const status = document.querySelector("[data-status]");
   const login = document.querySelector("[data-login]");
   const app = document.querySelector("[data-app]");
   const results = document.querySelector("[data-results]");
-  const editor = document.querySelector("[data-editor]");
+  const bookEditor = document.querySelector("[data-book-editor]");
+  const artEditor = document.querySelector("[data-art-editor]");
+  const artList = document.querySelector("[data-art-list]");
   const books = JSON.parse(document.getElementById("book-catalog")?.textContent || "[]");
-  let current = null;
+  const artPieces = JSON.parse(document.getElementById("art-catalog")?.textContent || "[]");
+  let currentBook = null;
+  let currentArt = null;
+  let previewUrls = { book: "", art: "" };
 
   function escapeHtml(value) {
     return String(value)
@@ -134,6 +314,10 @@ const catalog = (await getCollection("books"))
       binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
     }
     return btoa(binary);
+  }
+
+  function displayUrl(value) {
+    return value && value !== "#" ? value : "";
   }
 
   async function call(path, options = {}) {
@@ -158,6 +342,7 @@ const catalog = (await getCollection("books"))
   function showApp(email) {
     login?.classList.add("hidden");
     app?.classList.remove("hidden");
+    renderArtList();
     if (!status) return;
     if (email && email !== "local") {
       status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
@@ -168,6 +353,123 @@ const catalog = (await getCollection("books"))
     }
   }
 
+  function setTab(kind) {
+    document.querySelectorAll("[data-tab]").forEach((button) => {
+      const on = button.dataset.tab === kind;
+      button.classList.toggle("bg-primary", on);
+      button.classList.toggle("text-primary-foreground", on);
+      button.classList.toggle("border", !on);
+      button.classList.toggle("border-border", !on);
+      button.classList.toggle("rounded-full", true);
+    });
+    document.querySelectorAll("[data-panel]").forEach((panel) => {
+      panel.classList.toggle("hidden", panel.dataset.panel !== kind);
+    });
+  }
+
+  function bindDrop(kind) {
+    const drop = document.querySelector(`[data-${kind}-drop]`);
+    const input = document.querySelector(kind === "book" ? "[data-book-cover]" : "[data-art-image]");
+    const preview = document.querySelector(`[data-${kind}-preview]`);
+    const label = document.querySelector(`[data-${kind}-drop-label]`);
+    if (!drop || !input) return;
+
+    function showFile(file) {
+      if (!file) return;
+      if (previewUrls[kind]) URL.revokeObjectURL(previewUrls[kind]);
+      previewUrls[kind] = URL.createObjectURL(file);
+      if (preview) {
+        preview.src = previewUrls[kind];
+        preview.classList.remove("hidden");
+      }
+      if (label) label.textContent = file.name;
+    }
+
+    drop.addEventListener("click", () => input.click());
+    drop.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      drop.classList.add("border-primary");
+    });
+    drop.addEventListener("dragleave", () => drop.classList.remove("border-primary"));
+    drop.addEventListener("drop", (event) => {
+      event.preventDefault();
+      drop.classList.remove("border-primary");
+      const file = event.dataTransfer?.files?.[0];
+      if (!file) return;
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      input.files = transfer.files;
+      showFile(file);
+    });
+    input.addEventListener("change", () => {
+      if (input.files?.[0]) showFile(input.files[0]);
+    });
+  }
+
+  function resetDrop(kind, existingSrc, existingLabel) {
+    const input = document.querySelector(kind === "book" ? "[data-book-cover]" : "[data-art-image]");
+    const preview = document.querySelector(`[data-${kind}-preview]`);
+    const label = document.querySelector(`[data-${kind}-drop-label]`);
+    if (input) input.value = "";
+    if (previewUrls[kind]) URL.revokeObjectURL(previewUrls[kind]);
+    previewUrls[kind] = "";
+    if (preview) {
+      if (existingSrc) {
+        preview.src = existingSrc;
+        preview.classList.remove("hidden");
+      } else {
+        preview.removeAttribute("src");
+        preview.classList.add("hidden");
+      }
+    }
+    if (label) {
+      label.textContent = existingLabel || (kind === "book" ? "Drop a cover here, or click to choose a photo" : "Drop a photo here, or click to choose");
+    }
+  }
+
+  function renderArtList() {
+    if (!artList) return;
+    if (!artPieces.length) {
+      artList.innerHTML = `<li class="text-muted-foreground">No paintings yet.</li>`;
+      return;
+    }
+    artList.innerHTML = artPieces
+      .map(
+        (piece) =>
+          `<li><button type="button" class="w-full rounded-lg border border-border px-3 py-2 text-left hover:border-primary" data-art-slug="${escapeHtml(piece.slug)}">${escapeHtml(piece.title)} <span class="text-muted-foreground">· ${escapeHtml(piece.medium)}</span></button></li>`,
+      )
+      .join("");
+  }
+
+  function fillBook(book) {
+    currentBook = book;
+    bookEditor?.classList.remove("hidden");
+    document.querySelector("[data-book-title]").value = book.title;
+    document.querySelector("[data-book-author]").value = book.author;
+    document.querySelector("[data-book-genre]").value = book.genre === "Read" || book.genre === "Currently reading" ? "" : book.genre;
+    document.querySelector("[data-book-note]").value = book.note;
+    document.querySelector("[data-book-featured]").checked = book.featured;
+    document.querySelector("[data-book-bookshop]").value = displayUrl(book.bookshop);
+    document.querySelector("[data-book-amazon]").value = displayUrl(book.amazon);
+    const bits = [];
+    if (book.rating) bits.push(`${book.rating}★ on Goodreads`);
+    if (book.status === "currently-reading") bits.push("Currently reading");
+    else if (book.dateRead) bits.push(`Read ${book.dateRead}`);
+    document.querySelector("[data-book-meta]").textContent = bits.join(" · ");
+    resetDrop("book", "", book.cover ? `Current cover: ${book.cover}. Drop a new photo to replace it.` : "");
+  }
+
+  function fillArt(piece) {
+    currentArt = piece;
+    artEditor?.classList.remove("hidden");
+    document.querySelector("[data-art-title]").value = piece.title || "";
+    document.querySelector("[data-art-medium]").value = piece.medium || "Acrylic";
+    document.querySelector("[data-art-note]").value = piece.note || "";
+    document.querySelector("[data-art-featured]").checked = Boolean(piece.featured);
+    document.querySelector("[data-art-order]").value = piece.order || 0;
+    resetDrop("art", piece.image || "", piece.image ? "Drop a new photo to replace it" : "");
+  }
+
   async function boot() {
     try {
       const health = await call("/health");
@@ -176,7 +478,7 @@ const catalog = (await getCollection("books"))
           await call("/books?q=");
         } catch {
           login?.classList.remove("hidden");
-          if (status) status.textContent = "Sign in to edit notes and upload a Goodreads export.";
+          if (status) status.textContent = "Sign in to edit the library.";
           return;
         }
       }
@@ -184,16 +486,20 @@ const catalog = (await getCollection("books"))
     } catch (error) {
       if (isDev) {
         if (status) {
-          status.textContent =
-            "The editor API is not running. On this computer: npm run admin — then refresh.";
+          status.textContent = "The editor API is not running. On this computer: npm run admin — then refresh.";
         }
         return;
       }
-      if (status) {
-        status.textContent = error instanceof Error ? error.message : "Could not reach the editor.";
-      }
+      if (status) status.textContent = error instanceof Error ? error.message : "Could not reach the editor.";
     }
   }
+
+  document.querySelectorAll("[data-tab]").forEach((button) => {
+    button.addEventListener("click", () => setTab(button.dataset.tab));
+  });
+
+  bindDrop("book");
+  bindDrop("art");
 
   login?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -227,44 +533,124 @@ const catalog = (await getCollection("books"))
   results?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-slug]");
     if (!button) return;
-    current = books.find((book) => book.slug === button.dataset.slug);
-    if (!current) return;
-    editor?.classList.remove("hidden");
-    document.querySelector("[data-edit-title]").textContent = current.title;
-    document.querySelector("[data-edit-author]").textContent = current.author;
-    document.querySelector("[data-note]").value = current.note;
-    document.querySelector("[data-featured]").checked = current.featured;
+    const book = books.find((item) => item.slug === button.dataset.slug);
+    if (book) fillBook(book);
   });
 
-  document.querySelector("[data-save]")?.addEventListener("click", async () => {
-    if (!current) return;
+  artList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-art-slug]");
+    if (!button) return;
+    const piece = artPieces.find((item) => item.slug === button.dataset.artSlug);
+    if (piece) fillArt({ ...piece, create: false });
+  });
+
+  document.querySelector("[data-art-new]")?.addEventListener("click", () => {
+    fillArt({
+      slug: "",
+      title: "",
+      medium: "Acrylic",
+      note: "",
+      featured: false,
+      image: "",
+      order: artPieces.length + 1,
+      create: true,
+    });
+    document.querySelector("[data-art-title]")?.focus();
+  });
+
+  document.querySelector("[data-book-save]")?.addEventListener("click", async () => {
+    if (!currentBook) return;
     try {
-      current.note = document.querySelector("[data-note]").value;
-      current.featured = document.querySelector("[data-featured]").checked;
+      currentBook.title = document.querySelector("[data-book-title]").value;
+      currentBook.author = document.querySelector("[data-book-author]").value;
+      currentBook.genre = document.querySelector("[data-book-genre]").value;
+      currentBook.note = document.querySelector("[data-book-note]").value;
+      currentBook.featured = document.querySelector("[data-book-featured]").checked;
+      currentBook.bookshop = document.querySelector("[data-book-bookshop]").value;
+      currentBook.amazon = document.querySelector("[data-book-amazon]").value;
       await call("/book", {
         method: "POST",
         body: JSON.stringify({
-          slug: current.slug,
-          note: current.note,
-          featured: current.featured,
+          slug: currentBook.slug,
+          title: currentBook.title,
+          author: currentBook.author,
+          genre: currentBook.genre,
+          note: currentBook.note,
+          featured: currentBook.featured,
+          bookshop: currentBook.bookshop,
+          amazon: currentBook.amazon,
         }),
       });
-      const file = document.querySelector("[data-cover]").files[0];
+      const file = document.querySelector("[data-book-cover]").files[0];
       if (file) {
-        if (file.size > 2 * 1024 * 1024) {
-          throw new Error("Cover is too large (2 MB max)");
-        }
-        const contentBase64 = toBase64(await file.arrayBuffer());
+        if (file.size > 2 * 1024 * 1024) throw new Error("Cover is too large (2 MB max)");
         await call("/cover", {
           method: "POST",
-          body: JSON.stringify({ slug: current.slug, filename: file.name, contentBase64 }),
+          body: JSON.stringify({
+            kind: "book",
+            slug: currentBook.slug,
+            filename: file.name,
+            contentBase64: toBase64(await file.arrayBuffer()),
+          }),
         });
-        document.querySelector("[data-cover]").value = "";
+        currentBook.cover = file.name;
+        resetDrop("book", "", `Saved ${file.name}`);
       }
       if (status) {
         status.textContent = isDev
-          ? `Saved ${current.title}. Refresh the site to see it.`
-          : `Saved ${current.title}. It will show on the site after the rebuild.`;
+          ? `Saved ${currentBook.title}. Refresh the site to see it.`
+          : `Saved ${currentBook.title}. It will show on the site after the rebuild.`;
+      }
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    }
+  });
+
+  document.querySelector("[data-art-save]")?.addEventListener("click", async () => {
+    if (!currentArt) return;
+    try {
+      currentArt.title = document.querySelector("[data-art-title]").value;
+      currentArt.medium = document.querySelector("[data-art-medium]").value;
+      currentArt.note = document.querySelector("[data-art-note]").value;
+      currentArt.featured = document.querySelector("[data-art-featured]").checked;
+      currentArt.order = Number(document.querySelector("[data-art-order]").value || 0);
+      const created = await call("/art", {
+        method: "POST",
+        body: JSON.stringify({
+          create: Boolean(currentArt.create),
+          slug: currentArt.slug,
+          title: currentArt.title,
+          medium: currentArt.medium,
+          note: currentArt.note,
+          featured: currentArt.featured,
+          order: currentArt.order,
+        }),
+      });
+      currentArt.slug = created.slug || currentArt.slug;
+      currentArt.create = false;
+      const existing = artPieces.find((item) => item.slug === currentArt.slug);
+      if (existing) Object.assign(existing, currentArt);
+      else artPieces.push({ ...currentArt });
+      renderArtList();
+      const file = document.querySelector("[data-art-image]").files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) throw new Error("Photo is too large (2 MB max)");
+        const data = await call("/cover", {
+          method: "POST",
+          body: JSON.stringify({
+            kind: "art",
+            slug: currentArt.slug,
+            filename: file.name,
+            contentBase64: toBase64(await file.arrayBuffer()),
+          }),
+        });
+        currentArt.image = data.image;
+        resetDrop("art", data.image, "Photo saved");
+      }
+      if (status) {
+        status.textContent = isDev
+          ? `Saved ${currentArt.title}. Refresh the site to see it.`
+          : `Saved ${currentArt.title}. It will show on the site after the rebuild.`;
       }
     } catch (error) {
       if (status) status.textContent = error.message;
@@ -276,11 +662,10 @@ const catalog = (await getCollection("books"))
     const log = document.querySelector("[data-log]");
     if (!file) return;
     try {
-      const contentBase64 = toBase64(await file.arrayBuffer());
       if (log) log.textContent = "Importing…";
       const data = await call("/csv", {
         method: "POST",
-        body: JSON.stringify({ filename: file.name, contentBase64 }),
+        body: JSON.stringify({ filename: file.name, contentBase64: toBase64(await file.arrayBuffer()) }),
       });
       if (log) log.textContent = data.log || "Done.";
     } catch (error) {

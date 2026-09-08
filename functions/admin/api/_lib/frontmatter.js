@@ -9,12 +9,33 @@ export function upsertField(text, key, line) {
   return text.replace(/\n---\s*$/, `\n${line}\n---`);
 }
 
+export function applyYamlFields(text, updates) {
+  let next = text;
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined) continue;
+    if (typeof value === "boolean" || typeof value === "number") {
+      next = upsertField(next, key, `${key}: ${value}`);
+    } else {
+      next = upsertField(next, key, `${key}: ${yamlString(value)}`);
+    }
+  }
+  return next;
+}
+
 export function safeSlug(value) {
   const slug = String(value || "").trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug)) {
-    throw new Error("Invalid book");
+    throw new Error("Invalid name");
   }
   return slug;
+}
+
+export function slugFromTitle(title) {
+  const slug = String(title || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return safeSlug(slug);
 }
 
 export function json(data, status = 200) {

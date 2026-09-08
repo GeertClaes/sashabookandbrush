@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,7 +28,9 @@ try {
   // Local .env is optional.
 }
 const BOOKS_DIR = path.join(ROOT, "src", "content", "books");
+const ART_DIR = path.join(ROOT, "src", "content", "art");
 const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
+const ART_IMAGES_DIR = path.join(ROOT, "public", "images", "art");
 const DATA_DIR = path.join(ROOT, "data");
 const PORT = Number(process.env.ADMIN_PORT || 8787);
 const PASSWORD = process.env.ADMIN_PASSWORD || "";
@@ -79,6 +81,31 @@ function upsertField(text, key, line) {
     return text.replace(new RegExp(`^${key}:.*$`, "m"), line);
   }
   return text.replace(/\n---\s*$/, `\n${line}\n---`);
+}
+
+function applyYamlFields(text, updates) {
+  let next = text;
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined) continue;
+    if (typeof value === "boolean" || typeof value === "number") {
+      next = upsertField(next, key, `${key}: ${value}`);
+    } else {
+      next = upsertField(next, key, `${key}: ${yamlString(value)}`);
+    }
+  }
+  return next;
+}
+
+function affiliateValue(value) {
+  const trimmed = String(value || "").trim();
+  return trimmed || "#";
+}
+
+function slugFromTitle(title) {
+  return String(title || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 async function listBooks() {
@@ -175,23 +202,90 @@ const server = createServer(async (req, res) => {
       const body = JSON.parse((await readBody(req)) || "{}");
       const file = path.join(BOOKS_DIR, `${path.basename(body.slug)}.md`);
       let text = await readFile(file, "utf8");
-      if (typeof body.note === "string") text = upsertField(text, "note", `note: ${yamlString(body.note)}`);
-      if (typeof body.featured === "boolean") text = upsertField(text, "featured", `featured: ${body.featured}`);
+      const updates = {};
+      if (typeof body.title === "string" && body.title.trim()) updates.title = body.title.trim();
+      if (typeof body.author === "string" && body.author.trim()) updates.author = body.author.trim();
+      if (typeof body.genre === "string") updates.genre = body.genre.trim() || "Read";
+      if (typeof body.note === "string") updates.note = body.note;
+      if (typeof body.featured === "boolean") updates.featured = body.featured;
+      if (typeof body.bookshop === "string") updates.bookshop = affiliateValue(body.bookshop);
+      if (typeof body.amazon === "string") updates.amazon = affiliateValue(body.amazon);
+      text = applyYamlFields(text, updates);
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       json(res, 200, { ok: true });
       return;
     }
 
+    if (pathname === "/api/art" && req.method === "POST") {
+      const body = JSON.parse((await readBody(req)) || "{}");
+      const title = String(body.title || "").trim();
+      if (!title) {
+        json(res, 400, { error: "Title is required" });
+        return;
+      }
+      const slug = path.basename(body.slug || slugFromTitle(title));
+      const file = path.join(ART_DIR, `${slug}.md`);
+      let existing = null;
+      try {
+        existing = await readFile(file, "utf8");
+      } catch {
+        existing = null;
+      }
+      if (body.create && existing) {
+        json(res, 409, { error: "A painting with that name already exists" });
+        return;
+      }
+      if (!body.create && !existing) {
+        json(res, 404, { error: "Painting not found" });
+        return;
+      }
+      const medium = String(body.medium || "Acrylic").trim() || "Acrylic";
+      const note = typeof body.note === "string" ? body.note : "";
+      const featured = Boolean(body.featured);
+      const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
+      const image = typeof body.image === "string" ? body.image.trim() : "";
+      let text = existing;
+      if (!text) {
+        text = `---
+title: ${yamlString(title)}
+medium: ${yamlString(medium)}
+note: ${yamlString(note)}
+featured: ${featured}
+order: ${order}
+${image ? `image: ${yamlString(image)}\n` : ""}---
+`;
+      } else {
+        const updates = { title, medium, note, featured, order };
+        if (image) updates.image = image;
+        text = applyYamlFields(text, updates);
+      }
+      await mkdir(ART_DIR, { recursive: true });
+      await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+      json(res, 200, { ok: true, slug });
+      return;
+    }
+
     if (pathname === "/api/cover" && req.method === "POST") {
       const body = JSON.parse((await readBody(req)) || "{}");
+      const kind = body.kind === "art" ? "art" : "book";
       const slug = path.basename(body.slug);
       const ext = path.extname(body.filename || ".jpg").toLowerCase() || ".jpg";
       const safeExt = [".jpg", ".jpeg", ".png", ".webp"].includes(ext) ? ext : ".jpg";
       const filename = `${slug}${safeExt}`;
+      if (kind === "art") {
+        await mkdir(ART_IMAGES_DIR, { recursive: true });
+        await writeFile(path.join(ART_IMAGES_DIR, filename), Buffer.from(body.contentBase64, "base64"));
+        const file = path.join(ART_DIR, `${slug}.md`);
+        let text = await readFile(file, "utf8");
+        text = applyYamlFields(text, { image: `/images/art/${filename}` });
+        await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+        json(res, 200, { ok: true, image: `/images/art/${filename}` });
+        return;
+      }
       await writeFile(path.join(COVERS_DIR, filename), Buffer.from(body.contentBase64, "base64"));
       const file = path.join(BOOKS_DIR, `${slug}.md`);
       let text = await readFile(file, "utf8");
-      text = upsertField(text, "cover", `cover: ${yamlString(filename)}`);
+      text = applyYamlFields(text, { cover: filename });
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       json(res, 200, { ok: true, cover: filename });
       return;
