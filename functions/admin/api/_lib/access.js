@@ -38,20 +38,21 @@ function audienceOk(aud, expected) {
   return Array.isArray(aud) && aud.includes(expected);
 }
 
-export async function assertAccess(request, env) {
+export async function assertAccess(request, env, options = {}) {
   const host = teamHost(env.CF_ACCESS_TEAM_DOMAIN);
   const audience = String(env.CF_ACCESS_AUD || "").trim();
   const token = request.headers.get("Cf-Access-Jwt-Assertion") || "";
   const headerEmail = (request.headers.get("Cf-Access-Authenticated-User-Email") || "").toLowerCase();
+  const requireGithub = options.requireGithub !== false;
 
-  if (!env.ADMIN_GITHUB_TOKEN && !env.GITHUB_TOKEN) {
-    return { ok: false, error: "Writes are not configured" };
+  if (requireGithub && !env.ADMIN_GITHUB_TOKEN && !env.GITHUB_TOKEN) {
+    return { ok: false, error: "Writes are not configured. Set ADMIN_GITHUB_TOKEN on Pages." };
   }
   if (!host || !audience) {
-    return { ok: false, error: "Cloudflare Access is not configured" };
+    return { ok: false, error: "Set CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD on Pages, then retry the deploy." };
   }
   if (!token) {
-    return { ok: false, error: "Unauthorized" };
+    return { ok: false, error: "Missing Access token. Sign in with Google, then refresh." };
   }
 
   const [headerPart, payloadPart, signaturePart] = token.split(".");

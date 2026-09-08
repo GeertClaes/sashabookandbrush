@@ -3,7 +3,9 @@ import { json } from "./_lib/frontmatter.js";
 
 export async function onRequest(context) {
   try {
-    const result = await assertAccess(context.request, context.env);
+    const result = await assertAccess(context.request, context.env, {
+      requireGithub: context.request.method !== "GET",
+    });
     if (!result.ok) {
       return json({ error: result.error || "Unauthorized" }, 401);
     }

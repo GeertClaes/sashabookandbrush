@@ -142,6 +142,14 @@ const catalog = (await getCollection("books"))
       headers: { "Content-Type": "application/json", ...(options.headers || {}) },
       ...options,
     });
+    const type = response.headers.get("content-type") || "";
+    if (!type.includes("json")) {
+      throw new Error(
+        response.status === 404
+          ? "The editor API is not deployed. Confirm the Pages project includes the functions/ folder, then retry the deploy."
+          : "Cloudflare Access is still blocking /admin/api. Path must be /admin* and you must be signed in.",
+      );
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
     return data;
@@ -173,7 +181,7 @@ const catalog = (await getCollection("books"))
         }
       }
       showApp(health.email);
-    } catch {
+    } catch (error) {
       if (isDev) {
         if (status) {
           status.textContent =
@@ -182,8 +190,7 @@ const catalog = (await getCollection("books"))
         return;
       }
       if (status) {
-        status.textContent =
-          "Could not reach the editor. Finish Google sign-in if Cloudflare asked, or check that Access and GitHub are configured.";
+        status.textContent = error instanceof Error ? error.message : "Could not reach the editor.";
       }
     }
   }
