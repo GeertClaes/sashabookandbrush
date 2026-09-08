@@ -5,8 +5,6 @@ cover: "a-novel-love-story-ashley-poston.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1089
 status: "read"

@@ -38,14 +38,14 @@ note: "A short personal note — a couple of sentences is enough."
 rating: 5
 genre: "Romantasy"
 status: "read"
-bookshop: "https://bookshop.org/a/YOUR-ID/9781649374042"
-amazon: "https://www.amazon.co.uk/dp/1649374046?tag=YOUR-TAG-21"
 featured: true
 order: 1
 isbn: "9781649374042"
 dateRead: "2024-06-12"
 ---
 ```
+
+Leave `bookshop` / `amazon` out unless you need a special-edition URL. Buy buttons are built from ISBN plus the IDs in `src/data/site.json`.
 
 3. Put the cover image in `src/assets/covers/` and set `cover` to the filename. Astro will optimize it.
 4. Set `featured: true` to show it on the home page (aim for 4–9).
@@ -176,7 +176,7 @@ Buy buttons are built from ISBN plus IDs in `src/data/site.json`:
 - `affiliates.bookshopUkId` — Bookshop.org UK (primary)
 - `affiliates.amazonTag` — Amazon.co.uk Associates tracking ID (usually ends in `-21`)
 
-Leave those blank until the accounts exist; buttons hide when there is no ISBN and no override. Amazon links go to `amazon.co.uk`. Per-book `bookshop` / `amazon` URLs still win if they are real `https://` links (special editions). Buttons show on book pages and featured home cards, not on the full list.
+Leave those blank until the accounts exist; buttons hide when there is no ISBN and no override. Amazon links go to `amazon.co.uk`. Per-book `bookshop` / `amazon` fields are optional — only add them for special editions. Buttons show on book pages and featured home cards, not on the full list.
 
 The footer already includes an affiliate disclosure.
 

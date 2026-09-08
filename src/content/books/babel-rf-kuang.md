@@ -5,8 +5,6 @@ cover: "babel-rf-kuang.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1018
 status: "read"

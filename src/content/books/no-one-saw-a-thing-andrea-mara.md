@@ -5,8 +5,6 @@ cover: "no-one-saw-a-thing-andrea-mara.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1063
 status: "read"

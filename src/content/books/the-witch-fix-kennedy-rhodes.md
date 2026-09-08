@@ -5,8 +5,6 @@ cover: "the-witch-fix-kennedy-rhodes.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1004
 status: "read"

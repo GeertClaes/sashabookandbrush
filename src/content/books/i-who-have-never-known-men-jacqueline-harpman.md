@@ -5,8 +5,6 @@ cover: "i-who-have-never-known-men-jacqueline-harpman.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1020
 status: "read"

@@ -5,8 +5,6 @@ cover: "the-ashes-the-star-cursed-king-crowns-of-nyaxia-2-carissa-broadbent.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1147
 status: "read"

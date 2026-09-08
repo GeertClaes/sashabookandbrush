@@ -5,8 +5,6 @@ cover: "brisingr-the-inheritance-cycle-3-christopher-paolini.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1240
 status: "read"

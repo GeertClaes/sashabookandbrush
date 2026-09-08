@@ -5,8 +5,6 @@ cover: "eclipse-the-twilight-saga-3-stephenie-meyer.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1160
 status: "read"

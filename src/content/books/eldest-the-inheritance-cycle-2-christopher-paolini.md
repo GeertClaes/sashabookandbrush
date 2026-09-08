@@ -5,8 +5,6 @@ cover: "eldest-the-inheritance-cycle-2-christopher-paolini.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1241
 status: "read"

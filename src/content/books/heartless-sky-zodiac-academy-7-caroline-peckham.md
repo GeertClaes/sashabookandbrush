@@ -5,8 +5,6 @@ cover: "heartless-sky-zodiac-academy-7-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1038
 status: "read"

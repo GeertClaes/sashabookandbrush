@@ -5,8 +5,6 @@ cover: "harry-potter-and-the-deathly-hallows-full-cast-edition-jk-rowling.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1008
 status: "read"

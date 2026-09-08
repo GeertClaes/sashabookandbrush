@@ -5,8 +5,6 @@ cover: "all-the-lies-mindfck-4-st-abby.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1192
 status: "read"

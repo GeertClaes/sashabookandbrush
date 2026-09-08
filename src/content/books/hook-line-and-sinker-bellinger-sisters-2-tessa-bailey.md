@@ -5,8 +5,6 @@ cover: "hook-line-and-sinker-bellinger-sisters-2-tessa-bailey.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1174
 status: "read"

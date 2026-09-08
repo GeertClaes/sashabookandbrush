@@ -5,8 +5,8 @@ cover: "emma-jane-austen.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780141439587"
+isbn10: "0141439580"
 featured: false
 order: 1065
 status: "read"

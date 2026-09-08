@@ -5,8 +5,6 @@ cover: "the-risk-mindfck-1-st-abby.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1195
 status: "read"

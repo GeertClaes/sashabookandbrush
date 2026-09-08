@@ -5,8 +5,6 @@ cover: "ruthless-vows-letters-of-enchantment-2-rebecca-ross.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1126
 status: "read"

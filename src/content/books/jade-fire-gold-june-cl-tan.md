@@ -5,8 +5,6 @@ cover: "jade-fire-gold-june-cl-tan.jpg"
 note: "(FairyLoot book)\nI really enjoyed this book. It felt like a unique story and had some great surprises in it. Definitely worth reading. Also the cover art is stunning."
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1219
 status: "read"

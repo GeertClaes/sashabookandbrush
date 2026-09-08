@@ -5,8 +5,8 @@ cover: "the-fault-in-our-stars-john-green.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780142424179"
+isbn10: "014242417X"
 featured: false
 order: 1248
 status: "read"

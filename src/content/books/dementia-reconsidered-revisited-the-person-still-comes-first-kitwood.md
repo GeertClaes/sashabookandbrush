@@ -5,8 +5,6 @@ cover: "dementia-reconsidered-revisited-the-person-still-comes-first-kitwood.jpg
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1212
 status: "read"

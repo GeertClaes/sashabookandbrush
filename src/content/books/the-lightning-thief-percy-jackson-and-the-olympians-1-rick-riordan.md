@@ -5,8 +5,6 @@ cover: "the-lightning-thief-percy-jackson-and-the-olympians-1-rick-riordan.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1250
 status: "read"

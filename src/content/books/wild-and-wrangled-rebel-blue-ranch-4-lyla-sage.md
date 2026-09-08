@@ -5,8 +5,8 @@ cover: "wild-and-wrangled-rebel-blue-ranch-4-lyla-sage.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781529436754
+isbn10: 1529436753
 featured: false
 order: 1058
 status: "read"

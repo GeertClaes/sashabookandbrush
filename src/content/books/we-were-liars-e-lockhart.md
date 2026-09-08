@@ -5,8 +5,6 @@ cover: "we-were-liars-e-lockhart.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1247
 status: "read"

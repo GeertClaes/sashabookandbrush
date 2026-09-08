@@ -5,8 +5,8 @@ cover: "pucking-ever-after-volume-1-jacksonville-rays-15-emily-rath.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781962350990
+isbn10: 1962350991
 featured: false
 order: 1141
 status: "read"

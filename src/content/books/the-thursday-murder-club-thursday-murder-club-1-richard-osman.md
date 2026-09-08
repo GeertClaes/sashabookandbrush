@@ -5,8 +5,8 @@ cover: "the-thursday-murder-club-thursday-murder-club-1-richard-osman.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9780241425442
+isbn10: 0241425441
 featured: false
 order: 1029
 status: "read"

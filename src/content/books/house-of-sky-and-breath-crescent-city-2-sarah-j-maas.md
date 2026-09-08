@@ -5,8 +5,6 @@ cover: "house-of-sky-and-breath-crescent-city-2-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1197
 status: "read"

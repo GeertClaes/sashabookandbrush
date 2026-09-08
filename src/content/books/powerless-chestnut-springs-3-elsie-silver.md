@@ -5,8 +5,8 @@ cover: "powerless-chestnut-springs-3-elsie-silver.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781959285748
+isbn10: 1959285742
 featured: false
 order: 1093
 status: "read"

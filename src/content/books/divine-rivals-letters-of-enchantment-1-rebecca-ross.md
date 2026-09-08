@@ -5,8 +5,6 @@ cover: "divine-rivals-letters-of-enchantment-1-rebecca-ross.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1145
 status: "read"

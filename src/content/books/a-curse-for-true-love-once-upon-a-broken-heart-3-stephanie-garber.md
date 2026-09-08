@@ -5,8 +5,6 @@ cover: "a-curse-for-true-love-once-upon-a-broken-heart-3-stephanie-garber.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1131
 status: "read"

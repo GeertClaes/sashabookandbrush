@@ -5,8 +5,6 @@ cover: "witch-trial-harriet-tyce.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1013
 status: "read"

@@ -5,8 +5,6 @@ cover: "hunting-adeline-cat-and-mouse-2-hd-carlton.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1153
 status: "read"

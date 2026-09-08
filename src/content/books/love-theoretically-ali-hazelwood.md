@@ -5,8 +5,6 @@ cover: "love-theoretically-ali-hazelwood.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1136
 status: "read"

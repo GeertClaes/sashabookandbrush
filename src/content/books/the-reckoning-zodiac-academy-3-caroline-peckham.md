@@ -5,8 +5,6 @@ cover: "the-reckoning-zodiac-academy-3-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1043
 status: "read"

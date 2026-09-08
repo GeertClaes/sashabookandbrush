@@ -5,8 +5,6 @@ cover: "the-ex-vows-jessica-joyce.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1092
 status: "read"

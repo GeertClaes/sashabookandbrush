@@ -5,8 +5,6 @@ cover: "kingdom-of-the-cursed-kingdom-of-the-wicked-2-kerri-maniscalco.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1176
 status: "read"

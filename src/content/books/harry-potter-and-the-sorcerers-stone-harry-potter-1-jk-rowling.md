@@ -5,8 +5,6 @@ cover: "harry-potter-and-the-sorcerers-stone-harry-potter-1-jk-rowling.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1258
 status: "read"

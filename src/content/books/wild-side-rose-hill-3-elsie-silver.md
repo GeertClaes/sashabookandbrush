@@ -5,8 +5,8 @@ cover: "wild-side-rose-hill-3-elsie-silver.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781464237522
+isbn10: 1464237522
 featured: false
 order: 1062
 status: "read"

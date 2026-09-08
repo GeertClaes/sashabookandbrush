@@ -5,8 +5,6 @@ cover: "bound-bound-and-unbound-1-ali-hazelwood.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1030
 status: "read"

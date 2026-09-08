@@ -5,8 +5,6 @@ cover: "things-we-never-got-over-knockemout-1-lucy-score.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1179
 status: "read"

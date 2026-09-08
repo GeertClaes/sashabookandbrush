@@ -5,8 +5,8 @@ cover: "ugly-love-colleen-hoover.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781476753188
+isbn10: 1476753180
 featured: false
 order: 1205
 status: "read"

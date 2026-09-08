@@ -5,8 +5,6 @@ cover: "the-kite-runner-khaled-hosseini.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1243
 status: "read"

@@ -5,8 +5,8 @@ cover: "heartless-chestnut-springs-2-elsie-silver.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781728297019
+isbn10: 172829701X
 featured: false
 order: 1105
 status: "read"

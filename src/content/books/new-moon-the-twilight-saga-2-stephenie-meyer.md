@@ -5,8 +5,6 @@ cover: "new-moon-the-twilight-saga-2-stephenie-meyer.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1223
 status: "read"

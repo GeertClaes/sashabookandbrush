@@ -5,8 +5,6 @@ cover: "six-of-crows-six-of-crows-1-leigh-bardugo.jpg"
 note: "Loved this book! Excellent story telling, couldn’t put it down. Great characters and lots of twists and turns."
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1218
 status: "read"

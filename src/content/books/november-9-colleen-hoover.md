@@ -5,8 +5,6 @@ cover: "november-9-colleen-hoover.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1180
 status: "read"

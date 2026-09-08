@@ -5,8 +5,6 @@ cover: "harry-potter-and-the-goblet-of-fire-full-cast-edition-jk-rowling.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1006
 status: "read"

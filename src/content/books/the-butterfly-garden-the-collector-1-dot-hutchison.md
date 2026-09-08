@@ -5,8 +5,6 @@ cover: "the-butterfly-garden-the-collector-1-dot-hutchison.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1231
 status: "read"

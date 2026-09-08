@@ -5,8 +5,6 @@ cover: "lights-out-into-darkness-1-navessa-allen.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1053
 status: "read"

@@ -172,25 +172,26 @@ const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : nu
           }
 
           {
-            isbnLine && (
-              <p class="mt-4 text-xs tracking-wide text-muted-foreground">{isbnLine}</p>
+            (isbnLine || data.goodreadsId) && (
+              <p class="mt-4 text-xs tracking-wide text-muted-foreground">
+                {isbnLine}
+                {isbnLine && data.goodreadsId ? "  ·  " : ""}
+                {data.goodreadsId && (
+                  <a
+                    href={`https://www.goodreads.com/book/show/${data.goodreadsId}`}
+                    class="text-muted-foreground/70 transition-colors hover:text-muted-foreground"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Goodreads
+                  </a>
+                )}
+              </p>
             )
           }
 
-          <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div class="mt-6">
             <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} />
-            {
-              data.goodreadsId && (
-                <a
-                  href={`https://www.goodreads.com/book/show/${data.goodreadsId}`}
-                  class="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  View on Goodreads
-                </a>
-              )
-            }
           </div>
         </div>
       </div>

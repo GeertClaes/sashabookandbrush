@@ -5,8 +5,6 @@ cover: "the-housemaids-secret-the-housemaid-2-freida-mcfadden.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1162
 status: "read"

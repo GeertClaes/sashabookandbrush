@@ -5,8 +5,6 @@ cover: "book-lovers-emily-henry.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1189
 status: "read"

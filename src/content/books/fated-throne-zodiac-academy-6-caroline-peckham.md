@@ -5,8 +5,6 @@ cover: "fated-throne-zodiac-academy-6-caroline-peckham.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1040
 status: "read"

@@ -5,8 +5,8 @@ cover: "harry-potter-and-the-half-blood-prince-harry-potter-6-jk-rowling.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781551927602
+isbn10: 1551927608
 featured: false
 order: 1228
 status: "read"

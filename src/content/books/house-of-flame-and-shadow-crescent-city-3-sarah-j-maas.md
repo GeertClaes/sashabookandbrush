@@ -5,8 +5,6 @@ cover: "house-of-flame-and-shadow-crescent-city-3-sarah-j-maas.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1121
 status: "read"

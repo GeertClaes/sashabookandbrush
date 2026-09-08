@@ -5,8 +5,6 @@ cover: "breaking-dawn-the-twilight-saga-4-stephenie-meyer.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1226
 status: "read"

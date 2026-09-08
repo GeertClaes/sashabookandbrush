@@ -5,8 +5,6 @@ cover: "the-last-witch-cj-cooke.jpg"
 note: ""
 rating: 0
 genre: "Currently reading"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 0
 status: "currently-reading"

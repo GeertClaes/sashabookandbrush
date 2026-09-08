@@ -5,8 +5,6 @@ cover: "beyond-the-wand-the-magic-mayhem-of-growing-up-a-wizard-tom-felton.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1123
 status: "read"

@@ -5,8 +5,8 @@ cover: "deep-end-ali-hazelwood.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780593550441"
+isbn10: "0593550447"
 featured: false
 order: 1069
 status: "read"

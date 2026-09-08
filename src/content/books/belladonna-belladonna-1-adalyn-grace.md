@@ -5,8 +5,6 @@ cover: "belladonna-belladonna-1-adalyn-grace.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1133
 status: "read"

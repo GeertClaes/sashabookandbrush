@@ -5,8 +5,6 @@ cover: "till-death-do-us-part-the-asylum-confession-files-3-jack-steen.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1096
 status: "read"

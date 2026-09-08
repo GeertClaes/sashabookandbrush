@@ -5,8 +5,8 @@ cover: "a-kingdom-of-blood-and-betrayal-stars-and-shadows-2-holly-renee.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781464252259
+isbn10: 1464252254
 featured: false
 order: 1159
 status: "read"

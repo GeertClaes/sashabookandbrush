@@ -5,8 +5,6 @@ cover: "the-trial-of-lotta-rae-siobhan-macgowan.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1134
 status: "read"

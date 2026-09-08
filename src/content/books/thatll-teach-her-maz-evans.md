@@ -5,8 +5,6 @@ cover: "thatll-teach-her-maz-evans.jpg"
 note: ""
 rating: 1
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1044
 status: "read"

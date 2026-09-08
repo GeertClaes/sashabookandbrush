@@ -5,8 +5,6 @@ cover: "the-caged-queen-iskari-2-kristen-ciccarelli.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1260
 status: "read"

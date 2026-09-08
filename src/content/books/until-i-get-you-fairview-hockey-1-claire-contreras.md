@@ -5,8 +5,6 @@ cover: "until-i-get-you-fairview-hockey-1-claire-contreras.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1151
 status: "read"

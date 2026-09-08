@@ -5,8 +5,6 @@ cover: "beyond-the-veil-zodiac-academy-85-caroline-peckham.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1035
 status: "read"

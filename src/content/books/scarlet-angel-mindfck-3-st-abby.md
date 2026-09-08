@@ -5,8 +5,6 @@ cover: "scarlet-angel-mindfck-3-st-abby.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1193
 status: "read"

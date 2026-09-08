@@ -5,8 +5,6 @@ cover: "the-boyfriend-freida-mcfadden.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1079
 status: "read"

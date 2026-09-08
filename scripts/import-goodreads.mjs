@@ -312,6 +312,10 @@ function upsertField(text, key, line) {
   return text.replace(/\n---\s*$/, `\n${line}\n---`);
 }
 
+function stripPlaceholderAffiliates(text) {
+  return text.replace(/^(bookshop|amazon):\s*["']?#["']?\s*\r?\n/gm, "");
+}
+
 async function loadExistingLibrary() {
   const names = (await readdir(BOOKS_DIR)).filter((name) => name.endsWith(".md"));
   const byId = new Map();
@@ -524,8 +528,6 @@ cover: ${yamlString(book.cover)}
 note: ${yamlString(book.note)}
 rating: ${book.rating}
 genre: ${yamlString(book.genre)}
-bookshop: "#"
-amazon: "#"
 featured: false
 order: ${book.order}
 ${extraYaml(book).join("\n")}
@@ -554,8 +556,8 @@ async function mergeIntoExisting(file, book, existing = {}) {
     `note: ${yamlString(note)}`,
     `rating: ${book.rating}`,
     `genre: ${yamlString(book.genre)}`,
-    `bookshop: ${yamlString(existing.bookshop || book.bookshop || "#")}`,
-    `amazon: ${yamlString(existing.amazon || book.amazon || "#")}`,
+    isRealUrl(existing.bookshop) ? `bookshop: ${yamlString(existing.bookshop)}` : null,
+    isRealUrl(existing.amazon) ? `amazon: ${yamlString(existing.amazon)}` : null,
     `featured: ${existing.featured === "true" || existing.featured === true ? "true" : "false"}`,
     `order: ${book.order}`,
     ...extraYaml(book),
@@ -566,6 +568,7 @@ async function mergeIntoExisting(file, book, existing = {}) {
     if (skip.has(key)) continue;
     text = upsertField(text, key, line);
   }
+  text = stripPlaceholderAffiliates(text);
   await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
 }
 

@@ -5,8 +5,8 @@ cover: "a-kingdom-of-venom-and-vows-stars-and-shadows-3-holly-renee.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781464252280
+isbn10: 1464252289
 featured: false
 order: 1158
 status: "read"

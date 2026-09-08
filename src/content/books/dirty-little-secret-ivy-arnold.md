@@ -5,8 +5,6 @@ cover: "dirty-little-secret-ivy-arnold.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1154
 status: "read"

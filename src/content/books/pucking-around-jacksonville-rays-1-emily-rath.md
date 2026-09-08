@@ -5,8 +5,6 @@ cover: "pucking-around-jacksonville-rays-1-emily-rath.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1142
 status: "read"

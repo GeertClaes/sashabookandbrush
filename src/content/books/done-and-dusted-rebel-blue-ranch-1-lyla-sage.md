@@ -5,8 +5,6 @@ cover: "done-and-dusted-rebel-blue-ranch-1-lyla-sage.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1115
 status: "read"

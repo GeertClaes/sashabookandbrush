@@ -5,8 +5,6 @@ cover: "driving-in-the-dark-jack-harding.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1156
 status: "read"

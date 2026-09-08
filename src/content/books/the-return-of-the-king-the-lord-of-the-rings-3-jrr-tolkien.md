@@ -5,8 +5,8 @@ cover: "the-return-of-the-king-the-lord-of-the-rings-3-jrr-tolkien.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780261102375"
+isbn10: "0261102370"
 featured: false
 order: 1117
 status: "read"

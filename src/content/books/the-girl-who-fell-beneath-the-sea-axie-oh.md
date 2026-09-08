@@ -5,8 +5,6 @@ cover: "the-girl-who-fell-beneath-the-sea-axie-oh.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1184
 status: "read"

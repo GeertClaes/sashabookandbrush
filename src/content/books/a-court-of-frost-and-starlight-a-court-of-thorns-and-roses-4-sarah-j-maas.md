@@ -5,8 +5,6 @@ cover: "a-court-of-frost-and-starlight-a-court-of-thorns-and-roses-4-sarah-j-maa
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1220
 status: "read"

@@ -5,8 +5,6 @@ cover: "snowed-rylie-cooper-mysteries-7-stella-bixby.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1034
 status: "read"

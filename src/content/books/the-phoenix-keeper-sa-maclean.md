@@ -5,8 +5,6 @@ cover: "the-phoenix-keeper-sa-maclean.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1088
 status: "read"

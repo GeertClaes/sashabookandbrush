@@ -5,8 +5,8 @@ cover: "the-awakening-zodiac-academy-1-caroline-peckham.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781914425028
+isbn10: 1914425022
 featured: false
 order: 1048
 status: "read"

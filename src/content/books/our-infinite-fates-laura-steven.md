@@ -5,8 +5,6 @@ cover: "our-infinite-fates-laura-steven.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1012
 status: "read"

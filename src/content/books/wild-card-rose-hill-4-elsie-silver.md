@@ -5,8 +5,6 @@ cover: "wild-card-rose-hill-4-elsie-silver.jpg"
 note: ""
 rating: 0
 genre: "Currently reading"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 2
 status: "currently-reading"

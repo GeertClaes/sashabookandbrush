@@ -5,8 +5,6 @@ cover: "the-first-witch-of-boston-andrea-catalano.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1027
 status: "read"

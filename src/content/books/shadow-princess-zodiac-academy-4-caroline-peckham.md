@@ -5,8 +5,6 @@ cover: "shadow-princess-zodiac-academy-4-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1042
 status: "read"

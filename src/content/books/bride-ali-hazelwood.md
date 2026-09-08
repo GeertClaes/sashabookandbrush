@@ -5,8 +5,6 @@ cover: "bride-ali-hazelwood.jpg"
 note: "This was… weird."
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1114
 status: "read"

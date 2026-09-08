@@ -5,8 +5,6 @@ cover: "the-coldest-touch-isabel-sterling.jpg"
 note: "I got this book in a FairyLoot box as an extra.\nIt’s just okay. At some points it’s a bit cringe and I found it self like it was trying hard to be relevant. Nothing new or shocking in the book- angsty vamp teen and clueless humans."
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1217
 status: "read"

@@ -5,8 +5,6 @@ cover: "the-secret-paris-ingredient-mh-cali.jpg"
 note: ""
 rating: 0
 genre: "Currently reading"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1
 status: "currently-reading"

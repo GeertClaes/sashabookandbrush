@@ -5,8 +5,6 @@ cover: "sounds-like-love-ashley-poston.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1046
 status: "read"

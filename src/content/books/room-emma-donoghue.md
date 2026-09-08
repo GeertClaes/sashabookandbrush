@@ -5,8 +5,6 @@ cover: "room-emma-donoghue.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1233
 status: "read"

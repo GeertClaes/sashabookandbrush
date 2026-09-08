@@ -5,8 +5,6 @@ cover: "one-dark-window-the-shepherd-king-1-rachel-gillig.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1057
 status: "read"

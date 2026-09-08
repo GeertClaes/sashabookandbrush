@@ -5,8 +5,8 @@ cover: "funny-story-emily-henry.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9780241624128
+isbn10: 0241624126
 featured: false
 order: 1073
 status: "read"

@@ -5,8 +5,6 @@ cover: "the-kiss-curse-the-ex-hex-2-erin-sterling.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1084
 status: "read"

@@ -5,8 +5,6 @@ cover: "it-ends-with-us-it-ends-with-us-1-colleen-hoover.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1214
 status: "read"

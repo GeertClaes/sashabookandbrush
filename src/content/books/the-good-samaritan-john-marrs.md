@@ -5,8 +5,6 @@ cover: "the-good-samaritan-john-marrs.jpg"
 note: "What the f"
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1076
 status: "read"

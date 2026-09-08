@@ -5,8 +5,6 @@ cover: "it-starts-with-us-it-ends-with-us-2-colleen-hoover.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1173
 status: "read"

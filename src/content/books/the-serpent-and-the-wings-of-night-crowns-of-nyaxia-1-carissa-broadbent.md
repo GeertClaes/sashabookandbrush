@@ -5,8 +5,6 @@ cover: "the-serpent-and-the-wings-of-night-crowns-of-nyaxia-1-carissa-broadbent.
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1148
 status: "read"

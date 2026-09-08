@@ -5,8 +5,6 @@ cover: "harry-potter-and-the-order-of-the-phoenix-full-cast-edition-jk-rowling.j
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1007
 status: "read"

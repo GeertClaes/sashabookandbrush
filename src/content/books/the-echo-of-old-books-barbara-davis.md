@@ -5,8 +5,6 @@ cover: "the-echo-of-old-books-barbara-davis.webp"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1128
 status: "read"

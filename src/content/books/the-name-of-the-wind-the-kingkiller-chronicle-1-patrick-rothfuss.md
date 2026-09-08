@@ -5,8 +5,6 @@ cover: "the-name-of-the-wind-the-kingkiller-chronicle-1-patrick-rothfuss.jpg"
 note: "Need 3-5 business days to process this experience"
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1097
 status: "read"

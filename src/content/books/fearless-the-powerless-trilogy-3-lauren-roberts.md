@@ -5,8 +5,6 @@ cover: "fearless-the-powerless-trilogy-3-lauren-roberts.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1059
 status: "read"

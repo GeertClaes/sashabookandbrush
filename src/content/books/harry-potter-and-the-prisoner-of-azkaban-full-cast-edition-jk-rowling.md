@@ -5,8 +5,6 @@ cover: "harry-potter-and-the-prisoner-of-azkaban-full-cast-edition-jk-rowling.jp
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1028
 status: "read"

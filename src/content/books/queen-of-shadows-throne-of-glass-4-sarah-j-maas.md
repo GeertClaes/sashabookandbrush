@@ -5,8 +5,6 @@ cover: "queen-of-shadows-throne-of-glass-4-sarah-j-maas.jpg"
 note: "I don’t yet have words to express how I feel…"
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1168
 status: "read"

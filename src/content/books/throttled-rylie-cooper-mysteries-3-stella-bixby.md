@@ -5,8 +5,6 @@ cover: "throttled-rylie-cooper-mysteries-3-stella-bixby.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1052
 status: "read"

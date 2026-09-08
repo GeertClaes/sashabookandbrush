@@ -5,8 +5,6 @@ cover: "once-upon-a-broken-heart-once-upon-a-broken-heart-1-stephanie-garber.jpg
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1221
 status: "read"

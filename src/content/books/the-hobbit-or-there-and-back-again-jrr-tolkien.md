@@ -5,8 +5,8 @@ cover: "the-hobbit-or-there-and-back-again-jrr-tolkien.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780261102217"
+isbn10: "0261102214"
 featured: false
 order: 1257
 status: "read"

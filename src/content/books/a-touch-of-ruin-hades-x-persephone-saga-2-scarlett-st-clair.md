@@ -5,8 +5,6 @@ cover: "a-touch-of-ruin-hades-x-persephone-saga-2-scarlett-st-clair.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1186
 status: "read"

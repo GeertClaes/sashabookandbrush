@@ -5,8 +5,6 @@ cover: "a-forbidden-fate-a-forbidden-fate-series-kaven-hirning.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1175
 status: "read"

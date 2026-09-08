@@ -5,8 +5,6 @@ cover: "house-of-earth-and-blood-crescent-city-1-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1199
 status: "read"

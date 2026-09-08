@@ -5,8 +5,6 @@ cover: "the-hunger-games-the-hunger-games-1-suzanne-collins.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1249
 status: "read"

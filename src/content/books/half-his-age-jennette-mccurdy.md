@@ -5,8 +5,6 @@ cover: "half-his-age-jennette-mccurdy.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1024
 status: "read"

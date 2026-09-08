@@ -5,8 +5,6 @@ cover: "listen-for-the-lie-amy-tintera.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1075
 status: "read"

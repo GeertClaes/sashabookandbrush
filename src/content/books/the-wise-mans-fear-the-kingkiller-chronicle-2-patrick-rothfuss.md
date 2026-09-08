@@ -5,8 +5,6 @@ cover: "the-wise-mans-fear-the-kingkiller-chronicle-2-patrick-rothfuss.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1095
 status: "read"

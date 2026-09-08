@@ -5,8 +5,8 @@ cover: "the-two-towers-the-lord-of-the-rings-2-jrr-tolkien.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780261102368"
+isbn10: "0261102362"
 featured: false
 order: 1118
 status: "read"

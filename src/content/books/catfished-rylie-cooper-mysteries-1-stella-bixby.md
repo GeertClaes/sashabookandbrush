@@ -5,8 +5,8 @@ cover: "catfished-rylie-cooper-mysteries-1-stella-bixby.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9780999602102
+isbn10: 0999602101
 featured: false
 order: 1066
 status: "read"

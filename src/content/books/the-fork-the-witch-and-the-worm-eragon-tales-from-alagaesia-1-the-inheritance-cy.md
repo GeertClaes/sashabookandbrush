@@ -5,8 +5,6 @@ cover: "the-fork-the-witch-and-the-worm-eragon-tales-from-alagaesia-1-the-inheri
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1239
 status: "read"

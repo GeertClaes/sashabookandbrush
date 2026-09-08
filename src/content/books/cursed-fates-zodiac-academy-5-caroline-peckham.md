@@ -5,8 +5,6 @@ cover: "cursed-fates-zodiac-academy-5-caroline-peckham.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1041
 status: "read"

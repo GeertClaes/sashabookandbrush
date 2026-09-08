@@ -5,8 +5,8 @@ cover: "reckless-chestnut-springs-4-elsie-silver.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781728297033
+isbn10: 1728297036
 featured: false
 order: 1091
 status: "read"

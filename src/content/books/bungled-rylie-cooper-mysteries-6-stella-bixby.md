@@ -5,8 +5,6 @@ cover: "bungled-rylie-cooper-mysteries-6-stella-bixby.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1049
 status: "read"

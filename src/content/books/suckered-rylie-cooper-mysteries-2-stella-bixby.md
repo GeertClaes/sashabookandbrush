@@ -5,8 +5,6 @@ cover: "suckered-rylie-cooper-mysteries-2-stella-bixby.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1060
 status: "read"

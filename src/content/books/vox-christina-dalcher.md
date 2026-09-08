@@ -5,8 +5,6 @@ cover: "vox-christina-dalcher.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1068
 status: "read"

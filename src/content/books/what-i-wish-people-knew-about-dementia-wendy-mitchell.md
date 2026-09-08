@@ -5,8 +5,6 @@ cover: "what-i-wish-people-knew-about-dementia-wendy-mitchell.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1210
 status: "read"

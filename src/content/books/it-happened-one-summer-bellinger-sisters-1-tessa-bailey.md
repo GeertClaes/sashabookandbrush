@@ -5,8 +5,6 @@ cover: "it-happened-one-summer-bellinger-sisters-1-tessa-bailey.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1178
 status: "read"

@@ -5,8 +5,8 @@ cover: "tampered-rylie-cooper-mysteries-4-stella-bixby.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9780999602195
+isbn10: 0999602195
 featured: false
 order: 1051
 status: "read"

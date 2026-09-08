@@ -5,8 +5,6 @@ cover: "swift-and-saddled-rebel-blue-ranch-2-lyla-sage.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1113
 status: "read"

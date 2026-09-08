@@ -5,8 +5,6 @@ cover: "only-ever-yours-louise-oneill.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1083
 status: "read"

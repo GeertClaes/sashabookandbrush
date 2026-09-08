@@ -5,8 +5,6 @@ cover: "starling-house-alix-e-harrow.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1074
 status: "read"

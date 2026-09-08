@@ -5,8 +5,6 @@ cover: "invisible-boys-holden-sheppard.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1061
 status: "read"

@@ -5,8 +5,8 @@ cover: "the-dead-romantics-ashley-poston.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9780008779757
+isbn10: 0008779759
 featured: false
 order: 1082
 status: "read"

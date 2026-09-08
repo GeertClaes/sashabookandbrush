@@ -5,8 +5,6 @@ cover: "love-on-the-brain-ali-hazelwood.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1181
 status: "read"

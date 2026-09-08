@@ -5,8 +5,6 @@ cover: "never-let-me-go-kazuo-ishiguro.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1022
 status: "read"

@@ -5,8 +5,6 @@ cover: "two-can-play-ali-hazelwood.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1039
 status: "read"

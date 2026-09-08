@@ -5,8 +5,6 @@ cover: "sleeping-with-a-psychopath-carolyn-woods.jpg"
 note: "The story itself was kinda interesting in some part, however it went on for way longer than it needed too, and I did not like the narrator for the audiobook. 2.5 at a push 🤷🏼‍♀️"
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1099
 status: "read"

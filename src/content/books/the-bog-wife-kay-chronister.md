@@ -5,8 +5,6 @@ cover: "the-bog-wife-kay-chronister.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1080
 status: "read"

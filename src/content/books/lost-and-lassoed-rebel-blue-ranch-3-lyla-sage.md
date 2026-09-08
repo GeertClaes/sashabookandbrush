@@ -5,8 +5,6 @@ cover: "lost-and-lassoed-rebel-blue-ranch-3-lyla-sage.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1078
 status: "read"

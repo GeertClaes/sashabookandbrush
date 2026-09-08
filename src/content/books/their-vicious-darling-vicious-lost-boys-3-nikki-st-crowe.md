@@ -5,8 +5,8 @@ cover: "their-vicious-darling-vicious-lost-boys-3-nikki-st-crowe.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781959344001
+isbn10: 1959344005
 featured: false
 order: 1137
 status: "read"

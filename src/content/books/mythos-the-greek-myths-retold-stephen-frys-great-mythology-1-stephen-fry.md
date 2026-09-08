@@ -5,8 +5,6 @@ cover: "mythos-the-greek-myths-retold-stephen-frys-great-mythology-1-stephen-fry
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1237
 status: "read"

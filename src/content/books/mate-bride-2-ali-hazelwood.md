@@ -5,8 +5,6 @@ cover: "mate-bride-2-ali-hazelwood.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1033
 status: "read"

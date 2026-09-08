@@ -5,8 +5,6 @@ cover: "macbeth-a-shakespeare-story-andrew-matthews.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1236
 status: "read"

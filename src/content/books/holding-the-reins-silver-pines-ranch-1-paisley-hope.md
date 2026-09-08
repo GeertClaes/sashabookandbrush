@@ -5,8 +5,6 @@ cover: "holding-the-reins-silver-pines-ranch-1-paisley-hope.jpg"
 note: ""
 rating: 1
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1054
 status: "read"

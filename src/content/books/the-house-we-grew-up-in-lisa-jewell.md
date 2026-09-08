@@ -5,8 +5,6 @@ cover: "the-house-we-grew-up-in-lisa-jewell.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1025
 status: "read"

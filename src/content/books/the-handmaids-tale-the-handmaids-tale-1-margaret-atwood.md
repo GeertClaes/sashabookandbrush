@@ -5,8 +5,6 @@ cover: "the-handmaids-tale-the-handmaids-tale-1-margaret-atwood.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1251
 status: "read"

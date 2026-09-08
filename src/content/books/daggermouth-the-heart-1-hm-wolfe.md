@@ -5,8 +5,6 @@ cover: "daggermouth-the-heart-1-hm-wolfe.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1015
 status: "read"

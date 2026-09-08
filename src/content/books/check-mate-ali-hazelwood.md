@@ -5,8 +5,6 @@ cover: "check-mate-ali-hazelwood.jpg"
 note: "I loved every second of this!"
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1124
 status: "read"

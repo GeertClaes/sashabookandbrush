@@ -5,8 +5,6 @@ cover: "the-housemaid-the-housemaid-1-freida-mcfadden.jpg"
 note: "Read it in less than a day - AMAZING! Couldn’t put it down."
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1163
 status: "read"

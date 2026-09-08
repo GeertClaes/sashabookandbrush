@@ -5,8 +5,6 @@ cover: "first-time-caller-heartstrings-1-bk-borison.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1067
 status: "read"

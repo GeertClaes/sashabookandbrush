@@ -5,8 +5,6 @@ cover: "ruthless-fae-zodiac-academy-2-caroline-peckham.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1045
 status: "read"

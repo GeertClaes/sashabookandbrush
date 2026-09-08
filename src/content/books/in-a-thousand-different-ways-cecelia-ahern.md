@@ -5,8 +5,6 @@ cover: "in-a-thousand-different-ways-cecelia-ahern.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1087
 status: "read"

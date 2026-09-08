@@ -5,8 +5,6 @@ cover: "not-in-love-not-in-love-1-ali-hazelwood.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1094
 status: "read"

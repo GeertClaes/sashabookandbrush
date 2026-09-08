@@ -5,8 +5,6 @@ cover: "paint-it-all-red-mindfck-5-st-abby.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1191
 status: "read"

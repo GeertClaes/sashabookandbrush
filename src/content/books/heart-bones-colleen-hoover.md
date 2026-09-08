@@ -5,8 +5,8 @@ cover: "heart-bones-colleen-hoover.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781668021927
+isbn10: 1668021927
 featured: false
 order: 1198
 status: "read"

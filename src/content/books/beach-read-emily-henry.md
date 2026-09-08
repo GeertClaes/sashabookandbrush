@@ -5,8 +5,6 @@ cover: "beach-read-emily-henry.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1182
 status: "read"

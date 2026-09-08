@@ -5,8 +5,6 @@ cover: "tower-of-dawn-throne-of-glass-6-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1167
 status: "read"

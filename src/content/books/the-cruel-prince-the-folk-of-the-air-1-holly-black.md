@@ -5,8 +5,6 @@ cover: "the-cruel-prince-the-folk-of-the-air-1-holly-black.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1211
 status: "read"

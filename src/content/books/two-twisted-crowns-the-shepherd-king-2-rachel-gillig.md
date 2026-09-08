@@ -5,8 +5,6 @@ cover: "two-twisted-crowns-the-shepherd-king-2-rachel-gillig.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1055
 status: "read"

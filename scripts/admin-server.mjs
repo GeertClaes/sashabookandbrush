@@ -84,10 +84,18 @@ function upsertField(text, key, line) {
   return text.replace(/\n---\s*$/, `\n${line}\n---`);
 }
 
+function removeField(text, key) {
+  return text.replace(new RegExp(`^${key}:.*\\r?\\n`, "m"), "");
+}
+
 function applyYamlFields(text, updates) {
   let next = text;
   for (const [key, value] of Object.entries(updates)) {
     if (value === undefined) continue;
+    if (value === "" || value === null) {
+      next = removeField(next, key);
+      continue;
+    }
     if (typeof value === "boolean" || typeof value === "number") {
       next = upsertField(next, key, `${key}: ${value}`);
     } else {
@@ -98,8 +106,7 @@ function applyYamlFields(text, updates) {
 }
 
 function affiliateValue(value) {
-  const trimmed = String(value || "").trim();
-  return trimmed || "#";
+  return String(value || "").trim();
 }
 
 function slugFromTitle(title) {

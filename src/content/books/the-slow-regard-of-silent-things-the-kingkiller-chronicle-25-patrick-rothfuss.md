@@ -5,8 +5,6 @@ cover: "the-slow-regard-of-silent-things-the-kingkiller-chronicle-25-patrick-rot
 note: ""
 rating: 1
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1072
 status: "read"

@@ -5,8 +5,6 @@ cover: "butcher-blackbird-the-ruinous-love-trilogy-1-brynne-weaver.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1116
 status: "read"

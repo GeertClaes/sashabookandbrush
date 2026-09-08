@@ -5,8 +5,6 @@ cover: "the-asylum-confessions-the-asylum-confession-files-1-jack-steen.jpg"
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1098
 status: "read"

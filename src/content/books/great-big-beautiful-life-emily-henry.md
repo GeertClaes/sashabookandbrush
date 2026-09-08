@@ -5,8 +5,8 @@ cover: "great-big-beautiful-life-emily-henry.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9780241739860
+isbn10: 0241739861
 featured: false
 order: 1047
 status: "read"

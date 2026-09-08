@@ -5,8 +5,6 @@ cover: "harry-potter-and-the-cursed-child-parts-one-and-two-harry-potter-8-jk-ro
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1227
 status: "read"

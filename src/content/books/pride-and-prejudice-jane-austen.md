@@ -5,8 +5,6 @@ cover: "pride-and-prejudice-jane-austen.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1222
 status: "read"

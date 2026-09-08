@@ -5,8 +5,6 @@ cover: "the-sirens-emilia-hart.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1019
 status: "read"

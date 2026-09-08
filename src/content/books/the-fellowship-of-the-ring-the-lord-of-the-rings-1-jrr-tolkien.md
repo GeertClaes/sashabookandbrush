@@ -5,8 +5,8 @@ cover: "the-fellowship-of-the-ring-the-lord-of-the-rings-1-jrr-tolkien.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780261102351"
+isbn10: "0261102354"
 featured: false
 order: 1119
 status: "read"

@@ -5,8 +5,6 @@ cover: "gone-girl-gillian-flynn.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1253
 status: "read"

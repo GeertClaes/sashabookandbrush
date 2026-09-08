@@ -5,8 +5,6 @@ cover: "dont-let-the-forest-in-dont-let-the-forest-in-1-cg-drews.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1023
 status: "read"

@@ -5,8 +5,6 @@ cover: "the-pisces-melissa-broder.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1140
 status: "read"

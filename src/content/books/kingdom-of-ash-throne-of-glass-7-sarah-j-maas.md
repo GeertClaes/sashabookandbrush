@@ -5,8 +5,6 @@ cover: "kingdom-of-ash-throne-of-glass-7-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1164
 status: "read"

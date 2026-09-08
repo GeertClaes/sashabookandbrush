@@ -5,8 +5,6 @@ cover: "the-sky-weaver-iskari-3-kristen-ciccarelli.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1261
 status: "read"

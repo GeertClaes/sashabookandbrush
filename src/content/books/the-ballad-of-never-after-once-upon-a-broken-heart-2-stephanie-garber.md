@@ -5,8 +5,6 @@ cover: "the-ballad-of-never-after-once-upon-a-broken-heart-2-stephanie-garber.jp
 note: ""
 rating: 3
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1177
 status: "read"

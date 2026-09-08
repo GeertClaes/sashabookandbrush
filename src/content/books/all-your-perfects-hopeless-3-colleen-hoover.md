@@ -5,8 +5,6 @@ cover: "all-your-perfects-hopeless-3-colleen-hoover.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1196
 status: "read"

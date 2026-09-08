@@ -5,8 +5,8 @@ cover: "the-shock-of-the-fall-nathan-filer.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780007491452"
+isbn10: "0007491453"
 featured: false
 order: 1229
 status: "read"

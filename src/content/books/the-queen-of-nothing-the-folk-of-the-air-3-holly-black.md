@@ -5,8 +5,6 @@ cover: "the-queen-of-nothing-the-folk-of-the-air-3-holly-black.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1208
 status: "read"

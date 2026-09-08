@@ -5,8 +5,6 @@ cover: "the-last-namsara-iskari-1-kristen-ciccarelli.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1262
 status: "read"

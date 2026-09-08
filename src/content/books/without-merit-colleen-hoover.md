@@ -5,8 +5,8 @@ cover: "without-merit-colleen-hoover.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: 9781501170621
+isbn10: 1501170627
 featured: false
 order: 1203
 status: "read"

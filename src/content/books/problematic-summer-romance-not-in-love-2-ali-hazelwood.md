@@ -5,8 +5,6 @@ cover: "problematic-summer-romance-not-in-love-2-ali-hazelwood.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1056
 status: "read"

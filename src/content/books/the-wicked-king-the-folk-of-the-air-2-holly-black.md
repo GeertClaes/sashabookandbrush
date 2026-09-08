@@ -5,8 +5,6 @@ cover: "the-wicked-king-the-folk-of-the-air-2-holly-black.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1209
 status: "read"

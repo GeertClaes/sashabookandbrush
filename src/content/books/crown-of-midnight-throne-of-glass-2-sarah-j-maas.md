@@ -5,8 +5,6 @@ cover: "crown-of-midnight-throne-of-glass-2-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Currently reading"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 3
 status: "currently-reading"

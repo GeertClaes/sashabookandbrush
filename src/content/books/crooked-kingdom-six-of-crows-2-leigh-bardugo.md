@@ -5,8 +5,8 @@ cover: "crooked-kingdom-six-of-crows-2-leigh-bardugo.jpg"
 note: "Well, the first one was really good… but this? MASTERPIECE.\nI’m emotionally wrecked."
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9781250076974"
+isbn10: "1250076970"
 featured: false
 order: 1216
 status: "read"

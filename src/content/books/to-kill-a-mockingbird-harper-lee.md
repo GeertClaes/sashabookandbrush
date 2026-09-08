@@ -5,8 +5,6 @@ cover: "to-kill-a-mockingbird-harper-lee.jpg"
 note: ""
 rating: 2
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1255
 status: "read"

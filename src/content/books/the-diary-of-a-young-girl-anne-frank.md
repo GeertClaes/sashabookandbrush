@@ -5,8 +5,8 @@ cover: "the-diary-of-a-young-girl-anne-frank.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
+isbn: "9780141315188"
+isbn10: "0141315180"
 featured: false
 order: 1246
 status: "read"

@@ -5,7 +5,7 @@ const MAX_NOTE = 8000;
 
 function affiliateValue(value) {
   const trimmed = String(value || "").trim();
-  return trimmed || "#";
+  return trimmed;
 }
 
 export async function onRequestPost(context) {

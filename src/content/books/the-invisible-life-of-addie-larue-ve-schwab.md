@@ -5,8 +5,6 @@ cover: "the-invisible-life-of-addie-larue-ve-schwab.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1183
 status: "read"

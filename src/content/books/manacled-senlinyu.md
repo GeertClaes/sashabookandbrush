@@ -5,8 +5,6 @@ cover: "manacled-senlinyu.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1144
 status: "read"

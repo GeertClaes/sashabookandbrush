@@ -5,8 +5,6 @@ cover: "the-bell-jar-sylvia-plath.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1225
 status: "read"

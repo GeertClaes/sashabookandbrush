@@ -5,8 +5,6 @@ cover: "heir-of-fire-throne-of-glass-3-sarah-j-maas.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1169
 status: "read"

@@ -5,8 +5,6 @@ cover: "in-my-dreams-i-hold-a-knife-ashley-winstead.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1127
 status: "read"

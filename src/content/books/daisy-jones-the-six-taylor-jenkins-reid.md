@@ -5,8 +5,6 @@ cover: "daisy-jones-the-six-taylor-jenkins-reid.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1077
 status: "read"

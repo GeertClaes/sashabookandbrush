@@ -5,8 +5,6 @@ cover: "sidetracked-mindfck-2-st-abby.jpg"
 note: ""
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1194
 status: "read"

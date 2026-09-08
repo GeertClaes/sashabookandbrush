@@ -5,8 +5,6 @@ cover: "wisteria-belladonna-3-adalyn-grace.jpg"
 note: ""
 rating: 4
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1071
 status: "read"

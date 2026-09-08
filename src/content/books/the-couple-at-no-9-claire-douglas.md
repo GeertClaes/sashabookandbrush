@@ -5,8 +5,6 @@ cover: "the-couple-at-no-9-claire-douglas.jpg"
 note: "Wow. I starts slow but jeez the second half is a wild ride! Great ending definitely worth reading!"
 rating: 5
 genre: "Read"
-bookshop: "#"
-amazon: "#"
 featured: false
 order: 1149
 status: "read"
