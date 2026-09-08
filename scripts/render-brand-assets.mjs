@@ -9,7 +9,7 @@ const publicDir = path.join(root, "public");
 async function png(svgPath, outPath, width, height = width) {
   const svg = await readFile(svgPath);
   await sharp(svg, { density: 384 })
-    .resize(width, height, { fit: "contain", background: "#8C3340" })
+    .resize(width, height, { fit: "contain", background: "#F5EAD5" })
     .png()
     .toFile(outPath);
   console.log(`wrote ${path.relative(root, outPath)} (${width}×${height})`);

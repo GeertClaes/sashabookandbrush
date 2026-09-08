@@ -23,3 +23,17 @@ export function reviewExcerpt(note: string, length = 160) {
   if (compact.length <= length) return compact;
   return `${compact.slice(0, length).trim()}…`;
 }
+
+export function pageLength(pages: number) {
+  if (pages < 200) return { label: "A slim one", bars: 1 };
+  if (pages < 280) return { label: "A one-sitting read", bars: 2 };
+  if (pages < 360) return { label: "A solid sit", bars: 3 };
+  if (pages < 480) return { label: "A long soak", bars: 4 };
+  return { label: "A doorstop", bars: 5 };
+}
+
+export function rereadLabel(count: number) {
+  if (count === 2) return "Read twice";
+  if (count === 3) return "A third time through";
+  return `Read ${count} times`;
+}

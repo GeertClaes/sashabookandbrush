@@ -5,7 +5,7 @@ import StarRating from "../../components/StarRating.astro";
 import live from "../../data/goodreads-live.json";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { affiliateLinks } from "../../lib/affiliates";
-import { bookHref, formatFullDate } from "../../lib/books";
+import { bookHref, formatFullDate, pageLength, rereadLabel } from "../../lib/books";
 import { liveProgress } from "../../lib/live";
 import { getCollection } from "astro:content";
 
@@ -26,19 +26,23 @@ const description = data.note
   ? data.note.replace(/\s+/g, " ").trim().slice(0, 160)
   : `${data.title} by ${data.author}`;
 
-const facts = [
-  reading ? { label: "Shelf", value: "Currently reading" } : data.dateRead && { label: "Read", value: formatFullDate(data.dateRead) },
+const published = data.originalYear || data.yearPublished;
+const byline = [published, data.publisher].filter(Boolean).join(" · ");
+const dates = [
   data.dateAdded && { label: "Added", value: formatFullDate(data.dateAdded) },
-  data.pages && { label: "Pages", value: String(data.pages) },
-  (data.yearPublished || data.originalYear) && {
-    label: "Published",
-    value: String(data.originalYear || data.yearPublished),
+  !reading && data.dateRead && {
+    label: data.readCount && data.readCount > 1 ? "Last read" : "Read",
+    value: formatFullDate(data.dateRead),
   },
-  data.publisher && { label: "Publisher", value: data.publisher },
-  data.isbn && { label: "ISBN", value: data.isbn },
-  data.isbn10 && data.isbn10 !== data.isbn && { label: "ISBN-10", value: data.isbn10 },
-  data.readCount && data.readCount > 1 && { label: "Times read", value: String(data.readCount) },
 ].filter(Boolean) as { label: string; value: string }[];
+const length = data.pages ? pageLength(data.pages) : null;
+const rereads = data.readCount && data.readCount > 1 ? data.readCount : 0;
+const isbnLine = [
+  data.isbn && `ISBN ${data.isbn}`,
+  data.isbn10 && data.isbn10 !== data.isbn && `ISBN-10 ${data.isbn10}`,
+]
+  .filter(Boolean)
+  .join("  ·  ");
 
 const moreByAuthor = (await getCollection("books"))
   .filter((entry) => entry.id !== book.id && entry.data.author === data.author)
@@ -51,71 +55,132 @@ const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : nu
 <BaseLayout title={data.title} description={description}>
   <article class="min-h-screen bg-background">
     <div class="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-16">
-      <p class="mb-8">
+      <p class="mb-6 md:mb-8">
         <a href="/recommendations" class="text-sm font-medium text-primary underline-offset-4 hover:underline">
           ← All recommendations
         </a>
       </p>
 
-      <div class="grid items-start gap-10 md:grid-cols-[14rem_minmax(0,1fr)]">
+      <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-x-4 gap-y-6 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-x-10 md:gap-y-8">
         <CoverImage
           cover={data.cover}
           alt={`${data.title} by ${data.author}`}
-          class="mx-auto w-56 rounded-lg object-cover shadow-lg md:mx-0 md:w-full"
+          class="aspect-2/3 w-full rounded-lg object-cover shadow-lg md:row-span-2"
           width={320}
           height={480}
-          sizes="(min-width: 768px) 224px, 224px"
+          sizes="(min-width: 768px) 224px, 104px"
         />
 
         <div class="min-w-0">
           {
             label && (
-              <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{label}</p>
+              <p class="mb-2 text-xs font-medium tracking-widest text-accent uppercase md:mb-3">{label}</p>
             )
           }
-          <h1 class="font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
+          <h1 class="font-display text-2xl font-semibold leading-tight text-foreground sm:text-3xl md:text-5xl">
             {data.title}
           </h1>
-          <p class="mt-3 text-lg text-muted-foreground">{data.author}</p>
+          <p class="mt-1.5 text-sm text-muted-foreground md:mt-3 md:text-lg">{data.author}</p>
+          {
+            byline && (
+              <p class="mt-1 text-xs text-muted-foreground md:mt-1.5 md:text-sm">{byline}</p>
+            )
+          }
           {
             data.rating > 0 && (
-              <div class="mt-4">
+              <div class="mt-3 md:mt-4">
                 <StarRating rating={data.rating} />
               </div>
             )
           }
-          {reading && <p class="mt-3 text-sm text-accent">On the currently-reading shelf</p>}
           {
             typeof progress === "number" && (
-              <div class="mt-4 max-w-xs">
-                <div class="h-2 overflow-hidden rounded-full bg-muted">
+              <div class="mt-3 md:mt-4 md:max-w-xs">
+                <div class="h-1.5 overflow-hidden rounded-full bg-muted md:h-2">
                   <div class="h-full rounded-full bg-secondary" style={`width: ${progress}%`}></div>
                 </div>
                 <p class="mt-1 text-xs text-muted-foreground">{progress}% on Goodreads</p>
               </div>
             )
           }
+        </div>
 
+        <div class="col-span-2 min-w-0 md:col-span-1 md:col-start-2">
           {
-            facts.length > 0 && (
-              <dl class="mt-8 grid gap-3 text-sm sm:grid-cols-2">
-                {facts.map((fact) => (
+            dates.length > 0 && (
+              <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                {dates.map((item) => (
                   <div>
-                    <dt class="text-xs tracking-widest text-muted-foreground uppercase">{fact.label}</dt>
-                    <dd class="mt-0.5 text-foreground">{fact.value}</dd>
+                    <dt class="text-xs tracking-widest text-muted-foreground uppercase">{item.label}</dt>
+                    <dd class="mt-0.5 text-foreground">{item.value}</dd>
                   </div>
                 ))}
               </dl>
             )
           }
 
-          <div class="mt-8">
-            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} />
-          </div>
+          {
+            (length || rereads > 0) && (
+              <div class="mt-5 flex flex-wrap gap-3">
+                {length && (
+                  <div class="flex min-w-0 flex-1 items-center gap-3 rounded-lg border border-border bg-card px-3 py-3">
+                    <div class="flex h-9 items-end gap-0.5" aria-hidden="true">
+                      {[1, 2, 3, 4, 5].map((bar) => (
+                        <span
+                          class:list={[
+                            "w-1.5 rounded-sm",
+                            bar === 1 && "h-3",
+                            bar === 2 && "h-4",
+                            bar === 3 && "h-5",
+                            bar === 4 && "h-6",
+                            bar === 5 && "h-7",
+                            bar <= length.bars ? "bg-secondary" : "bg-border",
+                          ]}
+                        />
+                      ))}
+                    </div>
+                    <div class="min-w-0">
+                      <p class="font-display text-sm font-semibold leading-tight text-foreground">{length.label}</p>
+                      <p class="mt-0.5 text-xs text-muted-foreground">{data.pages} pages</p>
+                    </div>
+                  </div>
+                )}
+                {rereads > 0 && (
+                  <div class="flex min-w-0 flex-1 items-center gap-3 rounded-lg border border-border bg-card px-3 py-3">
+                    <div class="flex items-center" aria-hidden="true">
+                      {Array.from({ length: Math.min(rereads, 4) }, (_, index) => (
+                        <svg
+                          class:list={["h-6 w-5 text-accent", index > 0 && "-ml-1.5"]}
+                          fill="currentColor"
+                          viewBox="0 0 20 24"
+                        >
+                          <path d="M4 2.5h10.5A1.5 1.5 0 0116 4v16.5a1 1 0 01-1.4.9L10 19.2l-4.6 2.2A1 1 0 014 20.5V2.5z" opacity="0.2"></path>
+                          <path d="M3.5 3h11A1.5 1.5 0 0116 4.5v16a1 1 0 01-1.45.9L10 19l-4.55 2.4A1 1 0 014 20.5v-16A1.5 1.5 0 013.5 3zm1.5.9v15.4l4.55-2.4a1 1 0 01.9 0L15 19.3V3.9H5z"></path>
+                        </svg>
+                      ))}
+                    </div>
+                    <div class="min-w-0">
+                      <p class="font-display text-sm font-semibold leading-tight text-foreground">
+                        {rereadLabel(rereads)}
+                      </p>
+                      <p class="mt-0.5 text-xs text-muted-foreground">Back on the nightstand</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          }
 
           {
-            data.goodreadsId && (
-              <p class="mt-4">
+            isbnLine && (
+              <p class="mt-4 text-xs tracking-wide text-muted-foreground">{isbnLine}</p>
+            )
+          }
+
+          <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} />
+            {
+              data.goodreadsId && (
                 <a
                   href={`https://www.goodreads.com/book/show/${data.goodreadsId}`}
                   class="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
@@ -124,9 +189,9 @@ const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : nu
                 >
                   View on Goodreads
                 </a>
-              </p>
-            )
-          }
+              )
+            }
+          </div>
         </div>
       </div>
 
