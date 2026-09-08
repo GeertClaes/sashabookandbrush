@@ -65,21 +65,33 @@ const selectClass =
       </div>
 
       <div
-        class="mb-10 flex rounded-full border border-border bg-card p-1"
+        class="mb-10 flex flex-wrap gap-x-8 gap-y-2 border-b border-border"
         role="tablist"
         aria-label="Library views"
       >
         <button
           type="button"
           role="tab"
+          id="tab-stars"
+          aria-controls="panel-stars"
+          aria-selected="true"
+          data-view="stars"
+          class="relative -mb-px border-b-2 border-primary pb-3 font-display text-lg text-foreground"
+        >
+          Five stars
+          <span class="ml-2 font-sans text-xs font-normal text-muted-foreground">{fiveStars.length}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
           id="tab-library"
           aria-controls="panel-library"
-          aria-selected="true"
+          aria-selected="false"
           data-view="library"
-          class="flex flex-1 flex-col items-center rounded-full px-3 py-2 text-sm font-medium bg-primary text-primary-foreground"
+          class="relative -mb-px border-b-2 border-transparent pb-3 font-display text-lg text-muted-foreground hover:text-foreground"
         >
           Library
-          <span class="mt-0.5 hidden text-xs opacity-80 sm:block">{total} books</span>
+          <span class="ml-2 font-sans text-xs font-normal text-muted-foreground">{total}</span>
         </button>
         <button
           type="button"
@@ -88,22 +100,10 @@ const selectClass =
           aria-controls="panel-series"
           aria-selected="false"
           data-view="series"
-          class="flex flex-1 flex-col items-center rounded-full px-3 py-2 text-sm font-medium text-muted-foreground"
+          class="relative -mb-px border-b-2 border-transparent pb-3 font-display text-lg text-muted-foreground hover:text-foreground"
         >
           Series
-          <span class="mt-0.5 hidden text-xs opacity-80 sm:block">{seriesGroups.length} stacks</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          id="tab-stars"
-          aria-controls="panel-stars"
-          aria-selected="false"
-          data-view="stars"
-          class="flex flex-1 flex-col items-center rounded-full px-3 py-2 text-sm font-medium text-muted-foreground"
-        >
-          Five stars
-          <span class="mt-0.5 hidden text-xs opacity-80 sm:block">{fiveStars.length} loves</span>
+          <span class="ml-2 font-sans text-xs font-normal text-muted-foreground">{seriesGroups.length}</span>
         </button>
       </div>
 
@@ -130,7 +130,7 @@ const selectClass =
         }
       </div>
 
-      <div id="panel-stars" role="tabpanel" aria-labelledby="tab-stars" data-view-panel="stars" hidden>
+      <div id="panel-stars" role="tabpanel" aria-labelledby="tab-stars" data-view-panel="stars">
         {
           fiveStars.length > 0 ? (
             <div>
@@ -145,7 +145,7 @@ const selectClass =
         }
       </div>
 
-      <div id="panel-library" role="tabpanel" aria-labelledby="tab-library" data-view-panel="library">
+      <div id="panel-library" role="tabpanel" aria-labelledby="tab-library" data-view-panel="library" hidden>
       <div
         class="sticky top-16 z-30 mb-8 border-b border-border bg-background/95 py-3 backdrop-blur-sm"
         data-library-controls
@@ -277,25 +277,26 @@ const selectClass =
   const views = new Set(["library", "series", "stars"]);
 
   function setView(view: string) {
-    const next = views.has(view) ? view : "library";
+    const next = views.has(view) ? view : "stars";
     tabs.forEach((tab) => {
       const on = tab.dataset.view === next;
       tab.setAttribute("aria-selected", on ? "true" : "false");
-      tab.classList.toggle("bg-primary", on);
-      tab.classList.toggle("text-primary-foreground", on);
+      tab.classList.toggle("border-primary", on);
+      tab.classList.toggle("text-foreground", on);
+      tab.classList.toggle("border-transparent", !on);
       tab.classList.toggle("text-muted-foreground", !on);
     });
     panels.forEach((panel) => {
       panel.hidden = panel.dataset.viewPanel !== next;
     });
     const url = new URL(window.location.href);
-    if (next === "library") url.searchParams.delete("view");
+    if (next === "stars") url.searchParams.delete("view");
     else url.searchParams.set("view", next);
     history.replaceState(null, "", url);
   }
 
   tabs.forEach((tab) => {
-    tab.addEventListener("click", () => setView(tab.dataset.view || "library"));
+    tab.addEventListener("click", () => setView(tab.dataset.view || "stars"));
   });
 
   function compareDate(a: string, b: string, oldest = false) {
@@ -384,5 +385,5 @@ const selectClass =
     year.value = yearParam;
     apply();
   }
-  setView(yearParam ? "library" : viewParam || "library");
+  setView(yearParam ? "library" : viewParam || "stars");
 </script>
