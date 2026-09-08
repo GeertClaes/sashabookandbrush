@@ -61,7 +61,7 @@ This is support work, not a takeover. Sasha remains the voice of the brand. Pare
 | # | Task | Owner | Status |
 | --- | --- | --- | --- |
 | A1 | Build a clean personal website | Parent | **Done in repo** (Astro). Live host is **Cloudflare Pages**, not the home server. Docker remains as an optional fallback. |
-| A2 | Domain `sashabookandbrush.com` | Parent | **Chosen.** Still needs DNS + Pages custom domain if not already pointing. |
+| A2 | Domain `sashabookandbrush.com` | Parent | **Done.** Cloudflare registrar + Pages custom domain. |
 | A3 | Bookshop.org UK + Amazon Associates | Parent | **Not started** (`affiliates` IDs in `src/data/site.json` are empty) |
 | A4 | One-page media kit (PDF) | Parent | **Not started.** Work-with-me page exists on the site. |
 | A5 | Website + affiliate links in Instagram bio | Parent + Sasha | **Not started** |
@@ -191,20 +191,20 @@ Revenue targets in section 2 are **outcomes**, not a requirement to call the bui
 
 ## 10. Remaining to-do (parent)
 
-Code in the working copy is **not committed or pushed** yet. Cloudflare Access, the rebuild Worker, and affiliate accounts are **dashboard / account work** — they cannot be finished from the repo alone.
+Code is on GitHub and the custom domain is live. Remaining: rebuild Worker, `/admin` Access, affiliate accounts.
 
 How the site is meant to work: **Goodreads is the diary. The site is the shop window.** She rates and logs progress on Goodreads. The site does not write back. Full TBR stays off the public Books page.
 
 ### A. Get the code onto GitHub
 
-- [ ] Review local changes (library import, RSS sync, `/admin`, Pages Functions, rebuild Worker)
-- [ ] Commit and push to `main` (ask in chat if you want this done for you)
-- [ ] Confirm Cloudflare Pages is building from this repo (`npm run build`, output `dist`)
+- [x] Review local changes (library import, RSS sync, `/admin`, Pages Functions, rebuild Worker)
+- [x] Commit and push to `main`
+- [ ] Confirm Cloudflare Pages is building from this repo (`npm run build`, output `dist`) — site is serving at the domain
 
 ### B. Domain and Pages
 
-- [ ] Point `sashabookandbrush.com` DNS at the Pages project (if not already)
-- [ ] Confirm HTTPS and a successful production deploy
+- [x] Point `sashabookandbrush.com` DNS at the Pages project
+- [x] Confirm HTTPS and a successful production deploy
 - [ ] **Pages → Settings → Builds → Deploy hooks** → hook for `main`. Copy the URL; do not put it in the repo
 
 ### C. 6-hour Goodreads RSS sync (Cloudflare, not GitHub)

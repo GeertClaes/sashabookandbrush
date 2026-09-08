@@ -29,6 +29,7 @@ const upNext = (live.upNext || []).slice(0, 8).map((item) => {
     author: item.author,
     href: local ? bookHref(local.id) : `https://www.goodreads.com/book/show/${item.goodreadsId}`,
     cover: local?.data.cover || "",
+    remoteCover: item.image || "",
     local: Boolean(local),
   };
 });
@@ -165,6 +166,17 @@ const featuredSupplies = (await getCollection("supplies"))
                       class="mb-2 aspect-2/3 w-full rounded object-cover shadow-md"
                       width={120}
                       height={180}
+                    />
+                  ) : book.remoteCover ? (
+                    <img
+                      src={book.remoteCover}
+                      alt=""
+                      class="mb-2 aspect-2/3 w-full rounded object-cover shadow-md"
+                      width="120"
+                      height="180"
+                      loading="lazy"
+                      decoding="async"
+                      referrerpolicy="no-referrer"
                     />
                   ) : (
                     <div class="mb-2 aspect-2/3 rounded bg-hero-overlay/40" aria-hidden="true"></div>

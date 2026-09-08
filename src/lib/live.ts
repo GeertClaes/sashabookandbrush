@@ -2,6 +2,7 @@ type LiveBook = {
   title: string;
   author: string;
   goodreadsId?: string;
+  image?: string;
   progress?: number | null;
 };
 
