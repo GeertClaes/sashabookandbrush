@@ -28,9 +28,10 @@ export function affiliateLinks(book: AffiliateInput) {
   const bookshop =
     overrideBookshop ||
     (shopId && isbn13 ? `https://uk.bookshop.org/a/${shopId}/${isbn13}` : "");
+  const asin = isbn10 || isbn13;
   const amazon =
     overrideAmazon ||
-    (tag && (isbn10 || isbn13) ? `https://www.amazon.com/dp/${isbn10 || isbn13}?tag=${encodeURIComponent(tag)}` : "");
+    (tag && asin ? `https://www.amazon.co.uk/dp/${asin}/ref=nosim?tag=${encodeURIComponent(tag)}` : "");
 
   return { bookshop, amazon };
 }

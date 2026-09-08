@@ -39,7 +39,7 @@ rating: 5
 genre: "Romantasy"
 status: "read"
 bookshop: "https://bookshop.org/a/YOUR-ID/9781649374042"
-amazon: "https://www.amazon.com/dp/1649374046?tag=YOUR-TAG"
+amazon: "https://www.amazon.co.uk/dp/1649374046?tag=YOUR-TAG-21"
 featured: true
 order: 1
 isbn: "9781649374042"
@@ -154,7 +154,7 @@ title: "Liquitex Basics acrylics"
 brand: "Liquitex"
 category: "Paint"
 note: "Why this one earns a spot on the desk."
-amazon: "https://www.amazon.com/dp/EXAMPLE?tag=YOUR-TAG"
+amazon: "https://www.amazon.co.uk/dp/EXAMPLE?tag=YOUR-TAG-21"
 shop: "https://www.jacksonsart.com/..."
 shopLabel: "Jackson's"
 featured: true
@@ -174,9 +174,9 @@ The sun/moon button in the header toggles light and dark. The choice is saved in
 Buy buttons are built from ISBN plus IDs in `src/data/site.json`:
 
 - `affiliates.bookshopUkId` — Bookshop.org UK (primary)
-- `affiliates.amazonTag` — Amazon Associates tag (OneLink is configured on Amazon’s side)
+- `affiliates.amazonTag` — Amazon.co.uk Associates tracking ID (usually ends in `-21`)
 
-Leave those blank until the accounts exist; buttons hide when there is no ISBN and no override. Per-book `bookshop` / `amazon` URLs still win if they are real `https://` links (special editions). Buttons show on book pages and featured home cards, not on the full list.
+Leave those blank until the accounts exist; buttons hide when there is no ISBN and no override. Amazon links go to `amazon.co.uk`. Per-book `bookshop` / `amazon` URLs still win if they are real `https://` links (special editions). Buttons show on book pages and featured home cards, not on the full list.
 
 The footer already includes an affiliate disclosure.
 

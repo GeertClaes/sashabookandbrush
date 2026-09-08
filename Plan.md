@@ -62,7 +62,7 @@ This is support work, not a takeover. Sasha remains the voice of the brand. Pare
 | --- | --- | --- | --- |
 | A1 | Build a clean personal website | Parent | **Done in repo** (Astro). Live host is **Cloudflare Pages**, not the home server. Docker remains as an optional fallback. |
 | A2 | Domain `sashabookandbrush.com` | Parent | **Done.** Cloudflare registrar + Pages custom domain. |
-| A3 | Bookshop.org UK + Amazon Associates | Parent | **Not started** (`affiliates` IDs in `src/data/site.json` are empty) |
+| A3 | Bookshop.org UK + Amazon Associates | Parent | **Done in `site.json`:** Amazon `sashabookandb-21`, Bookshop UK `18142`. Confirm buttons on a live book page after deploy. |
 | A4 | One-page media kit (PDF) | Parent | **Not started.** `/work` exists and points to Instagram (no on-page packages). |
 | A5 | Website + affiliate links in Instagram bio | Parent + Sasha | **Not started** |
 
@@ -171,7 +171,7 @@ Dates are flexible. The point is sequence, not a hard calendar.
 - [ ] Bio link: direct site vs Linktree
 - [ ] Gumroad vs Etsy for first digital products
 - [ ] Exact collab package names and rates (Sasha decides)
-- [ ] Affiliate IDs once Bookshop UK + Amazon Associates exist
+- [x] Affiliate IDs in `site.json` (Amazon `sashabookandb-21`, Bookshop UK `18142`)
 
 ---
 
@@ -245,8 +245,8 @@ Bookmark for Sasha later: `https://sashabookandbrush.com/admin` (not in the publ
 
 ### E. Affiliates and go-live (still needed for revenue)
 
-- [ ] Bookshop.org UK affiliate ID → `affiliates.bookshopUkId` in `src/data/site.json`
-- [ ] Amazon Associates tag + OneLink → `affiliates.amazonTag`
+- [x] Bookshop.org UK affiliate ID → `affiliates.bookshopUkId` (`18142`)
+- [x] Amazon.co.uk tracking ID (ends in `-21`) → `affiliates.amazonTag` (`sashabookandb-21`)
 - [ ] Commit those IDs; confirm buy buttons on a book page and a featured home card
 - [ ] Media kit PDF (A4)
 - [ ] Instagram bio: site URL (and shop/affiliate once IDs exist)

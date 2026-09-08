@@ -11,7 +11,7 @@ Primary goals:
 - Simple “Work with me” presence (Instagram)
 - Future-proof for digital products and email list
 
-**Operating principle:** Goodreads is the diary. The site is the shop window. She rates, logs progress, and reviews on Goodreads. The site does not write back. Affiliates are Amazon OneLink + Bookshop.org UK. The full TBR stays off the public Books page.
+**Operating principle:** Goodreads is the diary. The site is the shop window. She rates, logs progress, and reviews on Goodreads. The site does not write back. Affiliates are Amazon.co.uk Associates + Bookshop.org UK. The full TBR stays off the public Books page.
 
 Aesthetic direction:
 - Cozy, warm, bookish (cream, burgundy, forest in the UI)
@@ -53,7 +53,7 @@ Optional later: blog, newsletter.
 | Feature | Status |
 | --- | --- |
 | Book cards, covers, notes, ratings | Done |
-| Affiliate buttons from ISBN + `site.json` IDs | Done; **IDs empty** until accounts exist |
+| Affiliate buttons from ISBN + `site.json` IDs | Done (Amazon `sashabookandb-21`, Bookshop UK `18142`); **needs a deploy to go live** |
 | Dark / light mode | Done |
 | SEO, canonical, OG, favicon, apple-touch, web manifest | Done |
 | Umami analytics | Done |
