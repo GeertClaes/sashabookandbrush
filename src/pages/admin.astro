@@ -158,18 +158,19 @@ const stats = [
                 <div>
                   <h2 class="font-display text-xl font-semibold text-foreground">Goodreads &amp; live site</h2>
                   <p class="mt-1 text-sm text-muted-foreground">
-                    Last RSS pull, and when the public pages catch up after a save.
+                    Reload this status. It does not start a new Goodreads pull — that happens when the site rebuilds.
                   </p>
                 </div>
                 <button
                   type="button"
                   data-activity-refresh
-                  class="rounded border border-border px-3 py-1.5 text-sm text-foreground"
+                  class="rounded border border-border px-3 py-1.5 text-sm text-foreground disabled:opacity-60"
                 >
                   Refresh
                 </button>
               </div>
               <p data-activity-site class="text-sm text-muted-foreground">Checking…</p>
+              <p data-activity-checked class="mt-1 text-xs text-muted-foreground"></p>
               <div data-activity-sync class="mt-4 rounded-lg border border-border bg-background p-4 text-sm"></div>
             </section>
 
@@ -468,6 +469,7 @@ const stats = [
   let currentSupply = null;
   let previewUrls = { book: "", art: "" };
   let activityTimer = 0;
+  let activityLoading = false;
 
   function formatWhen(value) {
     if (!value) return "not yet";
@@ -532,15 +534,32 @@ const stats = [
     }
   }
 
-  async function loadActivity() {
+  async function loadActivity(options = {}) {
+    if (activityLoading) return;
+    activityLoading = true;
+    const manual = Boolean(options.manual);
+    const button = document.querySelector("[data-activity-refresh]");
+    const checkedEl = document.querySelector("[data-activity-checked]");
+    if (manual && button) {
+      button.disabled = true;
+      button.textContent = "Refreshing…";
+    }
     try {
       const data = await call("/activity");
       renderActivity(data);
+      if (checkedEl) checkedEl.textContent = `Checked ${formatWhen(new Date().toISOString())}`;
       if (activityTimer) window.clearInterval(activityTimer);
-      activityTimer = window.setInterval(loadActivity, data.site?.building ? 15000 : 60000);
+      activityTimer = window.setInterval(() => loadActivity(), data.site?.building ? 15000 : 60000);
     } catch (error) {
       const siteEl = document.querySelector("[data-activity-site]");
       if (siteEl) siteEl.textContent = error instanceof Error ? error.message : "Could not load activity.";
+      if (checkedEl) checkedEl.textContent = "";
+    } finally {
+      activityLoading = false;
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Refresh";
+      }
     }
   }
 
@@ -568,6 +587,7 @@ const stats = [
   async function call(path, options = {}) {
     const response = await fetch(`${api}/admin/api${path}`, {
       credentials: "include",
+      cache: "no-store",
       headers: { "Content-Type": "application/json", ...(options.headers || {}) },
       ...options,
     });
@@ -773,8 +793,11 @@ const stats = [
     }
   }
 
-  document.querySelector("[data-activity-refresh]")?.addEventListener("click", () => {
-    loadActivity();
+  document.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-activity-refresh]") : null;
+    if (!button || button.disabled) return;
+    event.preventDefault();
+    loadActivity({ manual: true });
   });
 
   document.querySelectorAll("[data-tab]").forEach((button) => {
