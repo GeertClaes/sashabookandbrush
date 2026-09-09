@@ -40,7 +40,7 @@ export function summarizeDeployments(deployments = []) {
   if (!latest) {
     return {
       state: "unknown",
-      label: "No rebuild history yet",
+      label: "The public site updates about a minute after a save or Goodreads cron.",
       at: "",
       trigger: "",
       live: false,

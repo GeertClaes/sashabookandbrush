@@ -71,12 +71,11 @@ const stats = [
   noindex={true}
 >
   <div class="min-h-screen bg-background">
-    <div class="mx-auto max-w-3xl px-6 py-16 md:px-12">
+    <div class="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-16">
       <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Private</p>
       <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Studio editor</h1>
       <p class="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        Ratings and progress stay on Goodreads. Use this page for public notes, covers, featured pieces,
-        paintings, and the tools on Art.
+        Ratings and progress stay on Goodreads. Notes, covers, featured cards, paintings, and tools live here.
         {
           isDev ? (
             <>
@@ -88,42 +87,6 @@ const stats = [
           )
         }
       </p>
-
-      <dl class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {
-          stats.map((item) => (
-            <div class="rounded-xl border border-border bg-card px-4 py-3">
-              <dt class="text-xs tracking-widest text-muted-foreground uppercase">{item.label}</dt>
-              <dd class="font-display mt-1 text-lg font-semibold text-foreground">{item.value}</dd>
-            </div>
-          ))
-        }
-      </dl>
-      <p class="mb-6 text-xs text-muted-foreground">
-        Saves are stored as soon as you click Save. The public site updates after Cloudflare finishes rebuilding
-        (usually about a minute). Goodreads currently-reading is fetched during that rebuild.
-      </p>
-
-      <section class="mb-8 rounded-xl border border-border bg-card p-5">
-        <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 class="font-display text-xl font-semibold text-foreground">What's happening</h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              Whether the last Goodreads sync worked, and when edits are actually on the live site.
-            </p>
-          </div>
-          <button
-            type="button"
-            data-activity-refresh
-            class="rounded border border-border px-3 py-1.5 text-sm text-foreground"
-          >
-            Refresh
-          </button>
-        </div>
-        <p data-activity-site class="text-sm text-muted-foreground">Checking rebuilds…</p>
-        <div data-activity-sync class="mt-4 rounded-lg border border-border bg-background p-4 text-sm"></div>
-        <ol data-activity-log class="mt-5 space-y-2 text-sm"></ol>
-      </section>
 
       <p data-status class="mb-6 text-sm text-muted-foreground">Checking the editor…</p>
 
@@ -149,8 +112,15 @@ const stats = [
         <div class="flex flex-wrap gap-2">
           <button
             type="button"
-            data-tab="book"
+            data-tab="overview"
             class="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground"
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            data-tab="book"
+            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
           >
             Books
           </button>
@@ -170,7 +140,48 @@ const stats = [
           </button>
         </div>
 
-        <div data-panel="book" class="space-y-8">
+        <div data-panel="overview" class="space-y-6">
+          <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {
+              stats.map((item) => (
+                <div class="rounded-xl border border-border bg-card px-4 py-3">
+                  <dt class="text-xs tracking-widest text-muted-foreground uppercase">{item.label}</dt>
+                  <dd class="font-display mt-1 text-lg font-semibold text-foreground">{item.value}</dd>
+                </div>
+              ))
+            }
+          </dl>
+
+          <div class="grid gap-6 lg:grid-cols-2">
+            <section class="rounded-xl border border-border bg-card p-5">
+              <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 class="font-display text-xl font-semibold text-foreground">Goodreads &amp; live site</h2>
+                  <p class="mt-1 text-sm text-muted-foreground">
+                    Last RSS pull, and when the public pages catch up after a save.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  data-activity-refresh
+                  class="rounded border border-border px-3 py-1.5 text-sm text-foreground"
+                >
+                  Refresh
+                </button>
+              </div>
+              <p data-activity-site class="text-sm text-muted-foreground">Checking…</p>
+              <div data-activity-sync class="mt-4 rounded-lg border border-border bg-background p-4 text-sm"></div>
+            </section>
+
+            <section class="rounded-xl border border-border bg-card p-5">
+              <h2 class="font-display mb-1 text-xl font-semibold text-foreground">Recent activity</h2>
+              <p class="mb-4 text-sm text-muted-foreground">Saves from this editor and Goodreads syncs.</p>
+              <ol data-activity-log class="space-y-2 text-sm"></ol>
+            </section>
+          </div>
+        </div>
+
+        <div data-panel="book" class="hidden space-y-8">
           <section class="rounded-xl border border-border bg-card p-5">
             <h2 class="font-display mb-3 text-xl font-semibold text-foreground">Find a book</h2>
             <input
@@ -476,9 +487,14 @@ const stats = [
     const site = data.site || {};
     const sync = data.sync || {};
     if (siteEl) {
-      const when = site.at ? ` · ${formatWhen(site.at)}` : "";
-      const trigger = site.trigger ? ` · ${site.trigger}` : "";
-      siteEl.textContent = `${site.label || "Rebuild status unknown"}${when}${trigger}`;
+      if (site.deploymentsAvailable === false && !site.deploymentsError) {
+        siteEl.textContent =
+          "Saves are stored immediately. The public site usually updates within a minute after Cloudflare rebuilds. You do not need extra tokens for that.";
+      } else {
+        const when = site.at ? ` · ${formatWhen(site.at)}` : "";
+        const trigger = site.trigger ? ` · ${site.trigger}` : "";
+        siteEl.textContent = `${site.label || "Rebuild status unknown"}${when}${trigger}`;
+      }
     }
     if (syncEl) {
       const reading = (sync.reading || [])
@@ -498,7 +514,6 @@ const stats = [
         ${reading ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Now reading</span><br>${reading}</p>` : ""}
         ${changes ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Changes</span><br>${changes}</p>` : `<p class="mt-3 text-muted-foreground">No currently-reading changes in that sync.</p>`}
         ${site.deploymentsError ? `<p class="mt-3 text-xs text-muted-foreground">${escapeHtml(site.deploymentsError)}</p>` : ""}
-        ${site.deploymentsAvailable === false && !isDev && !site.deploymentsError ? `<p class="mt-3 text-xs text-muted-foreground">Add CF_ACCOUNT_ID and CF_API_TOKEN on Pages to see live rebuild progress here.</p>` : ""}
       `;
     }
     if (logEl) {
@@ -584,6 +599,7 @@ const stats = [
       }
     }
     loadActivity();
+    setTab("overview");
   }
 
   function setTab(kind) {
