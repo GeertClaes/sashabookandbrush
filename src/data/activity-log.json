@@ -1,3 +1,12 @@
 {
-  "events": []
+  "events": [
+    {
+      "at": "2026-09-09T14:00:43.207Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "5 currently reading, 8 up next. Wild Card (Rose Hill, #4): — → 75%; The Last Witch: 30% → 45%",
+      "by": "pages-build"
+    }
+  ]
 }

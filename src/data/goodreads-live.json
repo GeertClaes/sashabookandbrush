@@ -1,5 +1,40 @@
 {
-  "updated": "2026-09-08T07:06:31.596Z",
+  "updated": "2026-09-09T14:00:43.200Z",
+  "lastSync": {
+    "at": "2026-09-09T14:00:43.200Z",
+    "ok": true,
+    "source": "pages-build",
+    "readingCount": 5,
+    "upNextCount": 8,
+    "changes": [
+      "Wild Card (Rose Hill, #4): — → 75%",
+      "The Last Witch: 30% → 45%"
+    ],
+    "warning": null,
+    "error": null,
+    "reading": [
+      {
+        "title": "Wild Card (Rose Hill, #4)",
+        "progress": 75
+      },
+      {
+        "title": "The Last Witch",
+        "progress": 45
+      },
+      {
+        "title": "The Secret Paris Ingredient",
+        "progress": null
+      },
+      {
+        "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
+        "progress": null
+      },
+      {
+        "title": "Crown of Midnight (Throne of Glass, #2)",
+        "progress": null
+      }
+    ]
+  },
   "currentlyReading": [
     {
       "title": "Wild Card (Rose Hill, #4)",
@@ -7,7 +42,7 @@
       "goodreadsId": "227997554",
       "isbn": "0349441685",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1757825133l/227997554.jpg",
-      "progress": null
+      "progress": 75
     },
     {
       "title": "The Last Witch",
@@ -15,7 +50,7 @@
       "goodreadsId": "231769822",
       "isbn": "",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1751515024l/231769822._SY475_.jpg",
-      "progress": 30
+      "progress": 45
     },
     {
       "title": "The Secret Paris Ingredient",
