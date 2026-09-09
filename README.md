@@ -20,6 +20,125 @@ npm run build
 npm run preview
 ```
 
+## Environment configuration
+
+Secrets never go in git. There are three places to set them.
+
+| Where | What it is for |
+| --- | --- |
+| `.env` in this repo (copy from `.env.example`) | Local `npm run dev` / `npm run admin` only |
+| **Workers & Pages → sashabookandbrush → Settings → Variables and secrets → Production** | Live site, `/admin` API, Goodreads sync log, Overview rebuild status |
+| **Cron Worker** (this repo: `workers/rebuild-pages/`; dashboard may show a different name) | The 6-hour rebuild trigger only |
+
+After you change Pages variables, trigger a **new production deploy**. Functions and the build only see new values on the next build.
+
+Cloudflare also injects `CF_PAGES` and `CF_PAGES_BRANCH` during Pages builds. Do not set those yourself.
+
+### Local `.env`
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ADMIN_PASSWORD` | No | Password for local `/admin`. If empty, the local API is open on this machine only |
+| `PUBLIC_ADMIN_URL` | No | Local editor API. Default `http://127.0.0.1:8787` |
+| `ADMIN_PORT` | No | Port for `npm run admin`. Default `8787` |
+| `PUBLIC_FORMSPREE_ID` | No | Shop waitlist form id (the part after `/f/` on Formspree). Without it, Shop links to Instagram |
+
+Do not put GitHub or Cloudflare tokens in `.env` unless you are debugging Pages Functions locally.
+
+### Cloudflare Pages (production)
+
+**Workers & Pages** → click **sashabookandbrush** (the GitHub-connected Pages project, not the account list) → **Settings** → **Variables and secrets** → **Production**.
+
+Mark tokens as **Secret**.
+
+#### GitHub (admin saves + Goodreads sync log)
+
+1. On GitHub, open **Settings → Developer settings → Personal access tokens → Fine-grained tokens** (your user settings, not the repo).
+2. Resource owner: the user who owns `GeertClaes/sashabookandbrush`. Repository access: **Only select repositories** → this repo.
+3. Permissions: **Contents → Read and write**.
+4. Also in the repo: **Settings → Actions → General → Workflow permissions → Read and write** (CSV import Action commits back).
+
+| Variable | Example | Purpose |
+| --- | --- | --- |
+| `ADMIN_GITHUB_TOKEN` | `github_pat_…` | Admin saves, cover uploads, and recording Goodreads sync results during the Pages build |
+| `GITHUB_REPO` | `GeertClaes/sashabookandbrush` | Repo the admin API commits to |
+| `GITHUB_BRANCH` | `main` | Branch to commit to |
+
+#### Cloudflare Access (lock `/admin` to Google)
+
+1. [Zero Trust](https://one.dash.cloudflare.com) → **Access** → **Applications** → **Add an application** → **Self-hosted**.
+2. Domain `sashabookandbrush.com`, path `/admin*`. Repeat for `*.pages.dev`, or turn off preview deployments so `/admin` is not public there.
+3. Identity: **Google**. Policy: allow Sasha’s Gmail and yours.
+4. Copy the application **AUD** and team domain (`something.cloudflareaccess.com`).
+
+| Variable | Example | Purpose |
+| --- | --- | --- |
+| `CF_ACCESS_TEAM_DOMAIN` | `your-team.cloudflareaccess.com` | Validates the Access JWT |
+| `CF_ACCESS_AUD` | the AUD tag from the Access app | Same |
+| `ADMIN_EMAILS` | `sasha@gmail.com,you@gmail.com` | Extra allow-list after Google sign-in |
+
+#### Overview rebuild status (optional)
+
+Needed only if `/admin` → **Overview** should show “Site is live” / “Rebuild in progress”. Saves and Goodreads sync work without these.
+
+**Account ID:** [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages**. Copy **Account ID** from the right sidebar.
+
+**API token:**
+
+1. **Manage account → Account API tokens** → **Create Token**.
+2. **Start from scratch** (this UI’s name for a custom token).
+3. Scope the policy to the **KWOKAH account**, not only the `sashabookandbrush.com` domain. Pages APIs are account-level.
+4. **Developer Platform** (or search `Pages`) → **Cloudflare Pages → Read**.
+5. **Review token** → create → copy the secret once.
+
+| Variable | Example | Purpose |
+| --- | --- | --- |
+| `CF_ACCOUNT_ID` | `a8451fd1…` | Account that owns the Pages project |
+| `CF_API_TOKEN` | the token you just created | Lists recent Pages deployments |
+| `CF_PAGES_PROJECT` | `sashabookandbrush` | Only set this if the Pages project name is different |
+
+#### Shop waitlist (optional)
+
+| Variable | Purpose |
+| --- | --- |
+| `PUBLIC_FORMSPREE_ID` | Same as local. Set on Pages if you want the live Shop form |
+
+`PUBLIC_` variables are baked into the static HTML at **build** time.
+
+### Cron Worker (Goodreads rebuild)
+
+This is a **separate** Worker from the Pages project. It only needs one secret.
+
+1. Pages project → **Settings → Builds → Deploy hooks** → hook for `main`. Copy the URL. Do not put it in the repo.
+2. Deploy the Worker from this repo (once):
+
+```bash
+npx wrangler deploy --config workers/rebuild-pages/wrangler.toml
+npx wrangler secret put CLOUDFLARE_PAGES_DEPLOY_HOOK --config workers/rebuild-pages/wrangler.toml
+```
+
+| Variable | Where | Purpose |
+| --- | --- | --- |
+| `CLOUDFLARE_PAGES_DEPLOY_HOOK` | Worker secret (`wrangler secret put`) | POSTed every 6 hours so Pages rebuilds and refreshes currently reading |
+
+Do not add the deploy-hook URL to the Pages env vars list.
+
+### Quick check
+
+| You want | Must be set |
+| --- | --- |
+| Local site | none |
+| Local `/admin` | `npm run admin`; optional `ADMIN_PASSWORD` |
+| Live `/admin` saves | Access app + `ADMIN_GITHUB_TOKEN`, `GITHUB_REPO`, `CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD` |
+| Goodreads log on Overview | Same GitHub vars, available at **build** time (not Functions-only) |
+| Live rebuild spinner on Overview | `CF_ACCOUNT_ID` + `CF_API_TOKEN` |
+| Cron currently-reading refresh | Worker secret `CLOUDFLARE_PAGES_DEPLOY_HOOK` |
+| Shop email waitlist | `PUBLIC_FORMSPREE_ID` on Pages (and locally if you test it) |
+
 ## How to update content
 
 You do not need to touch the page templates for ordinary updates.
@@ -90,41 +209,13 @@ Then refresh the Books page. Shelf, rating, genre, year read, and sort are indep
 
 ### Library editor (`/admin`)
 
-Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. Tabs are **Books**, **Art**, and **Tools**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
+Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. Tabs are **Overview**, **Books**, **Art**, and **Tools**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
 
 On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` opens. Saves commit to GitHub; Pages rebuilds (usually about a minute). A CSV upload writes `data/export.csv`, then [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) runs `import-goodreads.mjs --skip-covers` and commits library files.
 
-**One-time setup (Cloudflare Access + GitHub):**
+Set Access, GitHub, and optional rebuild-status variables as described in [Environment configuration](#environment-configuration). API writes fail closed until Access and the GitHub token are set.
 
-1. [Zero Trust](https://one.dash.cloudflare.com) → **Access** → **Applications** → Add **Self-hosted**.
-2. Domain `sashabookandbrush.com`, path `/admin*`. Repeat for the `*.pages.dev` hostname, or disable preview deployments so `/admin` is not public there.
-3. Identity provider: **Google**. Policy: allow Sasha’s Gmail and yours.
-4. Copy the application **AUD** tag and team domain (`your-team.cloudflareaccess.com`).
-5. Create a GitHub fine-grained token with **Contents: Read and write** on this repo. Repo **Settings → Actions → General → Workflow permissions** must allow Actions to write (for the CSV import workflow).
-6. In the Pages project → **Settings → Environment variables** (Production):
-
-| Variable | Value |
-| --- | --- |
-| `ADMIN_GITHUB_TOKEN` | that GitHub token |
-| `GITHUB_REPO` | `GeertClaes/sashabookandbrush` |
-| `GITHUB_BRANCH` | `main` |
-| `CF_ACCESS_TEAM_DOMAIN` | `your-team.cloudflareaccess.com` |
-| `CF_ACCESS_AUD` | Access application AUD |
-| `ADMIN_EMAILS` | comma-separated Google emails |
-
-API writes fail closed until Access and the GitHub token are set. Do not put `/admin` in the public nav.
-
-The studio **What's happening** panel shows the last Goodreads RSS sync (success/fail, currently reading, what changed) and a log of editor saves. Saves hit GitHub immediately; the public site updates when Pages finishes rebuilding (usually about a minute).
-
-To see live rebuild status (building / live / failed) as well, add these Pages production env vars:
-
-| Variable | Value |
-| --- | --- |
-| `CF_ACCOUNT_ID` | Cloudflare account ID (right sidebar of the dashboard) |
-| `CF_API_TOKEN` | API token with **Account → Cloudflare Pages → Read** |
-| `CF_PAGES_PROJECT` | Pages project name, if it is not `sashabookandbrush` |
-
-The same `ADMIN_GITHUB_TOKEN` is used at **build time** so each cron rebuild can record the Goodreads result. After deploy, open `/admin` and use Refresh on that panel.
+**Overview** shows the last Goodreads RSS sync (success/fail, currently reading, what changed) and a log of editor saves. Saves hit GitHub immediately; the public site updates when Pages finishes rebuilding (usually about a minute).
 
 Locally:
 
@@ -132,7 +223,7 @@ Locally:
 npm run admin
 ```
 
-Then open `/admin` on the dev server. Optional `ADMIN_PASSWORD` in `.env` (`PUBLIC_ADMIN_URL` only if the API is not on `http://127.0.0.1:8787`).
+Then open `/admin` on the dev server. Optional `ADMIN_PASSWORD` in `.env`.
 
 ### Add or edit art
 
@@ -200,18 +291,11 @@ The home shelf and progress % come from public Goodreads RSS (`npm run sync:good
 
 ### Cloudflare Pages
 
-The production site is static. RSS cannot update the live HTML unless Pages rebuilds. Use a **Cloudflare Worker cron**, not GitHub Actions — Pages has no built-in schedule, and Worker cron is more reliable than Actions `on.schedule`.
+The production site is static. RSS cannot update the live HTML unless Pages rebuilds. Use a **Cloudflare Worker cron**, not GitHub Actions.
 
-1. Pages build command: `npm run build` (already includes the Goodreads RSS sync).
-2. **Pages → Settings → Builds → Deploy hooks** → add a hook for `main`. Copy the URL. Do not put it in the repo.
-3. Deploy [`workers/rebuild-pages/`](workers/rebuild-pages/) once (separate from the Pages site):
+Build command: `npm run build` (includes the Goodreads RSS sync). Create the deploy hook and Worker secret as in [Environment configuration](#environment-configuration) → **Cron Worker**.
 
-```bash
-npx wrangler deploy --config workers/rebuild-pages/wrangler.toml
-npx wrangler secret put CLOUDFLARE_PAGES_DEPLOY_HOOK --config workers/rebuild-pages/wrangler.toml
-```
-
-That Worker runs every 6 hours UTC (`0 */6 * * *`). Each run POSTs the hook; Pages rebuilds and refreshes currently reading / progress / up next. Free Pages is 500 builds/month; 6-hour cron is about 120. For daily instead, change the cron in `wrangler.toml` to `0 6 * * *` and redeploy.
+The Worker runs every 6 hours UTC (`0 */6 * * *`). Each run POSTs the hook; Pages rebuilds currently reading / progress / up next. Free Pages is 500 builds/month; 6-hour cron is about 120. For daily instead, change the cron in `wrangler.toml` to `0 6 * * *` and redeploy.
 
 Do not also schedule a GitHub Action against the same hook.
 
@@ -230,11 +314,7 @@ Edit `src/data/site.json` for:
 
 ### Shop waitlist
 
-1. Create a form at [Formspree](https://formspree.io).
-2. Copy `.env.example` to `.env`.
-3. Set `PUBLIC_FORMSPREE_ID` to the form id (the part after `/f/`).
-
-Until that is set, Shop links to Instagram instead of an email field. Collaborations also go through Instagram (`/work`).
+Create a form at [Formspree](https://formspree.io) and set `PUBLIC_FORMSPREE_ID` as in [Environment configuration](#environment-configuration). Until that is set, Shop links to Instagram. Collaborations also go through Instagram (`/work`).
 
 ### Favicon and share card
 
