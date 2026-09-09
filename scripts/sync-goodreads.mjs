@@ -14,6 +14,7 @@ const ROOT = process.cwd();
 const site = JSON.parse(await readFile(path.join(ROOT, "src", "data", "site.json"), "utf8"));
 const USER_ID = site.goodreads?.userId || "141471789";
 const OUT = path.join(ROOT, "src", "data", "goodreads-live.json");
+const PUBLIC_OUT = path.join(ROOT, "public", "data", "goodreads-live.json");
 const ACTIVITY_PATH = path.join(ROOT, ACTIVITY_FILE);
 const ALLOW_FAIL = process.argv.includes("--allow-fail");
 const BROWSER_UA =
@@ -86,14 +87,18 @@ function readingSummary(books = []) {
 }
 
 async function writeActivity(entry) {
+  if (process.env.CF_PAGES === "1") return;
   const log = parseActivityLog(await readFile(ACTIVITY_PATH, "utf8").catch(() => ""));
   await mkdir(path.dirname(ACTIVITY_PATH), { recursive: true });
   await writeFile(ACTIVITY_PATH, stringifyActivity(appendActivity(log, entry)), "utf8");
 }
 
 async function writeLive(payload) {
+  const text = `${JSON.stringify(payload, null, 2)}\n`;
   await mkdir(path.dirname(OUT), { recursive: true });
-  await writeFile(OUT, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  await writeFile(OUT, text, "utf8");
+  await mkdir(path.dirname(PUBLIC_OUT), { recursive: true });
+  await writeFile(PUBLIC_OUT, text, "utf8");
 }
 
 const previous = await readJson(OUT, { currentlyReading: [], upNext: [] });

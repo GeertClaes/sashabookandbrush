@@ -27,7 +27,7 @@ Secrets never go in git. There are three places to set them.
 | Where | What it is for |
 | --- | --- |
 | `.env` in this repo (copy from `.env.example`) | Local `npm run dev` / `npm run admin` only |
-| **Workers & Pages → sashabookandbrush → Settings → Variables and secrets → Production** | Live site, `/admin` API, Goodreads sync log, Overview rebuild status |
+| **Workers & Pages → sashabookandbrush → Settings → Variables and secrets → Production** | Live site, `/admin` API, Overview rebuild status |
 | **Cron Worker** (this repo: `workers/rebuild-pages/`; dashboard may show a different name) | The 6-hour rebuild trigger only |
 
 After you change Pages variables, trigger a **new production deploy**. Functions and the build only see new values on the next build.
@@ -55,7 +55,7 @@ Do not put GitHub or Cloudflare tokens in `.env` unless you are debugging Pages 
 
 Mark tokens as **Secret**.
 
-#### GitHub (admin saves + Goodreads sync log)
+#### GitHub (admin saves)
 
 1. On GitHub, open **Settings → Developer settings → Personal access tokens → Fine-grained tokens** (your user settings, not the repo).
 2. Resource owner: the user who owns `GeertClaes/sashabookandbrush`. Repository access: **Only select repositories** → this repo.
@@ -64,9 +64,11 @@ Mark tokens as **Secret**.
 
 | Variable | Example | Purpose |
 | --- | --- | --- |
-| `ADMIN_GITHUB_TOKEN` | `github_pat_…` | Admin saves, cover uploads, and recording Goodreads sync results during the Pages build |
+| `ADMIN_GITHUB_TOKEN` | `github_pat_…` | Admin saves and cover uploads |
 | `GITHUB_REPO` | `GeertClaes/sashabookandbrush` | Repo the admin API commits to |
 | `GITHUB_BRANCH` | `main` | Branch to commit to |
+
+Goodreads RSS is pulled during the Pages **build**. It updates the live site only. It does **not** commit back to GitHub, so those `[skip ci]` log commits should no longer appear on `main`.
 
 #### Cloudflare Access (lock `/admin` to Google)
 
@@ -134,7 +136,7 @@ Do not add the deploy-hook URL to the Pages env vars list.
 | Local site | none |
 | Local `/admin` | `npm run admin`; optional `ADMIN_PASSWORD` |
 | Live `/admin` saves | Access app + `ADMIN_GITHUB_TOKEN`, `GITHUB_REPO`, `CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD` |
-| Goodreads log on Overview | Same GitHub vars, available at **build** time (not Functions-only) |
+| Goodreads log on Overview | None extra — it is written during the Pages build |
 | Live rebuild spinner on Overview | `CF_ACCOUNT_ID` + `CF_API_TOKEN` |
 | Cron currently-reading refresh | Worker secret `CLOUDFLARE_PAGES_DEPLOY_HOOK` |
 | Shop email waitlist | `PUBLIC_FORMSPREE_ID` on Pages (and locally if you test it) |
@@ -287,7 +289,7 @@ The footer already includes an affiliate disclosure.
 
 The home shelf and progress % come from public Goodreads RSS (`npm run sync:goodreads`). That also writes a short “Up next” TBR teaser. The full library (ratings, reviews, covers) still needs a CSV import.
 
-`npm run build` runs the RSS sync first, then Astro. If Goodreads is down, the last `src/data/goodreads-live.json` is kept so the deploy still works. On production, a Cloudflare Worker cron triggers that rebuild.
+`npm run build` runs the RSS sync first, then Astro. If Goodreads is down, the last `src/data/goodreads-live.json` is kept so the deploy still works. The result is baked into the site (and `/data/goodreads-live.json` for Overview). It is not committed to git. On production, a Cloudflare Worker cron triggers that rebuild.
 
 ### Cloudflare Pages
 
