@@ -2,11 +2,19 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
+import {
+  ACTIVITY_FILE,
+  appendActivity,
+  describeReadingChanges,
+  parseActivityLog,
+  stringifyActivity,
+} from "./lib/activity.mjs";
 
 const ROOT = process.cwd();
 const site = JSON.parse(await readFile(path.join(ROOT, "src", "data", "site.json"), "utf8"));
 const USER_ID = site.goodreads?.userId || "141471789";
 const OUT = path.join(ROOT, "src", "data", "goodreads-live.json");
+const ACTIVITY_PATH = path.join(ROOT, ACTIVITY_FILE);
 const ALLOW_FAIL = process.argv.includes("--allow-fail");
 const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
@@ -62,6 +70,49 @@ function baseTitle(value) {
     .trim();
 }
 
+async function readJson(file, fallback) {
+  try {
+    return JSON.parse(await readFile(file, "utf8"));
+  } catch {
+    return fallback;
+  }
+}
+
+function readingSummary(books = []) {
+  return books.map((book) => ({
+    title: book.title,
+    progress: typeof book.progress === "number" ? book.progress : null,
+  }));
+}
+
+async function writeActivity(entry) {
+  const log = parseActivityLog(await readFile(ACTIVITY_PATH, "utf8").catch(() => ""));
+  await mkdir(path.dirname(ACTIVITY_PATH), { recursive: true });
+  await writeFile(ACTIVITY_PATH, stringifyActivity(appendActivity(log, entry)), "utf8");
+}
+
+async function writeLive(payload) {
+  await mkdir(path.dirname(OUT), { recursive: true });
+  await writeFile(OUT, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+const previous = await readJson(OUT, { currentlyReading: [], upNext: [] });
+const source = process.env.CF_PAGES === "1" ? "pages-build" : "local";
+
+function lastSyncFields({ ok, changes = [], warning = "", error = "", currentlyReading, upNext }) {
+  return {
+    at: new Date().toISOString(),
+    ok,
+    source,
+    readingCount: currentlyReading.length,
+    upNextCount: upNext.length,
+    changes,
+    warning: warning || null,
+    error: error || null,
+    reading: readingSummary(currentlyReading),
+  };
+}
+
 try {
   const [readingXml, tbrXml, updatesXml] = await Promise.all([
     curlText(`https://www.goodreads.com/review/list_rss/${USER_ID}?shelf=currently-reading`),
@@ -83,32 +134,78 @@ try {
 
   const upNext = rssItems(tbrXml).slice(0, 8);
 
-  if (currentlyReading.length === 0) {
-    let previous = { currentlyReading: [] };
-    try {
-      previous = JSON.parse(await readFile(OUT, "utf8"));
-    } catch {
-      // first run
-    }
-    if (previous.currentlyReading?.length) {
-      console.warn("Goodreads RSS returned no currently-reading books; keeping the previous live file.");
-      process.exit(0);
-    }
+  if (currentlyReading.length === 0 && previous.currentlyReading?.length) {
+    const warning = "Goodreads RSS returned no currently-reading books; kept the previous shelf.";
+    console.warn(warning);
+    const lastSync = lastSyncFields({
+      ok: false,
+      warning,
+      currentlyReading: previous.currentlyReading,
+      upNext: previous.upNext || [],
+      changes: [],
+    });
+    await writeLive({
+      ...previous,
+      updated: previous.updated || lastSync.at,
+      lastSync,
+    });
+    await writeActivity({
+      type: "goodreads",
+      ok: false,
+      title: "Goodreads RSS sync",
+      detail: warning,
+      by: source,
+    });
+    process.exit(0);
   }
 
+  const changes = describeReadingChanges(previous.currentlyReading || [], currentlyReading);
+  const lastSync = lastSyncFields({
+    ok: true,
+    changes,
+    currentlyReading,
+    upNext,
+  });
   const payload = {
-    updated: new Date().toISOString(),
+    updated: lastSync.at,
+    lastSync,
     currentlyReading,
     upNext,
   };
 
-  await mkdir(path.dirname(OUT), { recursive: true });
-  await writeFile(OUT, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  await writeLive(payload);
+  const changeText = changes.length ? changes.join("; ") : "No changes to currently reading.";
+  await writeActivity({
+    type: "goodreads",
+    ok: true,
+    title: "Goodreads RSS sync",
+    detail: `${currentlyReading.length} currently reading, ${upNext.length} up next. ${changeText}`,
+    by: source,
+  });
   console.log(
     `Wrote ${path.relative(ROOT, OUT)}: ${currentlyReading.length} currently reading, ${upNext.length} up next.`,
   );
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
+  const lastSync = lastSyncFields({
+    ok: false,
+    error: message,
+    currentlyReading: previous.currentlyReading || [],
+    upNext: previous.upNext || [],
+    changes: [],
+  });
+  await writeLive({
+    ...previous,
+    updated: previous.updated || lastSync.at,
+    lastSync,
+  });
+  await writeActivity({
+    type: "goodreads",
+    ok: false,
+    title: "Goodreads RSS sync failed",
+    detail: message,
+    by: source,
+  });
   if (ALLOW_FAIL) {
     console.warn(`Goodreads sync skipped (${message}). Using the last committed live file.`);
     process.exit(0);

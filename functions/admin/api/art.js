@@ -1,4 +1,5 @@
 import { applyYamlFields, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
+import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
 
 const MAX_NOTE = 8000;
@@ -19,7 +20,7 @@ function artPhotoRepoPath(image) {
   return match ? `public/images/art/${match[1]}` : "";
 }
 
-async function deletePainting(env, slug) {
+async function deletePainting(env, slug, email = "") {
   const filePath = `src/content/art/${slug}.md`;
   const existing = await tryGetTextFile(env, filePath);
   if (!existing) return json({ error: "Painting not found" }, 404);
@@ -30,7 +31,16 @@ async function deletePainting(env, slug) {
     files.push({ path: photo, delete: true });
   }
 
-  await commitFiles(env, `Admin: delete art ${slug}`, files);
+  await commitFiles(
+    env,
+    `Admin: delete art ${slug}`,
+    await filesWithActivity(env, files, {
+      type: "admin",
+      title: `Deleted painting ${slug}`,
+      detail: "It leaves the Art page after the site rebuilds (about a minute).",
+      by: email,
+    }),
+  );
   return json({ ok: true, slug, deleted: true });
 }
 
@@ -51,7 +61,7 @@ export async function onRequestPost(context) {
     const body = await readJson(context.request);
     if (body.delete) {
       const slug = safeSlug(body.slug);
-      return await deletePainting(context.env, slug);
+      return await deletePainting(context.env, slug, context.data.email || "");
     }
 
     const title = String(body.title || "").trim();
@@ -86,9 +96,16 @@ export async function onRequestPost(context) {
     }
     if (!text.endsWith("\n")) text += "\n";
 
-    await commitFiles(context.env, `Admin: ${existing ? "update" : "add"} art ${slug}`, [
-      { path: filePath, content: text, encoding: "utf-8" },
-    ]);
+    await commitFiles(
+      context.env,
+      `Admin: ${existing ? "update" : "add"} art ${slug}`,
+      await filesWithActivity(context.env, [{ path: filePath, content: text, encoding: "utf-8" }], {
+        type: "admin",
+        title: `${existing ? "Updated" : "Added"} ${title}`,
+        detail: "Painting saved. It shows on the site after the rebuild (about a minute).",
+        by: context.data.email || "",
+      }),
+    );
     return json({ ok: true, slug });
   } catch (error) {
     return fail(error, error instanceof Error && /invalid name/i.test(error.message) ? 400 : 500);

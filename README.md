@@ -114,6 +114,18 @@ On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` 
 
 API writes fail closed until Access and the GitHub token are set. Do not put `/admin` in the public nav.
 
+The studio **What's happening** panel shows the last Goodreads RSS sync (success/fail, currently reading, what changed) and a log of editor saves. Saves hit GitHub immediately; the public site updates when Pages finishes rebuilding (usually about a minute).
+
+To see live rebuild status (building / live / failed) as well, add these Pages production env vars:
+
+| Variable | Value |
+| --- | --- |
+| `CF_ACCOUNT_ID` | Cloudflare account ID (right sidebar of the dashboard) |
+| `CF_API_TOKEN` | API token with **Account → Cloudflare Pages → Read** |
+| `CF_PAGES_PROJECT` | Pages project name, if it is not `sashabookandbrush` |
+
+The same `ADMIN_GITHUB_TOKEN` is used at **build time** so each cron rebuild can record the Goodreads result. After deploy, open `/admin` and use Refresh on that panel.
+
 Locally:
 
 ```bash

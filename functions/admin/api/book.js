@@ -1,4 +1,5 @@
 import { applyYamlFields, fail, json, readJson, safeSlug } from "./_lib/frontmatter.js";
+import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, getTextFile } from "./_lib/github.js";
 
 const MAX_NOTE = 8000;
@@ -31,9 +32,16 @@ export async function onRequestPost(context) {
     text = applyYamlFields(text, updates);
     if (!text.endsWith("\n")) text += "\n";
 
-    await commitFiles(context.env, `Admin: update book ${slug}`, [
-      { path: filePath, content: text, encoding: "utf-8" },
-    ]);
+    await commitFiles(
+      context.env,
+      `Admin: update book ${slug}`,
+      await filesWithActivity(context.env, [{ path: filePath, content: text, encoding: "utf-8" }], {
+        type: "admin",
+        title: `Updated ${updates.title || slug}`,
+        detail: "Book saved. The public page updates after the site rebuilds (about a minute).",
+        by: context.data.email || "",
+      }),
+    );
     return json({ ok: true });
   } catch (error) {
     return fail(error, error instanceof Error && /not found|invalid name/i.test(error.message) ? 400 : 500);

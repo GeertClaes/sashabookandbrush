@@ -100,8 +100,30 @@ const stats = [
         }
       </dl>
       <p class="mb-6 text-xs text-muted-foreground">
-        RSS stats refresh when the site rebuilds (about every 6 hours). Saves appear after the next deploy.
+        Saves are stored as soon as you click Save. The public site updates after Cloudflare finishes rebuilding
+        (usually about a minute). Goodreads currently-reading is fetched during that rebuild.
       </p>
+
+      <section class="mb-8 rounded-xl border border-border bg-card p-5">
+        <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="font-display text-xl font-semibold text-foreground">What's happening</h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+              Whether the last Goodreads sync worked, and when edits are actually on the live site.
+            </p>
+          </div>
+          <button
+            type="button"
+            data-activity-refresh
+            class="rounded border border-border px-3 py-1.5 text-sm text-foreground"
+          >
+            Refresh
+          </button>
+        </div>
+        <p data-activity-site class="text-sm text-muted-foreground">Checking rebuilds…</p>
+        <div data-activity-sync class="mt-4 rounded-lg border border-border bg-background p-4 text-sm"></div>
+        <ol data-activity-log class="mt-5 space-y-2 text-sm"></ol>
+      </section>
 
       <p data-status class="mb-6 text-sm text-muted-foreground">Checking the editor…</p>
 
@@ -434,6 +456,78 @@ const stats = [
   let currentArt = null;
   let currentSupply = null;
   let previewUrls = { book: "", art: "" };
+  let activityTimer = 0;
+
+  function formatWhen(value) {
+    if (!value) return "not yet";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString("en-GB", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Europe/London",
+    });
+  }
+
+  function renderActivity(data) {
+    const siteEl = document.querySelector("[data-activity-site]");
+    const syncEl = document.querySelector("[data-activity-sync]");
+    const logEl = document.querySelector("[data-activity-log]");
+    const site = data.site || {};
+    const sync = data.sync || {};
+    if (siteEl) {
+      const when = site.at ? ` · ${formatWhen(site.at)}` : "";
+      const trigger = site.trigger ? ` · ${site.trigger}` : "";
+      siteEl.textContent = `${site.label || "Rebuild status unknown"}${when}${trigger}`;
+    }
+    if (syncEl) {
+      const reading = (sync.reading || [])
+        .map((book) => {
+          const pct = typeof book.progress === "number" ? ` (${book.progress}%)` : "";
+          return escapeHtml(`${book.title}${pct}`);
+        })
+        .join("<br>");
+      const changes = (sync.changes || []).map((item) => escapeHtml(item)).join("<br>");
+      const tone = sync.ok ? "text-foreground" : "text-accent";
+      const headline = sync.ok ? "Goodreads sync succeeded" : "Goodreads sync had a problem";
+      const extra = sync.warning || sync.error || "";
+      syncEl.innerHTML = `
+        <p class="${tone} font-medium">${headline}</p>
+        <p class="mt-1 text-xs text-muted-foreground">${escapeHtml(formatWhen(sync.at))} · ${escapeHtml(String(sync.readingCount || 0))} currently reading · ${escapeHtml(String(sync.upNextCount || 0))} up next</p>
+        ${extra ? `<p class="mt-2 text-muted-foreground">${escapeHtml(extra)}</p>` : ""}
+        ${reading ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Now reading</span><br>${reading}</p>` : ""}
+        ${changes ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Changes</span><br>${changes}</p>` : `<p class="mt-3 text-muted-foreground">No currently-reading changes in that sync.</p>`}
+        ${site.deploymentsError ? `<p class="mt-3 text-xs text-muted-foreground">${escapeHtml(site.deploymentsError)}</p>` : ""}
+        ${site.deploymentsAvailable === false && !isDev && !site.deploymentsError ? `<p class="mt-3 text-xs text-muted-foreground">Add CF_ACCOUNT_ID and CF_API_TOKEN on Pages to see live rebuild progress here.</p>` : ""}
+      `;
+    }
+    if (logEl) {
+      const events = data.events || [];
+      if (!events.length) {
+        logEl.innerHTML = `<li class="text-muted-foreground">No admin or sync events recorded yet.</li>`;
+      } else {
+        logEl.innerHTML = events
+          .slice(0, 20)
+          .map((event) => {
+            const mark = event.ok === false ? "Failed" : event.type === "goodreads" ? "Goodreads" : "Editor";
+            return `<li class="rounded-lg border border-border px-3 py-2"><p class="font-medium text-foreground">${escapeHtml(event.title)}</p><p class="mt-0.5 text-xs text-muted-foreground">${escapeHtml(mark)} · ${escapeHtml(formatWhen(event.at))}${event.by ? ` · ${escapeHtml(event.by)}` : ""}</p>${event.detail ? `<p class="mt-1 text-muted-foreground">${escapeHtml(event.detail)}</p>` : ""}</li>`;
+          })
+          .join("");
+      }
+    }
+  }
+
+  async function loadActivity() {
+    try {
+      const data = await call("/activity");
+      renderActivity(data);
+      if (activityTimer) window.clearInterval(activityTimer);
+      activityTimer = window.setInterval(loadActivity, data.site?.building ? 15000 : 60000);
+    } catch (error) {
+      const siteEl = document.querySelector("[data-activity-site]");
+      if (siteEl) siteEl.textContent = error instanceof Error ? error.message : "Could not load activity.";
+    }
+  }
 
   function escapeHtml(value) {
     return String(value)
@@ -480,14 +574,16 @@ const stats = [
     app?.classList.remove("hidden");
     renderArtList();
     renderSupplyList();
-    if (!status) return;
-    if (email && email !== "local") {
-      status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
-    } else if (isDev) {
-      status.textContent = "Editor is connected on this computer.";
-    } else {
-      status.textContent = "Editor is connected. Saves go live after the site rebuilds (usually a minute).";
+    if (status) {
+      if (email && email !== "local") {
+        status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
+      } else if (isDev) {
+        status.textContent = "Editor is connected on this computer.";
+      } else {
+        status.textContent = "Editor is connected. Saves go live after the site rebuilds (usually a minute).";
+      }
     }
+    loadActivity();
   }
 
   function setTab(kind) {
@@ -661,6 +757,10 @@ const stats = [
     }
   }
 
+  document.querySelector("[data-activity-refresh]")?.addEventListener("click", () => {
+    loadActivity();
+  });
+
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => setTab(button.dataset.tab));
   });
@@ -793,6 +893,7 @@ const stats = [
           ? `Saved ${currentBook.title}. Refresh the site to see it.`
           : `Saved ${currentBook.title}. It will show on the site after the rebuild.`;
       }
+      loadActivity();
     } catch (error) {
       if (status) status.textContent = error.message;
     }
@@ -845,6 +946,7 @@ const stats = [
           ? `Saved ${currentArt.title}. Refresh the site to see it.`
           : `Saved ${currentArt.title}. It will show on the site after the rebuild.`;
       }
+      loadActivity();
     } catch (error) {
       if (status) status.textContent = error.message;
     }
@@ -915,6 +1017,7 @@ const stats = [
           ? `Saved ${currentSupply.title}. Refresh the site to see it.`
           : `Saved ${currentSupply.title}. It will show on the site after the rebuild.`;
       }
+      loadActivity();
     } catch (error) {
       if (status) status.textContent = error.message;
     }
@@ -955,6 +1058,7 @@ const stats = [
         body: JSON.stringify({ filename: file.name, contentBase64: toBase64(await file.arrayBuffer()) }),
       });
       if (log) log.textContent = data.log || "Done.";
+      loadActivity();
     } catch (error) {
       if (log) log.textContent = error.message;
     }

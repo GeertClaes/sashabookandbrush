@@ -5,6 +5,12 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  ACTIVITY_FILE,
+  appendActivity,
+  parseActivityLog,
+  stringifyActivity,
+} from "./lib/activity.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -116,6 +122,16 @@ function slugFromTitle(title) {
     .replace(/^-+|-+$/g, "");
 }
 
+async function recordLocalActivity(entry) {
+  try {
+    const file = path.join(ROOT, ACTIVITY_FILE);
+    const log = parseActivityLog(await readFile(file, "utf8").catch(() => ""));
+    await writeFile(file, stringifyActivity(appendActivity(log, { ...entry, by: "local" })), "utf8");
+  } catch {
+    // Local activity log is best-effort.
+  }
+}
+
 async function removeFile(file) {
   try {
     await unlink(file);
@@ -209,6 +225,41 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    if ((pathname === "/activity" || pathname === "/api/activity") && req.method === "GET") {
+      const live = JSON.parse(
+        await readFile(path.join(ROOT, "src", "data", "goodreads-live.json"), "utf8").catch(() => "{}"),
+      );
+      const log = parseActivityLog(await readFile(path.join(ROOT, ACTIVITY_FILE), "utf8").catch(() => ""));
+      json(res, 200, {
+        ok: true,
+        sync: live.lastSync || {
+          at: live.updated || "",
+          ok: Boolean(live.updated),
+          source: "local",
+          readingCount: live.currentlyReading?.length || 0,
+          upNextCount: live.upNext?.length || 0,
+          changes: [],
+          warning: null,
+          error: null,
+          reading: (live.currentlyReading || []).map((book) => ({
+            title: book.title,
+            progress: book.progress ?? null,
+          })),
+        },
+        events: log.events,
+        site: {
+          state: "local",
+          label: "Local editor — refresh the site to see file changes",
+          at: "",
+          trigger: "this computer",
+          live: true,
+          building: false,
+          deploymentsAvailable: false,
+        },
+      });
+      return;
+    }
+
     if (pathname === "/api/books" && req.method === "GET") {
       const q = (url.searchParams.get("q") || "").toLowerCase();
       const books = await listBooks();
@@ -234,6 +285,11 @@ const server = createServer(async (req, res) => {
       if (typeof body.amazon === "string") updates.amazon = affiliateValue(body.amazon);
       text = applyYamlFields(text, updates);
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+      await recordLocalActivity({
+        type: "admin",
+        title: `Updated ${updates.title || body.slug}`,
+        detail: "Saved on this computer. Refresh the site to see it.",
+      });
       json(res, 200, { ok: true });
       return;
     }

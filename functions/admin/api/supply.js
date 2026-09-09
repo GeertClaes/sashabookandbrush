@@ -1,4 +1,5 @@
 import { applyYamlFields, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
+import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, tryGetTextFile } from "./_lib/github.js";
 
 const MAX_NOTE = 8000;
@@ -30,7 +31,16 @@ export async function onRequestPost(context) {
       const filePath = `src/content/supplies/${slug}.md`;
       const existing = await tryGetTextFile(context.env, filePath);
       if (!existing) return json({ error: "Tool not found" }, 404);
-      await commitFiles(context.env, `Admin: delete supply ${slug}`, [{ path: filePath, delete: true }]);
+      await commitFiles(
+        context.env,
+        `Admin: delete supply ${slug}`,
+        await filesWithActivity(context.env, [{ path: filePath, delete: true }], {
+          type: "admin",
+          title: `Deleted tool ${slug}`,
+          detail: "It leaves the Art page after the site rebuilds (about a minute).",
+          by: context.data.email || "",
+        }),
+      );
       return json({ ok: true, slug, deleted: true });
     }
 
@@ -68,9 +78,16 @@ export async function onRequestPost(context) {
     }
     if (!text.endsWith("\n")) text += "\n";
 
-    await commitFiles(context.env, `Admin: ${existing ? "update" : "add"} supply ${slug}`, [
-      { path: filePath, content: text, encoding: "utf-8" },
-    ]);
+    await commitFiles(
+      context.env,
+      `Admin: ${existing ? "update" : "add"} supply ${slug}`,
+      await filesWithActivity(context.env, [{ path: filePath, content: text, encoding: "utf-8" }], {
+        type: "admin",
+        title: `${existing ? "Updated" : "Added"} ${title}`,
+        detail: "Tool saved. It shows on the site after the rebuild (about a minute).",
+        by: context.data.email || "",
+      }),
+    );
     return json({ ok: true, slug });
   } catch (error) {
     return fail(error, error instanceof Error && /invalid name/i.test(error.message) ? 400 : 500);
