@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-09T14:10:19.031Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "5 currently reading, 8 up next. No changes to currently reading.",
+      "by": "pages-build"
+    },
+    {
       "at": "2026-09-09T14:00:43.207Z",
       "type": "goodreads",
       "ok": true,
