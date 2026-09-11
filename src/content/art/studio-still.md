@@ -1,7 +1,6 @@
 ---
-title: "Studio still"
-medium: "Mixed"
-note: "Brushes, palette, checkered Kindle, and whatever I'm reading. The art desk is half the feed for a reason."
+title: "Frodo Baggins"
+medium: "Digital Painting on Procreate"
 featured: false
 order: 3
 ---

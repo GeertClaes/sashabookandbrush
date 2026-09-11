@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-11T23:51:50.806Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Frodo Baggins",
+      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-11T23:46:02.873Z",
       "type": "admin",
       "ok": true,
