@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-11T23:59:51.892Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Deleted painting mountain-study",
+      "detail": "It leaves the Art page after the site rebuilds (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-11T23:58:40.939Z",
       "type": "admin",
       "ok": true,
