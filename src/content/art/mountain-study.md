@@ -1,7 +1,7 @@
 ---
-title: "Mountain study"
-medium: "Acrylic"
-note: "Snow, distance, and a lot of tiny brushes. This one shows up on the grid between the book stacks."
+title: "The Mountains of Velaris"
+medium: "Acrylic on canvas"
+note: "Inspired by one of my favourite series by Sarah J Maas, the mountains of Velaris."
 featured: true
 order: 1
 ---
