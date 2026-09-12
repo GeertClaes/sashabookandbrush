@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-12T00:00:19.433Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Added The Mountains of Velaris",
+      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-11T23:59:51.892Z",
       "type": "admin",
       "ok": true,
