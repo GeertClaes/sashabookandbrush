@@ -311,9 +311,9 @@ const stats = [
               class="mb-4 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary"
             >
               <img data-art-preview class="hidden max-h-48 rounded object-cover shadow" alt="" />
-              <span data-art-drop-label>Drop a photo here, or click to choose</span>
+              <span data-art-drop-label>Drop a photo here, or click to choose. Large phone photos are resized.</span>
             </button>
-            <input type="file" data-art-image accept="image/jpeg,image/png,image/webp" class="hidden" />
+            <input type="file" data-art-image accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="hidden" />
             <div class="flex flex-wrap gap-2">
               <button type="button" data-art-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
                 Save painting
@@ -578,6 +578,43 @@ const stats = [
       binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
     }
     return btoa(binary);
+  }
+
+  async function blobToJpeg(file, maxBytes = 2 * 1024 * 1024) {
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file);
+    } catch {
+      const name = `${file.type} ${file.name}`.toLowerCase();
+      throw new Error(
+        name.includes("heic") || name.includes("heif")
+          ? "This iPhone photo is HEIC. Save it as JPG, or try Safari."
+          : "Use a JPG, PNG, or WebP photo.",
+      );
+    }
+    const maxEdge = 2000;
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    let quality = 0.88;
+    let blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    while (blob && blob.size > maxBytes && quality > 0.5) {
+      quality -= 0.08;
+      blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    }
+    if (!blob || blob.size > maxBytes) throw new Error("Photo is still too large after shrinking (2 MB max).");
+    return blob;
+  }
+
+  async function preparePhoto(file) {
+    const ext = `.${(file.name.split(".").pop() || "jpg").toLowerCase()}`;
+    const allowed = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+    const blob = file.size <= 2 * 1024 * 1024 && allowed.has(ext) ? file : await blobToJpeg(file);
+    const filename = blob === file ? file.name : "photo.jpg";
+    return { filename, contentBase64: toBase64(await blob.arrayBuffer()) };
   }
 
   function displayUrl(value) {
@@ -946,6 +983,8 @@ const stats = [
       currentArt.note = document.querySelector("[data-art-note]").value;
       currentArt.featured = document.querySelector("[data-art-featured]").checked;
       currentArt.order = Number(document.querySelector("[data-art-order]").value || 0);
+      const file = document.querySelector("[data-art-image]").files[0];
+      const photo = file ? await preparePhoto(file) : null;
       const created = await call("/art", {
         method: "POST",
         body: JSON.stringify({
@@ -956,29 +995,29 @@ const stats = [
           note: currentArt.note,
           featured: currentArt.featured,
           order: currentArt.order,
+          ...(photo || {}),
         }),
       });
       currentArt.slug = created.slug || currentArt.slug;
       currentArt.create = false;
+      if (created.image) currentArt.image = created.image;
       document.querySelector("[data-art-delete]")?.classList.remove("hidden");
       const existing = artPieces.find((item) => item.slug === currentArt.slug);
       if (existing) Object.assign(existing, currentArt);
       else artPieces.push({ ...currentArt });
       renderArtList();
-      const file = document.querySelector("[data-art-image]").files[0];
       if (file) {
-        if (file.size > 2 * 1024 * 1024) throw new Error("Photo is too large (2 MB max)");
-        const data = await call("/cover", {
-          method: "POST",
-          body: JSON.stringify({
-            kind: "art",
-            slug: currentArt.slug,
-            filename: file.name,
-            contentBase64: toBase64(await file.arrayBuffer()),
-          }),
-        });
-        currentArt.image = data.image;
-        resetDrop("art", data.image, "Photo saved");
+        const preview = document.querySelector("[data-art-preview]");
+        const label = document.querySelector("[data-art-drop-label]");
+        if (preview && previewUrls.art) {
+          preview.src = previewUrls.art;
+          preview.classList.remove("hidden");
+        }
+        if (label) {
+          label.textContent = isDev
+            ? "Photo saved. Refresh the Art page to see it."
+            : "Photo saved. It shows on the site after the rebuild.";
+        }
       }
       if (status) {
         status.textContent = isDev

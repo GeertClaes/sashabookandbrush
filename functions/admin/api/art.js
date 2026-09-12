@@ -1,5 +1,6 @@
 import { applyYamlFields, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
+import { parseImageUpload } from "./_lib/photo.js";
 import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
 
 const MAX_NOTE = 8000;
@@ -84,7 +85,10 @@ export async function onRequestPost(context) {
     const medium = String(body.medium || "Acrylic").trim() || "Acrylic";
     const featured = Boolean(body.featured);
     const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
-    const image = typeof body.image === "string" ? body.image.trim() : "";
+    const parsed = parseImageUpload(body, slug);
+    if (!parsed.ok) return json({ error: parsed.error }, 400);
+    const photo = parsed.photo;
+    const image = photo?.publicPath || (typeof body.image === "string" ? body.image.trim() : "");
 
     let text = existing;
     if (!text) {
@@ -96,17 +100,24 @@ export async function onRequestPost(context) {
     }
     if (!text.endsWith("\n")) text += "\n";
 
+    const files = [{ path: filePath, content: text, encoding: "utf-8" }];
+    if (photo) {
+      files.push({ path: photo.artRepoPath, content: photo.contentBase64, encoding: "base64" });
+    }
+
     await commitFiles(
       context.env,
       `Admin: ${existing ? "update" : "add"} art ${slug}`,
-      await filesWithActivity(context.env, [{ path: filePath, content: text, encoding: "utf-8" }], {
+      await filesWithActivity(context.env, files, {
         type: "admin",
         title: `${existing ? "Updated" : "Added"} ${title}`,
-        detail: "Painting saved. It shows on the site after the rebuild (about a minute).",
+        detail: photo
+          ? "Painting and photo saved. They show on the site after the rebuild (about a minute)."
+          : "Painting saved. It shows on the site after the rebuild (about a minute).",
         by: context.data.email || "",
       }),
     );
-    return json({ ok: true, slug });
+    return json({ ok: true, slug, image: image || undefined });
   } catch (error) {
     return fail(error, error instanceof Error && /invalid name/i.test(error.message) ? 400 : 500);
   }

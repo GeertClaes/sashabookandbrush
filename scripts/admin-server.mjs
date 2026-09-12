@@ -11,6 +11,7 @@ import {
   parseActivityLog,
   stringifyActivity,
 } from "./lib/activity.mjs";
+import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -341,7 +342,13 @@ const server = createServer(async (req, res) => {
       const note = typeof body.note === "string" ? body.note : "";
       const featured = Boolean(body.featured);
       const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
-      const image = typeof body.image === "string" ? body.image.trim() : "";
+      const parsed = parseImageUpload(body, slug);
+      if (!parsed.ok) {
+        json(res, 400, { error: parsed.error });
+        return;
+      }
+      const photo = parsed.photo;
+      const image = photo?.publicPath || (typeof body.image === "string" ? body.image.trim() : "");
       let text = existing;
       if (!text) {
         text = `---
@@ -359,7 +366,11 @@ ${image ? `image: ${yamlString(image)}\n` : ""}---
       }
       await mkdir(ART_DIR, { recursive: true });
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-      json(res, 200, { ok: true, slug });
+      if (photo) {
+        await mkdir(ART_IMAGES_DIR, { recursive: true });
+        await writeFile(path.join(ART_IMAGES_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
+      }
+      json(res, 200, { ok: true, slug, image: image || undefined });
       return;
     }
 
@@ -445,25 +456,32 @@ order: ${order}
       const body = JSON.parse((await readBody(req)) || "{}");
       const kind = body.kind === "art" ? "art" : "book";
       const slug = path.basename(body.slug);
-      const ext = path.extname(body.filename || ".jpg").toLowerCase() || ".jpg";
-      const safeExt = [".jpg", ".jpeg", ".png", ".webp"].includes(ext) ? ext : ".jpg";
-      const filename = `${slug}${safeExt}`;
-      if (kind === "art") {
-        await mkdir(ART_IMAGES_DIR, { recursive: true });
-        await writeFile(path.join(ART_IMAGES_DIR, filename), Buffer.from(body.contentBase64, "base64"));
-        const file = path.join(ART_DIR, `${slug}.md`);
-        let text = await readFile(file, "utf8");
-        text = applyYamlFields(text, { image: `/images/art/${filename}` });
-        await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-        json(res, 200, { ok: true, image: `/images/art/${filename}` });
+      const parsed = parseImageUpload(body, slug);
+      if (!parsed.ok) {
+        json(res, 400, { error: parsed.error });
         return;
       }
-      await writeFile(path.join(COVERS_DIR, filename), Buffer.from(body.contentBase64, "base64"));
+      if (!parsed.photo) {
+        json(res, 400, { error: "Missing image" });
+        return;
+      }
+      const photo = parsed.photo;
+      if (kind === "art") {
+        await mkdir(ART_IMAGES_DIR, { recursive: true });
+        await writeFile(path.join(ART_IMAGES_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
+        const file = path.join(ART_DIR, `${slug}.md`);
+        let text = await readFile(file, "utf8");
+        text = applyYamlFields(text, { image: photo.publicPath });
+        await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+        json(res, 200, { ok: true, image: photo.publicPath });
+        return;
+      }
+      await writeFile(path.join(COVERS_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
       const file = path.join(BOOKS_DIR, `${slug}.md`);
       let text = await readFile(file, "utf8");
-      text = applyYamlFields(text, { cover: filename });
+      text = applyYamlFields(text, { cover: photo.filename });
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-      json(res, 200, { ok: true, cover: filename });
+      json(res, 200, { ok: true, cover: photo.filename });
       return;
     }
 
