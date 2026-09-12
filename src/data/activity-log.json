@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-12T00:01:57.896Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Photo for girl-in-turmoil",
+      "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-12T00:01:54.881Z",
       "type": "admin",
       "ok": true,
