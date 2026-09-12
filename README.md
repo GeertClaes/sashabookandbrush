@@ -236,14 +236,14 @@ Then open `/admin` on the dev server. Optional `ADMIN_PASSWORD` in `.env`.
 ---
 title: "Mountain study"
 medium: "Acrylic"
-image: "/images/art/mountain-study.jpg"
+image: "mountain-study.jpg"
 note: "A short note about the piece."
 featured: true
 order: 1
 ---
 ```
 
-3. Put the photo in `public/images/art/` and point `image` at that path. Leave `image` out until you have one — the card uses a branded placeholder until the photo is up.
+3. Put the photo in `src/assets/art/` and point `image` at that filename. Leave `image` out until you have one — the card uses a branded placeholder until the photo is up.
 4. Set `featured: true` to show it on the home page.
 
 ### Add or edit art supplies

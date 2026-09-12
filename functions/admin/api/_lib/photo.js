@@ -24,8 +24,8 @@ export function parseImageUpload(body, slug) {
     photo: {
       filename,
       contentBase64,
-      publicPath: `/images/art/${filename}`,
-      artRepoPath: `public/images/art/${filename}`,
+      publicPath: filename,
+      artRepoPath: `src/assets/art/${filename}`,
       bookRepoPath: `src/assets/covers/${filename}`,
     },
   };

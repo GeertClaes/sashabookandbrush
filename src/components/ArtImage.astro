@@ -1,0 +1,32 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import MediaPlaceholder from "./MediaPlaceholder.astro";
+
+interface Props {
+  image: string;
+  alt: string;
+  class?: string;
+  width: number;
+  height: number;
+  sizes?: string;
+}
+
+const { image: imagePath, alt, class: className = "", width, height, sizes = `${width}px` } = Astro.props;
+
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/art/*.{jpg,jpeg,png,webp}",
+  { eager: true },
+);
+const filename = (imagePath || "").split("/").pop() || "";
+const match = filename ? Object.entries(modules).find(([key]) => key.endsWith(`/${filename}`)) : undefined;
+const image = match?.[1].default;
+---
+
+{
+  image ? (
+    <Image src={image} alt={alt} width={width} height={height} sizes={sizes} class={className} />
+  ) : (
+    <MediaPlaceholder kind="art" class={className} label={alt} width={width} height={height} />
+  )
+}

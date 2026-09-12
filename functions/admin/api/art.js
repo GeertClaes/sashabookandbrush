@@ -17,8 +17,8 @@ function yamlField(text, key) {
 
 function artPhotoRepoPath(image) {
   const value = String(image || "").trim();
-  const match = value.match(/^\/images\/art\/([a-z0-9._-]+)$/i);
-  return match ? `public/images/art/${match[1]}` : "";
+  const match = value.match(/^(?:\/images\/art\/)?([a-z0-9._-]+)$/i);
+  return match ? `src/assets/art/${match[1]}` : "";
 }
 
 async function deletePainting(env, slug, email = "") {

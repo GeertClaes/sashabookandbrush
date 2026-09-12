@@ -38,7 +38,7 @@ const BOOKS_DIR = path.join(ROOT, "src", "content", "books");
 const ART_DIR = path.join(ROOT, "src", "content", "art");
 const SUPPLIES_DIR = path.join(ROOT, "src", "content", "supplies");
 const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
-const ART_IMAGES_DIR = path.join(ROOT, "public", "images", "art");
+const ART_IMAGES_DIR = path.join(ROOT, "src", "assets", "art");
 const DATA_DIR = path.join(ROOT, "data");
 const PORT = Number(process.env.ADMIN_PORT || 8787);
 const PASSWORD = process.env.ADMIN_PASSWORD || "";
@@ -143,7 +143,7 @@ async function removeFile(file) {
 
 function artPhotoFile(image) {
   const value = String(image || "").trim();
-  const match = value.match(/^\/images\/art\/([a-z0-9._-]+)$/i);
+  const match = value.match(/^(?:\/images\/art\/)?([a-z0-9._-]+)$/i);
   return match ? path.join(ART_IMAGES_DIR, match[1]) : "";
 }
 
