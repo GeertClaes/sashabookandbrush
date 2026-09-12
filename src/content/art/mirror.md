@@ -1,7 +1,8 @@
 ---
 title: "Mirror"
-medium: "Acrylic"
-note: "A girl looking back. I painted this between chapters and it still lives on the easel in more than one photo."
+medium: "Acrylic on canvas"
+note: "This is inspired by a recent book club read - The Names by Florence Knapp. "
 featured: true
 order: 2
+image: "/images/art/mirror.jpg"
 ---

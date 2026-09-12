@@ -2,7 +2,7 @@
 title: "Liquitex Basics acrylics"
 brand: "Liquitex"
 category: "Paint"
-note: "The tubes that actually get squeezed. Not precious, just reliable colour for landscapes and the odd portrait between chapters."
+note: "Some of my most used acrylic paints. "
 amazon: "#"
 featured: true
 order: 1
