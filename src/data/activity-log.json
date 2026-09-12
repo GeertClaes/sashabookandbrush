@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-12T08:11:30.482Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Studio still",
+      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
+      "by": "geert.wl.claes@gmail.com"
+    },
+    {
       "at": "2026-09-12T00:01:57.896Z",
       "type": "admin",
       "ok": true,
