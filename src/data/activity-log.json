@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-13T19:47:52.821Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Bilbo Baggins",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-13T19:47:44.356Z",
       "type": "admin",
       "ok": true,
