@@ -108,52 +108,43 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
           <p class="mb-8 text-[11px] leading-snug text-sage">
             Affiliate links. I earn a small commission at no extra cost to you.
           </p>
-          <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="grid grid-cols-2 items-stretch gap-5 sm:grid-cols-3 xl:grid-cols-5">
             {currentlyReading.map((book) => {
               const progress = liveProgress(live, book.data.title, book.data.goodreadsId);
               const buy = affiliateLinks(book.data);
               return (
-                <article class="flex min-w-0 gap-4">
-                  <a href={bookHref(book.id)} class="group shrink-0">
+                <article class="flex min-w-0 flex-col">
+                  <a href={bookHref(book.id)} class="group min-w-0">
                     <CoverImage
                       cover={book.data.cover}
                       alt={`${book.data.title} by ${book.data.author}`}
-                      class="h-48 w-32 rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-52 sm:w-36"
-                      width={144}
-                      height={208}
+                      class="mb-3 aspect-2/3 w-full rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5"
+                      width={180}
+                      height={270}
+                      sizes="(min-width: 1280px) 12vw, (min-width: 640px) 22vw, 45vw"
                     />
-                  </a>
-                  <div class="min-w-0 flex-1">
-                    <a href={bookHref(book.id)} class="group block">
-                      <h2 class="font-display text-lg font-semibold leading-snug text-cream">
-                        {book.data.title}
-                      </h2>
-                      <p class="mt-1 text-sm text-sage">{book.data.author}</p>
-                      {typeof progress === "number" && (
-                        <div class="mt-3 max-w-36">
-                          <div class="h-1.5 overflow-hidden rounded-full bg-cream/20">
-                            <div class="h-full rounded-full bg-sage" style={`width: ${progress}%`}></div>
-                          </div>
-                          <p class="mt-1 text-xs text-sage">{progress}%</p>
+                    <h2 class="font-display line-clamp-2 text-base font-semibold leading-snug text-cream">
+                      {book.data.title}
+                    </h2>
+                    <p class="mt-1 line-clamp-1 text-sm text-sage">{book.data.author}</p>
+                    {typeof progress === "number" && (
+                      <div class="mt-3">
+                        <div class="h-1.5 overflow-hidden rounded-full bg-cream/20">
+                          <div class="h-full rounded-full bg-sage" style={`width: ${progress}%`}></div>
                         </div>
-                      )}
-                      {book.data.note && (
-                        <p class="mt-3 line-clamp-4 text-sm leading-relaxed text-parchment italic">
-                          “{book.data.note}”
-                        </p>
-                      )}
-                    </a>
-                    <div class="mt-4">
-                      <AffiliateButtons
-                        bookshop={buy.bookshop}
-                        amazon={buy.amazon}
-                        slug={book.id}
-                        title={book.data.title}
-                        tone="dark"
-                        hideHint
-                        stack
-                      />
-                    </div>
+                        <p class="mt-1 text-xs text-sage">{progress}%</p>
+                      </div>
+                    )}
+                  </a>
+                  <div class="mt-auto pt-3">
+                    <AffiliateButtons
+                      bookshop={buy.bookshop}
+                      amazon={buy.amazon}
+                      slug={book.id}
+                      title={book.data.title}
+                      tone="dark"
+                      hideHint
+                    />
                   </div>
                 </article>
               );
@@ -232,6 +223,9 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
           <h2 class="font-display text-3xl font-semibold leading-tight text-foreground md:text-4xl">
             Reads I'm recommending<br /><em class="font-light italic">right now</em>
           </h2>
+          <p class="mt-3 text-[11px] leading-snug text-muted-foreground">
+            Affiliate links. I earn a small commission at no extra cost to you.
+          </p>
         </div>
         <a
           href="/recommendations"
@@ -240,7 +234,7 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
           Browse all →
         </a>
       </div>
-      <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
+      <div class="grid grid-cols-2 items-stretch gap-5 md:grid-cols-4">
         {
           featured.map((book) => (
             <BookCard {...book.data} href={bookHref(book.id)} slug={book.id} showBuy />

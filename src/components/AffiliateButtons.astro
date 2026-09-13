@@ -8,7 +8,6 @@ interface Props {
   slug?: string;
   tone?: "light" | "dark";
   hideHint?: boolean;
-  stack?: boolean;
 }
 
 const {
@@ -18,22 +17,24 @@ const {
   slug = "",
   tone = "light",
   hideHint = false,
-  stack = false,
 } = Astro.props;
 
 const shopUrl = realUrl(bookshop);
 const amazonUrl = realUrl(amazon);
 const hasLinks = Boolean(shopUrl || amazonUrl);
+const pair = Boolean(shopUrl && amazonUrl);
 const dark = tone === "dark";
 const affiliateRel = "sponsored noopener noreferrer";
-const bookshopLabel = title ? `Buy ${title} on Bookshop.org` : undefined;
-const amazonLabel = title ? `Buy ${title} on Amazon` : undefined;
+const bookshopLabel = title ? `Buy ${title} on Bookshop.org` : "Buy on Bookshop.org";
+const amazonLabel = title ? `Buy ${title} on Amazon` : "Buy on Amazon";
+const chip =
+  "inline-flex min-w-0 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium leading-none transition-opacity hover:opacity-90";
 ---
 
 {
   hasLinks && (
-    <div class="space-y-2">
-      <div class:list={[stack ? "flex flex-col items-stretch gap-2" : "flex flex-wrap gap-2"]}>
+    <div class="space-y-1.5">
+      <div class:list={[pair ? "grid grid-cols-2 gap-1.5" : "flex"]}>
         {shopUrl && (
           <a
             href={shopUrl}
@@ -43,22 +44,13 @@ const amazonLabel = title ? `Buy ${title} on Amazon` : undefined;
             data-umami-event-retailer="bookshop"
             data-umami-event-slug={slug || undefined}
             class:list={[
-              "inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-90",
-              stack && "w-full justify-center",
+              chip,
               dark
                 ? "border border-cream/70 bg-cream text-secondary"
                 : "bg-secondary text-secondary-foreground",
             ]}
           >
-            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              ></path>
-            </svg>
-            Bookshop.org
+            Bookshop
           </a>
         )}
         {amazonUrl && (
@@ -69,27 +61,8 @@ const amazonLabel = title ? `Buy ${title} on Amazon` : undefined;
             data-umami-event="affiliate-click"
             data-umami-event-retailer="amazon"
             data-umami-event-slug={slug || undefined}
-            class:list={[
-              "inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-90",
-              stack && "w-full justify-center",
-              dark ? "bg-accent text-cream" : "bg-accent text-primary-foreground",
-            ]}
+            class:list={[chip, dark ? "bg-accent text-cream" : "bg-accent text-primary-foreground"]}
           >
-            <svg class="h-3 w-3.5" viewBox="0 0 24 16" fill="none" aria-hidden="true">
-              <path
-                d="M1.5 11.2c4.8 3.4 11.6 4.2 17.6 2.1"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-              />
-              <path
-                d="M17.4 9.6l2.6 3.6 2.2-2.4"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
             Amazon
           </a>
         )}

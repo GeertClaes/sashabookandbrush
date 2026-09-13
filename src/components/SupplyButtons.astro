@@ -20,8 +20,8 @@ const shopAria = title ? `Buy ${title} at ${shopLabel}` : undefined;
 
 {
   hasLinks && (
-    <div class="mt-4 space-y-2">
-      <div class="flex flex-wrap gap-2">
+    <div class="mt-4 space-y-1.5">
+      <div class:list={[amazonUrl && shopUrl ? "grid grid-cols-2 gap-1.5" : "flex"]}>
         {amazonUrl && (
           <a
             href={amazonUrl}
@@ -30,7 +30,7 @@ const shopAria = title ? `Buy ${title} at ${shopLabel}` : undefined;
             data-umami-event="affiliate-click"
             data-umami-event-retailer="amazon"
             data-umami-event-slug={slug || undefined}
-            class="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium bg-secondary text-secondary-foreground hover:opacity-90 transition-opacity"
+            class="inline-flex min-w-0 items-center justify-center rounded-md bg-secondary px-2 py-1.5 text-[11px] font-medium leading-none text-secondary-foreground transition-opacity hover:opacity-90"
           >
             Amazon
           </a>
@@ -43,7 +43,7 @@ const shopAria = title ? `Buy ${title} at ${shopLabel}` : undefined;
             data-umami-event="affiliate-click"
             data-umami-event-retailer="other"
             data-umami-event-slug={slug || undefined}
-            class="inline-flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+            class="inline-flex min-w-0 items-center justify-center rounded-md border border-border px-2 py-1.5 text-[11px] font-medium leading-none text-muted-foreground transition-colors hover:border-primary hover:text-primary"
           >
             {shopLabel}
           </a>

@@ -75,47 +75,54 @@
     "lede": "Every book here is one I've actually read and rated. Browse by series or five-star loves, or search the full shelf."
   },
   "stats": [
-    { "label": "Instagram followers", "value": "3,060" },
-    { "label": "Goodreads books", "value": "543" },
-    { "label": "Ratings", "value": "276" },
-    { "label": "Written reviews", "value": "24" }
+    { "label": "On Instagram", "value": "3,060" },
+    { "label": "Books on Goodreads", "value": "543" },
+    { "label": "Ratings given", "value": "276" },
+    { "label": "Notes written", "value": "24" }
   ],
-  "workIntro": "I partner with publishers, authors, and book-adjacent brands on honest romantasy and bookish-art content for a small, engaged reading community. ARC reviews, pretty photography, and the occasional painting in the frame.",
+  "workIntro": "If your book would actually live on my nightstand — romantasy, pretty editions, something I'd press into a friend's hands — I'd love to hear from you. DMs on Instagram; that's the inbox I actually see.",
+  "work": {
+    "eyebrow": "Say hello",
+    "headline": "If I'd lend it to a friend,",
+    "headlineItalic": "I'll post it.",
+    "lede": "I'm Sasha: romantasy, special editions, and the paintings I make between chapters. Publishers, authors, and bookish brands are welcome — as long as the title actually fits the shelves.",
+    "note": "I'm an Aussie reading in Wales, usually with Dobby stealing the good blanket and a sticker-covered Kindle nearby. I don't do fake enthusiasm. If it shows up on the grid or on this site, I liked it."
+  },
   "offers": [
     {
-      "title": "ARC Reviews",
-      "desc": "Honest reviews for advance copies — on Instagram and this site, flagged clearly as ARCs."
+      "title": "Early copies",
+      "desc": "I'll read it like a reader, not a billboard. Honest thoughts on Instagram and here, clearly flagged as an ARC."
     },
     {
-      "title": "Paid Collaborations",
-      "desc": "Feed posts, Reels, and Stories. Your brief, my voice, no fake enthusiasm."
+      "title": "Pretty posts",
+      "desc": "Reels, Stories, and feed photos from the nook. Your book, my lighting, my voice — no scripted gushing."
     },
     {
-      "title": "Gifted Reviews",
-      "desc": "Books and bookish products in exchange for organic coverage when they actually fit the grid."
+      "title": "Gifted, if it fits",
+      "desc": "Send it if it belongs next to the TBR. I'll share it because I want to, not because I have to."
     },
     {
-      "title": "Books + art",
-      "desc": "Flat lays, painted stills, and site features. The brush in the name is not decorative."
+      "title": "Books and a little paint",
+      "desc": "The brush in the name is real. Painted stills, wet acrylics in the frame, the studio between chapters."
     }
   ],
   "packages": [
     {
-      "title": "Stories only",
-      "desc": "Instagram Stories coverage for a title or campaign."
+      "title": "A few Stories",
+      "desc": "The casual version — in the nook, on the Kindle, in the wild. Easy to tap through."
     },
     {
-      "title": "Reel + Stories",
-      "desc": "A dedicated Reel plus supporting Stories."
+      "title": "A Reel and Stories",
+      "desc": "The one people save, plus a couple of Stories around it so it doesn't vanish in a day."
     },
     {
-      "title": "Full review package",
-      "desc": "Feed post, Reel, Stories, and a write-up on this site."
+      "title": "The full sit-down",
+      "desc": "Feed post, Reel, Stories, and a note on this site so it lives somewhere quieter than the algorithm."
     }
   ],
   "credentials": {
-    "title": "PR influencer",
-    "org": "Rattle the Stars"
+    "title": "Also",
+    "org": "ARC reader and Rattle the Stars PR influencer — a fancy way of saying I get books early, and I still only post the ones I'd recommend to a friend."
   },
   "shop": {
     "eyebrow": "Coming soon",

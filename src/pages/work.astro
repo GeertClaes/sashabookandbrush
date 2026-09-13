@@ -2,37 +2,64 @@
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const { workIntro, stats, offers, packages, credentials, instagram, handle } = site;
+const { work, workIntro, stats, offers, packages, credentials, instagram, handle, about } = site;
 ---
 
-<BaseLayout
-  title="Work with me"
-  description={workIntro}
->
+<BaseLayout title="Work with me" description={workIntro}>
   <div class="min-h-screen bg-background">
     <div class="mx-auto max-w-5xl px-6 py-16 md:px-12">
-      <div class="max-w-2xl">
-        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Collaborations</p>
-        <h1 class="font-display mb-5 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
-          Work with me
-        </h1>
-        <p class="mb-8 text-base leading-relaxed text-muted-foreground">{workIntro}</p>
-        <a
-          href={instagram}
-          class="inline-flex items-center gap-2 rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-            ></path>
-          </svg>
-          Message {handle}
-        </a>
+      <div class="grid items-start gap-12 md:grid-cols-5">
+        <div class="md:col-span-2">
+          <div class="md:sticky md:top-28">
+            <div class="mb-4 aspect-[3/4] overflow-hidden rounded-lg bg-muted">
+              <img
+                src={about.image}
+                alt={about.imageAlt}
+                class="h-full w-full object-cover dark:hidden"
+                width="600"
+                height="800"
+              />
+              <img
+                src={about.imageDark}
+                alt={about.imageAlt}
+                class="hidden h-full w-full object-cover dark:block"
+                width="600"
+                height="800"
+              />
+            </div>
+            <p class="text-sm leading-relaxed text-muted-foreground">
+              The nook, the lamps, the shelves. This is where your book would sit.
+            </p>
+          </div>
+        </div>
+
+        <div class="md:col-span-3">
+          <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{work.eyebrow}</p>
+          <h1 class="font-display mb-6 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
+            {work.headline}<br />
+            <em class="font-light italic">{work.headlineItalic}</em>
+          </h1>
+          <div class="max-w-none space-y-4 leading-relaxed text-foreground">
+            <p>{work.lede}</p>
+            <p>{work.note}</p>
+          </div>
+          <a
+            href={instagram}
+            class="mt-8 inline-flex items-center gap-2 rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+              ></path>
+            </svg>
+            DM me on Instagram
+          </a>
+        </div>
       </div>
 
-      <dl class="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <dl class="mt-16 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {
           stats.map((item) => (
             <div class="rounded-lg border border-border bg-card px-4 py-3">
@@ -44,14 +71,18 @@ const { workIntro, stats, offers, packages, credentials, instagram, handle } = s
       </dl>
 
       <section class="mt-16">
-        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">What I do</p>
-        <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">Honest coverage, in my voice</h2>
+        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">What I like making</p>
+        <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">The same energy as the grid</h2>
+        <p class="mb-8 max-w-2xl leading-relaxed text-muted-foreground">
+          Small, bookish, a bit painterly. If it wouldn't look at home next to a Maas stack or a wet canvas, it
+          probably isn't for me — and that's alright.
+        </p>
         <div class="grid gap-4 sm:grid-cols-2">
           {
             offers.map((offer) => (
               <div class="rounded-lg border border-border bg-card p-5">
                 <h3 class="font-display text-lg font-semibold text-foreground">{offer.title}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{offer.desc}</p>
+                <p class="mt-2 text-sm leading-relaxed text-foreground/80">{offer.desc}</p>
               </div>
             ))
           }
@@ -59,26 +90,49 @@ const { workIntro, stats, offers, packages, credentials, instagram, handle } = s
       </section>
 
       <section class="mt-16">
-        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Packages</p>
-        <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">How we can work</h2>
+        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">If we work together</p>
+        <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">A few ways it can look</h2>
+        <p class="mb-8 max-w-2xl leading-relaxed text-muted-foreground">
+          These are starting points, not a menu I recite. Tell me the book and we'll shape it around what actually
+          suits.
+        </p>
         <div class="grid gap-4 md:grid-cols-3">
           {
             packages.map((item) => (
               <div class="rounded-lg border border-border bg-card p-5">
                 <h3 class="font-display text-lg font-semibold text-foreground">{item.title}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+                <p class="mt-2 text-sm leading-relaxed text-foreground/80">{item.desc}</p>
               </div>
             ))
           }
         </div>
-        <p class="mt-4 text-sm text-muted-foreground">Rates on request via Instagram.</p>
+        <p class="mt-5 text-sm leading-relaxed text-muted-foreground">
+          I don't put prices on the internet. Slide into {handle} and we'll figure out what fits.
+        </p>
       </section>
 
-      <section class="mt-16 rounded-lg border border-border bg-card p-5">
+      <section class="mt-16 rounded-lg border border-border bg-card p-6">
         <p class="text-xs font-medium tracking-widest text-accent uppercase">{credentials.title}</p>
-        <p class="font-display mt-1 text-xl font-semibold text-foreground">{credentials.org}</p>
+        <p class="mt-2 leading-relaxed text-foreground">{credentials.org}</p>
+      </section>
+
+      <section class="mt-16 max-w-2xl">
+        <h2 class="font-display mb-4 text-2xl font-semibold text-foreground">Come say hi</h2>
+        <p class="mb-6 leading-relaxed text-foreground">
+          If a title belongs on these shelves, I'd rather hear about it in a DM than a cold pitch deck. Bring the
+          book. I'll bring the nook, the Kindle, and probably a cat in the background.
+        </p>
+        <a
+          href={instagram}
+          class="inline-flex items-center gap-2 rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Message {handle}
+        </a>
       </section>
     </div>
   </div>
 </BaseLayout>
+
 
