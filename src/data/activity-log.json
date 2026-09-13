@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-13T19:35:44.119Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Deleted painting the-mountains-of-velaris",
+      "detail": "It leaves the Art page after the site rebuilds (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-13T17:36:16.154Z",
       "type": "admin",
       "ok": true,
