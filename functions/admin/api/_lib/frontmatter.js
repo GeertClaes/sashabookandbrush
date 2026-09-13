@@ -1,3 +1,9 @@
+export function emptyAffiliateUrl(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed || trimmed === "#") return "";
+  return trimmed;
+}
+
 export function yamlString(value) {
   return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n")}"`;
 }

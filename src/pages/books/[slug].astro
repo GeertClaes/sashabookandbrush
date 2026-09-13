@@ -3,10 +3,13 @@ import AffiliateButtons from "../../components/AffiliateButtons.astro";
 import CoverImage from "../../components/CoverImage.astro";
 import StarRating from "../../components/StarRating.astro";
 import live from "../../data/goodreads-live.json";
+import site from "../../data/site.json";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { affiliateLinks } from "../../lib/affiliates";
 import { bookHref, formatFullDate, pageLength, rereadLabel } from "../../lib/books";
+import { coverModule } from "../../lib/covers";
 import { liveProgress } from "../../lib/live";
+import { getImage } from "astro:assets";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
@@ -50,9 +53,18 @@ const moreByAuthor = (await getCollection("books"))
   .slice(0, 4);
 const buy = affiliateLinks(data);
 const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : null;
+const cover = coverModule(data.cover);
+const og = cover ? await getImage({ src: cover, width: 800, height: 1200, format: "jpg" }) : null;
 ---
 
-<BaseLayout title={data.title} description={description}>
+<BaseLayout
+  title={data.title}
+  description={description}
+  image={og?.src ?? site.share.image}
+  imageAlt={`${data.title} by ${data.author}`}
+  imageWidth={og ? Number(og.attributes.width) : 1200}
+  imageHeight={og ? Number(og.attributes.height) : 630}
+>
   <article class="min-h-screen bg-background">
     <div class="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-16">
       <p class="mb-6 md:mb-8">
@@ -191,7 +203,7 @@ const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : nu
           }
 
           <div class="mt-6">
-            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} />
+            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} title={data.title} slug={book.id} />
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ function cleanIsbn(value?: string) {
   return String(value || "").replace(/[^\dXx]/g, "");
 }
 
-function realUrl(value?: string) {
+export function realUrl(value?: string) {
   const raw = String(value || "").trim();
   if (!raw || raw === "#") return "";
   return /^https?:\/\//i.test(raw) ? raw : "";

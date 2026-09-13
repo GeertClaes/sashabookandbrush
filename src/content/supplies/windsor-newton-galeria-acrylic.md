@@ -1,9 +1,8 @@
 ---
-title: "Windsor & Newton Galeria acrylic"
-brand: "Windsor & Newton"
+title: "Winsor & Newton Galeria acrylic"
+brand: "Winsor & Newton"
 category: "Paint"
 note: "Classic and always great quality. "
-amazon: "#"
 featured: false
 order: 5
 ---

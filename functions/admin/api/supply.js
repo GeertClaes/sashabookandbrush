@@ -1,23 +1,18 @@
-import { applyYamlFields, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
+import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, tryGetTextFile } from "./_lib/github.js";
 
 const MAX_NOTE = 8000;
 
-function affiliateValue(value) {
-  const trimmed = String(value || "").trim();
-  return !trimmed || trimmed === "#" ? "#" : trimmed;
-}
-
 function supplyMarkdown({ title, brand, category, note, amazon, shop, shopLabel, featured, order }) {
+  const amazonLine = amazon ? `amazon: ${yamlString(amazon)}\n` : "";
   const shopLines = shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : "";
   return `---
 title: ${yamlString(title)}
 brand: ${yamlString(brand)}
 category: ${yamlString(category)}
 note: ${yamlString(note)}
-amazon: ${yamlString(amazon)}
-${shopLines}featured: ${featured}
+${amazonLine}${shopLines}featured: ${featured}
 order: ${order}
 ---
 `;
@@ -63,8 +58,8 @@ export async function onRequestPost(context) {
 
     const brand = String(body.brand || "").trim();
     const category = String(body.category || "Studio").trim() || "Studio";
-    const amazon = affiliateValue(body.amazon);
-    const shop = String(body.shop || "").trim();
+    const amazon = emptyAffiliateUrl(body.amazon);
+    const shop = emptyAffiliateUrl(body.shop);
     const shopLabel = String(body.shopLabel || "").trim();
     const featured = Boolean(body.featured);
     const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;

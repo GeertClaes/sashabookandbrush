@@ -21,6 +21,7 @@ interface Props {
   dateAdded?: string;
   variant?: "grid" | "row";
   href?: string;
+  slug?: string;
   showBuy?: boolean;
 }
 
@@ -39,6 +40,7 @@ const {
   dateRead,
   variant = "grid",
   href,
+  slug = "",
   showBuy = false,
 } = Astro.props;
 
@@ -178,7 +180,7 @@ const cardClass = [
         )}
         {showBuy && (
           <div class="px-4 pb-4">
-            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} />
+            <AffiliateButtons bookshop={buy.bookshop} amazon={buy.amazon} title={title} slug={slug} />
           </div>
         )}
       </>

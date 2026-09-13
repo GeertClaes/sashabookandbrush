@@ -1,56 +1,103 @@
 ---
+import { realUrl } from "../lib/affiliates";
+
 interface Props {
   bookshop?: string;
   amazon?: string;
+  title?: string;
+  slug?: string;
+  tone?: "light" | "dark";
+  hideHint?: boolean;
+  stack?: boolean;
 }
 
-const { bookshop = "", amazon = "" } = Astro.props;
+const {
+  bookshop = "",
+  amazon = "",
+  title = "",
+  slug = "",
+  tone = "light",
+  hideHint = false,
+  stack = false,
+} = Astro.props;
+
+const shopUrl = realUrl(bookshop);
+const amazonUrl = realUrl(amazon);
+const hasLinks = Boolean(shopUrl || amazonUrl);
+const dark = tone === "dark";
 const affiliateRel = "sponsored noopener noreferrer";
+const bookshopLabel = title ? `Buy ${title} on Bookshop.org` : undefined;
+const amazonLabel = title ? `Buy ${title} on Amazon` : undefined;
 ---
 
 {
-  (bookshop || amazon) && (
-    <div class="flex flex-wrap gap-2">
-      {bookshop && (
-        <a
-          href={bookshop}
-          rel={affiliateRel}
-          class="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium bg-secondary text-secondary-foreground hover:opacity-90 transition-opacity"
-        >
-          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-            ></path>
-          </svg>
-          Bookshop.org
-        </a>
-      )}
-      {amazon && (
-        <a
-          href={amazon}
-          rel={affiliateRel}
-          class="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium bg-accent text-primary-foreground hover:opacity-90 transition-opacity"
-        >
-          <svg class="h-3 w-3.5" viewBox="0 0 24 16" fill="none" aria-hidden="true">
-            <path
-              d="M1.5 11.2c4.8 3.4 11.6 4.2 17.6 2.1"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-            />
-            <path
-              d="M17.4 9.6l2.6 3.6 2.2-2.4"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          Amazon
-        </a>
+  hasLinks && (
+    <div class="space-y-2">
+      <div class:list={[stack ? "flex flex-col items-stretch gap-2" : "flex flex-wrap gap-2"]}>
+        {shopUrl && (
+          <a
+            href={shopUrl}
+            rel={affiliateRel}
+            aria-label={bookshopLabel}
+            data-umami-event="affiliate-click"
+            data-umami-event-retailer="bookshop"
+            data-umami-event-slug={slug || undefined}
+            class:list={[
+              "inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-90",
+              stack && "w-full justify-center",
+              dark
+                ? "border border-cream/70 bg-cream text-secondary"
+                : "bg-secondary text-secondary-foreground",
+            ]}
+          >
+            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path>
+            </svg>
+            Bookshop.org
+          </a>
+        )}
+        {amazonUrl && (
+          <a
+            href={amazonUrl}
+            rel={affiliateRel}
+            aria-label={amazonLabel}
+            data-umami-event="affiliate-click"
+            data-umami-event-retailer="amazon"
+            data-umami-event-slug={slug || undefined}
+            class:list={[
+              "inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-90",
+              stack && "w-full justify-center",
+              dark ? "bg-accent text-cream" : "bg-accent text-primary-foreground",
+            ]}
+          >
+            <svg class="h-3 w-3.5" viewBox="0 0 24 16" fill="none" aria-hidden="true">
+              <path
+                d="M1.5 11.2c4.8 3.4 11.6 4.2 17.6 2.1"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+              <path
+                d="M17.4 9.6l2.6 3.6 2.2-2.4"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Amazon
+          </a>
+        )}
+      </div>
+      {!hideHint && (
+        <p class:list={["text-[11px] leading-snug", dark ? "text-sage" : "text-muted-foreground"]}>
+          Affiliate links. I earn a small commission at no extra cost to you.
+        </p>
       )}
     </div>
   )

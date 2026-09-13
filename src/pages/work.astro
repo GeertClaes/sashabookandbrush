@@ -1,24 +1,24 @@
 ---
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const { workIntro, stats, offers, packages, credentials, instagram, handle } = site;
 ---
 
 <BaseLayout
   title="Work with me"
-  description={`The best way to reach ${site.handle} about collaborations is Instagram.`}
+  description={workIntro}
 >
   <div class="min-h-screen bg-background">
     <div class="mx-auto max-w-5xl px-6 py-16 md:px-12">
-      <div class="max-w-xl">
+      <div class="max-w-2xl">
         <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Collaborations</p>
         <h1 class="font-display mb-5 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
           Work with me
         </h1>
-        <p class="mb-8 text-base leading-relaxed text-muted-foreground">
-          Publishers, authors, and bookish brands — DM me on Instagram. That's the inbox I actually see.
-        </p>
+        <p class="mb-8 text-base leading-relaxed text-muted-foreground">{workIntro}</p>
         <a
-          href={site.instagram}
+          href={instagram}
           class="inline-flex items-center gap-2 rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           target="_blank"
           rel="noopener noreferrer"
@@ -28,9 +28,57 @@ import BaseLayout from "../layouts/BaseLayout.astro";
               d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
             ></path>
           </svg>
-          Message {site.handle}
+          Message {handle}
         </a>
       </div>
+
+      <dl class="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {
+          stats.map((item) => (
+            <div class="rounded-lg border border-border bg-card px-4 py-3">
+              <dt class="text-xs tracking-widest text-muted-foreground uppercase">{item.label}</dt>
+              <dd class="font-display mt-1 text-lg font-semibold text-foreground">{item.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <section class="mt-16">
+        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">What I do</p>
+        <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">Honest coverage, in my voice</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+          {
+            offers.map((offer) => (
+              <div class="rounded-lg border border-border bg-card p-5">
+                <h3 class="font-display text-lg font-semibold text-foreground">{offer.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{offer.desc}</p>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="mt-16">
+        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Packages</p>
+        <h2 class="font-display mb-6 text-2xl font-semibold text-foreground">How we can work</h2>
+        <div class="grid gap-4 md:grid-cols-3">
+          {
+            packages.map((item) => (
+              <div class="rounded-lg border border-border bg-card p-5">
+                <h3 class="font-display text-lg font-semibold text-foreground">{item.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+              </div>
+            ))
+          }
+        </div>
+        <p class="mt-4 text-sm text-muted-foreground">Rates on request via Instagram.</p>
+      </section>
+
+      <section class="mt-16 rounded-lg border border-border bg-card p-5">
+        <p class="text-xs font-medium tracking-widest text-accent uppercase">{credentials.title}</p>
+        <p class="font-display mt-1 text-xl font-semibold text-foreground">{credentials.org}</p>
+      </section>
     </div>
   </div>
 </BaseLayout>
+

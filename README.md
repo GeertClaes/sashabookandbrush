@@ -28,7 +28,7 @@ Secrets never go in git. There are three places to set them.
 | --- | --- |
 | `.env` in this repo (copy from `.env.example`) | Local `npm run dev` / `npm run admin` only |
 | **Workers & Pages → sashabookandbrush → Settings → Variables and secrets → Production** | Live site, `/admin` API, Overview rebuild status |
-| **Cron Worker** (this repo: `workers/rebuild-pages/`; dashboard may show a different name) | The 6-hour rebuild trigger only |
+| **Cron Worker** (this repo: `workers/rebuild-pages/`; live name `pages-cron-deploy`) | The daily rebuild trigger only |
 
 After you change Pages variables, trigger a **new production deploy**. Functions and the build only see new values on the next build.
 
@@ -125,7 +125,7 @@ npx wrangler secret put CLOUDFLARE_PAGES_DEPLOY_HOOK --config workers/rebuild-pa
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
-| `CLOUDFLARE_PAGES_DEPLOY_HOOK` | Worker secret (`wrangler secret put`) | POSTed every 6 hours so Pages rebuilds and refreshes currently reading |
+| `CLOUDFLARE_PAGES_DEPLOY_HOOK` | Worker secret (`wrangler secret put`) | POSTed daily so Pages rebuilds and refreshes currently reading |
 
 Do not add the deploy-hook URL to the Pages env vars list.
 
@@ -222,10 +222,11 @@ Set Access, GitHub, and optional rebuild-status variables as described in [Envir
 Locally:
 
 ```bash
+npm run dev
 npm run admin
 ```
 
-Then open `/admin` on the dev server. Optional `ADMIN_PASSWORD` in `.env`.
+Open **http://127.0.0.1:4321/admin** (the site). `npm run admin` is only the save API on port 8787 — opening that URL in a browser now redirects to the studio. Optional `ADMIN_PASSWORD` in `.env`.
 
 ### Add or edit art
 
@@ -297,7 +298,7 @@ The production site is static. RSS cannot update the live HTML unless Pages rebu
 
 Build command: `npm run build` (includes the Goodreads RSS sync). Create the deploy hook and Worker secret as in [Environment configuration](#environment-configuration) → **Cron Worker**.
 
-The Worker runs every 6 hours UTC (`0 */6 * * *`). Each run POSTs the hook; Pages rebuilds currently reading / progress / up next. Free Pages is 500 builds/month; 6-hour cron is about 120. For daily instead, change the cron in `wrangler.toml` to `0 6 * * *` and redeploy.
+The Worker runs daily at 00:00 UTC (`0 0 * * *`). Each run POSTs the hook; Pages rebuilds currently reading / progress / up next. Free Pages is 500 builds/month; daily cron is about 30. Do not `wrangler deploy` with a different Worker `name` — that would create a duplicate.
 
 Do not also schedule a GitHub Action against the same hook.
 

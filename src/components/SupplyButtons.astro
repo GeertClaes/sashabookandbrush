@@ -1,31 +1,57 @@
 ---
+import { realUrl } from "../lib/affiliates";
+
 interface Props {
-  amazon: string;
+  amazon?: string;
   shop?: string;
   shopLabel?: string;
+  title?: string;
+  slug?: string;
 }
 
-const { amazon, shop, shopLabel = "Shop" } = Astro.props;
+const { amazon = "", shop = "", shopLabel = "Shop", title = "", slug = "" } = Astro.props;
+const amazonUrl = realUrl(amazon);
+const shopUrl = realUrl(shop);
+const hasLinks = Boolean(amazonUrl || shopUrl);
 const affiliateRel = "sponsored noopener noreferrer";
+const amazonLabel = title ? `Buy ${title} on Amazon` : undefined;
+const shopAria = title ? `Buy ${title} at ${shopLabel}` : undefined;
 ---
 
-<div class="mt-4 flex flex-wrap gap-2">
-  <a
-    href={amazon}
-    rel={affiliateRel}
-    class="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium bg-secondary text-secondary-foreground hover:opacity-90 transition-opacity"
-  >
-    Amazon
-  </a>
-  {
-    shop && (
-      <a
-        href={shop}
-        rel={affiliateRel}
-        class="inline-flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-      >
-        {shopLabel}
-      </a>
-    )
-  }
-</div>
+{
+  hasLinks && (
+    <div class="mt-4 space-y-2">
+      <div class="flex flex-wrap gap-2">
+        {amazonUrl && (
+          <a
+            href={amazonUrl}
+            rel={affiliateRel}
+            aria-label={amazonLabel}
+            data-umami-event="affiliate-click"
+            data-umami-event-retailer="amazon"
+            data-umami-event-slug={slug || undefined}
+            class="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium bg-secondary text-secondary-foreground hover:opacity-90 transition-opacity"
+          >
+            Amazon
+          </a>
+        )}
+        {shopUrl && (
+          <a
+            href={shopUrl}
+            rel={affiliateRel}
+            aria-label={shopAria}
+            data-umami-event="affiliate-click"
+            data-umami-event-retailer="other"
+            data-umami-event-slug={slug || undefined}
+            class="inline-flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          >
+            {shopLabel}
+          </a>
+        )}
+      </div>
+      <p class="text-[11px] leading-snug text-muted-foreground">
+        Affiliate links. I earn a small commission at no extra cost to you.
+      </p>
+    </div>
+  )
+}

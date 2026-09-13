@@ -47,7 +47,7 @@ const supplies = defineCollection({
     brand: z.string(),
     category: z.string(),
     note: z.string(),
-    amazon: z.string(),
+    amazon: z.string().optional().default(""),
     shop: z.string().optional(),
     shopLabel: z.string().optional(),
     featured: z.boolean().default(false),

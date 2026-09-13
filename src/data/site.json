@@ -1,9 +1,9 @@
 {
   "name": "Sasha",
-  "brand": "sasha & brush",
+  "brand": "SashaBook&Brush",
   "handle": "@sashabookandbrush",
   "instagram": "https://instagram.com/sashabookandbrush",
-  "bookshop": "https://uk.bookshop.org",
+  "bookshop": "https://uk.bookshop.org/a/18142",
   "goodreads": {
     "userId": "141471789",
     "profile": "https://www.goodreads.com/user/show/141471789-sasha-horwood",
@@ -31,8 +31,7 @@
     { "href": "/recommendations", "label": "Books" },
     { "href": "/art", "label": "Art" },
     { "href": "/about", "label": "About" },
-    { "href": "/work", "label": "Work with me" },
-    { "href": "/shop", "label": "Shop" }
+    { "href": "/work", "label": "Work with me" }
   ],
   "about": {
     "image": "/images/SashaHero.jpg",

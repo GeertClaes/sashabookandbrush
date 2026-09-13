@@ -1,4 +1,5 @@
 ---
+import AffiliateButtons from "../components/AffiliateButtons.astro";
 import ArtCard from "../components/ArtCard.astro";
 import BookCard from "../components/BookCard.astro";
 import CoverImage from "../components/CoverImage.astro";
@@ -7,6 +8,7 @@ import SupplyCard from "../components/SupplyCard.astro";
 import live from "../data/goodreads-live.json";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { affiliateLinks } from "../lib/affiliates";
 import { bookHref } from "../lib/books";
 import { liveProgress } from "../lib/live";
 import { getCollection } from "astro:content";
@@ -42,6 +44,9 @@ const featuredArt = (await getCollection("art"))
 const featuredSupplies = (await getCollection("supplies"))
   .filter((item) => item.data.featured)
   .sort((a, b) => a.data.order - b.data.order);
+
+const readingHref = currentlyReading.length > 0 ? "#currently-reading" : "/recommendations";
+const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Browse books →";
 ---
 
 <BaseLayout transparentHeader>
@@ -74,10 +79,10 @@ const featuredSupplies = (await getCollection("supplies"))
       </p>
       <div class="flex flex-wrap gap-4">
         <a
-          href="/recommendations"
+          href={readingHref}
           class="rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
-          Browse books →
+          {readingLabel}
         </a>
         <a
           href="/art"
@@ -91,45 +96,66 @@ const featuredSupplies = (await getCollection("supplies"))
 
   {
     currentlyReading.length > 0 && (
-      <section class="bg-secondary py-16">
+      <section id="currently-reading" class="scroll-mt-20 bg-secondary py-16">
         <div class="mx-auto max-w-5xl px-6 md:px-12">
-          <div class="mb-8 flex items-center gap-3">
+          <div class="mb-3 flex items-center gap-3">
             <span class="h-2 w-2 animate-pulse rounded-full bg-sage"></span>
             <p class="text-sm font-medium tracking-widest text-sage uppercase">
               Currently reading
               {currentlyReading.length > 1 ? ` · ${currentlyReading.length} books` : ""}
             </p>
           </div>
-          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+          <p class="mb-8 text-[11px] leading-snug text-sage">
+            Affiliate links. I earn a small commission at no extra cost to you.
+          </p>
+          <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {currentlyReading.map((book) => {
               const progress = liveProgress(live, book.data.title, book.data.goodreadsId);
+              const buy = affiliateLinks(book.data);
               return (
-                <a href={bookHref(book.id)} class="group min-w-0">
-                  <CoverImage
-                    cover={book.data.cover}
-                    alt={`${book.data.title} by ${book.data.author}`}
-                    class="mb-3 h-48 w-32 rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-52 sm:w-36"
-                    width={144}
-                    height={208}
-                  />
-                  <h2 class="font-display text-lg font-semibold leading-snug text-cream">
-                    {book.data.title}
-                  </h2>
-                  <p class="mt-1 text-sm text-sage">{book.data.author}</p>
-                  {typeof progress === "number" && (
-                    <div class="mt-3 max-w-36">
-                      <div class="h-1.5 overflow-hidden rounded-full bg-cream/20">
-                        <div class="h-full rounded-full bg-sage" style={`width: ${progress}%`}></div>
-                      </div>
-                      <p class="mt-1 text-xs text-sage">{progress}%</p>
+                <article class="flex min-w-0 gap-4">
+                  <a href={bookHref(book.id)} class="group shrink-0">
+                    <CoverImage
+                      cover={book.data.cover}
+                      alt={`${book.data.title} by ${book.data.author}`}
+                      class="h-48 w-32 rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-52 sm:w-36"
+                      width={144}
+                      height={208}
+                    />
+                  </a>
+                  <div class="min-w-0 flex-1">
+                    <a href={bookHref(book.id)} class="group block">
+                      <h2 class="font-display text-lg font-semibold leading-snug text-cream">
+                        {book.data.title}
+                      </h2>
+                      <p class="mt-1 text-sm text-sage">{book.data.author}</p>
+                      {typeof progress === "number" && (
+                        <div class="mt-3 max-w-36">
+                          <div class="h-1.5 overflow-hidden rounded-full bg-cream/20">
+                            <div class="h-full rounded-full bg-sage" style={`width: ${progress}%`}></div>
+                          </div>
+                          <p class="mt-1 text-xs text-sage">{progress}%</p>
+                        </div>
+                      )}
+                      {book.data.note && (
+                        <p class="mt-3 line-clamp-4 text-sm leading-relaxed text-parchment italic">
+                          “{book.data.note}”
+                        </p>
+                      )}
+                    </a>
+                    <div class="mt-4">
+                      <AffiliateButtons
+                        bookshop={buy.bookshop}
+                        amazon={buy.amazon}
+                        slug={book.id}
+                        title={book.data.title}
+                        tone="dark"
+                        hideHint
+                        stack
+                      />
                     </div>
-                  )}
-                  {book.data.note && (
-                    <p class="mt-3 line-clamp-4 text-sm leading-relaxed text-parchment italic">
-                      “{book.data.note}”
-                    </p>
-                  )}
-                </a>
+                  </div>
+                </article>
               );
             })}
           </div>
@@ -217,7 +243,7 @@ const featuredSupplies = (await getCollection("supplies"))
       <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
         {
           featured.map((book) => (
-            <BookCard {...book.data} href={bookHref(book.id)} showBuy />
+            <BookCard {...book.data} href={bookHref(book.id)} slug={book.id} showBuy />
           ))
         }
       </div>
@@ -265,7 +291,7 @@ const featuredSupplies = (await getCollection("supplies"))
         <div class="grid gap-4 md:grid-cols-2">
           {
             featuredSupplies.map((item) => (
-              <SupplyCard {...item.data} />
+              <SupplyCard {...item.data} slug={item.id} />
             ))
           }
         </div>

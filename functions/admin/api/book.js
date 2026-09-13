@@ -1,13 +1,8 @@
-import { applyYamlFields, fail, json, readJson, safeSlug } from "./_lib/frontmatter.js";
+import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug } from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, getTextFile } from "./_lib/github.js";
 
 const MAX_NOTE = 8000;
-
-function affiliateValue(value) {
-  const trimmed = String(value || "").trim();
-  return trimmed;
-}
 
 export async function onRequestPost(context) {
   try {
@@ -26,8 +21,11 @@ export async function onRequestPost(context) {
     if (typeof body.genre === "string") updates.genre = body.genre.trim() || "Read";
     if (typeof body.note === "string") updates.note = body.note;
     if (typeof body.featured === "boolean") updates.featured = body.featured;
-    if (typeof body.bookshop === "string") updates.bookshop = affiliateValue(body.bookshop);
-    if (typeof body.amazon === "string") updates.amazon = affiliateValue(body.amazon);
+    if (body.featured !== false && Number.isFinite(Number(body.order))) updates.order = Number(body.order);
+    if (typeof body.isbn === "string") updates.isbn = String(body.isbn).replace(/[^\dXx]/g, "");
+    if (typeof body.isbn10 === "string") updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
+    if (typeof body.bookshop === "string") updates.bookshop = emptyAffiliateUrl(body.bookshop);
+    if (typeof body.amazon === "string") updates.amazon = emptyAffiliateUrl(body.amazon);
 
     text = applyYamlFields(text, updates);
     if (!text.endsWith("\n")) text += "\n";

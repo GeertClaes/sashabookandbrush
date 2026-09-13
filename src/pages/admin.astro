@@ -2,6 +2,9 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import type { ImageMetadata } from "astro";
 import live from "../data/goodreads-live.json";
+import site from "../data/site.json";
+import { affiliateLinks, realUrl } from "../lib/affiliates";
+import { coverModule } from "../lib/covers";
 import { getCollection } from "astro:content";
 
 const artImages = import.meta.glob<{ default: ImageMetadata }>("../assets/art/*.{jpg,jpeg,png,webp}", {
@@ -23,12 +26,17 @@ const books = (await getCollection("books"))
     note: book.data.note || "",
     featured: Boolean(book.data.featured),
     cover: book.data.cover || "",
+    coverUrl: coverModule(book.data.cover)?.src || "",
     genre: book.data.genre || "",
     bookshop: book.data.bookshop === "#" ? "" : book.data.bookshop || "",
     amazon: book.data.amazon === "#" ? "" : book.data.amazon || "",
+    isbn: book.data.isbn || "",
+    isbn10: book.data.isbn10 || "",
     rating: book.data.rating || 0,
     status: book.data.status || "read",
     dateRead: book.data.dateRead || "",
+    order: book.data.order || 0,
+    buy: affiliateLinks(book.data),
   }))
   .sort((a, b) => a.title.localeCompare(b.title));
 const art = (await getCollection("art"))
@@ -50,7 +58,7 @@ const supplies = (await getCollection("supplies"))
     brand: item.data.brand,
     category: item.data.category,
     note: item.data.note || "",
-    amazon: item.data.amazon === "#" ? "" : item.data.amazon || "",
+    amazon: realUrl(item.data.amazon),
     shop: item.data.shop || "",
     shopLabel: item.data.shopLabel || "",
     featured: Boolean(item.data.featured),
@@ -74,6 +82,58 @@ const stats = [
   { label: "Paintings", value: String(art.length) },
   { label: "Tools", value: String(supplies.length) },
 ];
+const health = [
+  {
+    label: "Public notes",
+    value: `${books.filter((book) => book.note.trim()).length} / ${books.length}`,
+    tab: "book",
+    queue: "no-note",
+  },
+  {
+    label: "Featured",
+    value: `${books.filter((book) => book.featured).length} / target 6–8`,
+    tab: "book",
+    queue: "featured",
+  },
+  {
+    label: "Currently reading",
+    value: String(books.filter((book) => book.status === "currently-reading").length),
+    tab: "book",
+    queue: "currently-reading",
+  },
+  {
+    label: "Five-star, no note",
+    value: String(books.filter((book) => book.rating === 5 && !book.note.trim()).length),
+    tab: "book",
+    queue: "five-star-no-note",
+  },
+  {
+    label: "Missing ISBN",
+    value: String(books.filter((book) => !book.isbn && !book.isbn10).length),
+    tab: "book",
+    queue: "missing-isbn",
+  },
+  {
+    label: "Tools without Amazon",
+    value: `${supplies.filter((item) => !item.amazon).length} / ${supplies.length}`,
+    tab: "supply",
+  },
+  {
+    label: "Art missing image",
+    value: String(art.filter((piece) => !piece.image).length),
+    tab: "art",
+  },
+  {
+    label: "Art empty note",
+    value: String(art.filter((piece) => !piece.note.trim()).length),
+    tab: "art",
+  },
+];
+const affiliateConfig = {
+  amazonTag: site.affiliates?.amazonTag || "",
+  bookshopUkId: site.affiliates?.bookshopUkId || "",
+  siteOrigin: "https://sashabookandbrush.com",
+};
 ---
 
 <BaseLayout
@@ -82,7 +142,7 @@ const stats = [
   noindex={true}
 >
   <div class="min-h-screen bg-background">
-    <div class="mx-auto max-w-5xl px-6 py-12 md:px-12 md:py-16">
+    <div class="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
       <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Private</p>
       <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Studio editor</h1>
       <p class="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground">
@@ -99,7 +159,7 @@ const stats = [
         }
       </p>
 
-      <p data-status class="mb-6 text-sm text-muted-foreground">Checking the editor…</p>
+      <p data-status class="sticky top-16 z-40 mb-6 rounded-lg border border-transparent bg-background/95 px-3 py-2 text-sm text-muted-foreground backdrop-blur-sm">Checking the editor…</p>
 
       {
         isDev && (
@@ -120,7 +180,7 @@ const stats = [
       }
 
       <div data-app class="hidden space-y-8">
-        <div class="flex flex-wrap gap-2">
+        <div class="sticky top-28 z-30 -mx-2 flex flex-wrap gap-2 bg-background/95 px-2 py-2 backdrop-blur-sm">
           <button
             type="button"
             data-tab="overview"
@@ -163,6 +223,37 @@ const stats = [
             }
           </dl>
 
+          <section class="rounded-xl border border-border bg-card p-5">
+            <h2 class="font-display mb-1 text-xl font-semibold text-foreground">Content health</h2>
+            <p class="mb-4 text-sm text-muted-foreground">
+              Queues for notes, featured cards, and missing links. Counts refresh after the next rebuild.
+            </p>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {
+                health.map((item) => (
+                  <button
+                    type="button"
+                    data-health-tab={item.tab}
+                    data-health-queue={item.queue || ""}
+                    class="rounded-lg border border-border bg-background px-3 py-3 text-left hover:border-primary"
+                  >
+                    <span class="block text-xs tracking-widest text-muted-foreground uppercase">{item.label}</span>
+                    <span class="font-display mt-1 block text-lg font-semibold text-foreground">{item.value}</span>
+                  </button>
+                ))
+              }
+            </div>
+          </section>
+
+          <section class="rounded-xl border border-border bg-card p-5">
+            <h2 class="font-display mb-1 text-xl font-semibold text-foreground">For Instagram</h2>
+            <p class="mb-4 text-sm text-muted-foreground">
+              Copy a page or shop link for a Story sticker or the bio. These always go to the live site.
+            </p>
+            <div class="mb-4 flex flex-wrap gap-2" data-ig-pages></div>
+            <div data-ig-reading class="space-y-2"></div>
+          </section>
+
           <div class="grid gap-6 lg:grid-cols-2">
             <section class="rounded-xl border border-border bg-card p-5">
               <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
@@ -191,96 +282,209 @@ const stats = [
               <ol data-activity-log class="space-y-2 text-sm"></ol>
             </section>
           </div>
+
+          <details class="rounded-xl border border-border bg-card px-5 py-4 text-sm">
+            <summary class="cursor-pointer font-medium text-muted-foreground">
+              Advanced: import a Goodreads CSV
+            </summary>
+            <p class="mt-3 text-muted-foreground">
+              Only needed when ratings or new finished books should land on the site. Notes, covers, and featured
+              flags are kept.
+            </p>
+            <input type="file" data-csv accept=".csv" class="mt-4 block text-sm" />
+            <button type="button" data-import class="mt-3 rounded border border-border px-4 py-2 text-sm">
+              Import CSV
+            </button>
+            <pre data-log class="mt-3 overflow-x-auto text-xs text-muted-foreground"></pre>
+          </details>
         </div>
 
-        <div data-panel="book" class="hidden space-y-8">
-          <section class="rounded-xl border border-border bg-card p-5">
-            <h2 class="font-display mb-3 text-xl font-semibold text-foreground">Find a book</h2>
+        <div data-panel="book" class="hidden">
+          <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
+          <div class="space-y-4 lg:sticky lg:top-40">
+          <details class="rounded-xl border border-border bg-card p-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-foreground">
+              <span>Home featured</span>
+              <span class="text-xs font-normal text-muted-foreground" data-featured-count></span>
+            </summary>
+            <div class="mt-3 flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                data-featured-save
+                class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary"
+              >
+                Save order
+              </button>
+            </div>
+            <ol data-featured-board class="mt-3 space-y-2 text-sm"></ol>
+          </details>
+
+          <section class="rounded-xl border border-border bg-card p-4">
+            <h2 class="font-display mb-3 text-lg font-semibold text-foreground">Find a book</h2>
             <input
               type="search"
               data-search
-              placeholder="Title or author"
-              class="mb-4 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              placeholder="Search any title or author…"
+              class="mb-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             />
-            <ul data-results class="space-y-2 text-sm"></ul>
+            <div class="mb-3 flex flex-wrap gap-1.5" data-queues role="tablist" aria-label="Book queues">
+              <button type="button" data-queue="currently-reading" class="rounded-full border border-border px-2.5 py-1 text-xs">Reading <span data-queue-n="currently-reading" class="text-muted-foreground"></span></button>
+              <button type="button" data-queue="featured" class="rounded-full border border-border px-2.5 py-1 text-xs">Featured <span data-queue-n="featured" class="text-muted-foreground"></span></button>
+              <button type="button" data-queue="five-star-no-note" class="rounded-full border border-border px-2.5 py-1 text-xs">5★ no note <span data-queue-n="five-star-no-note" class="text-muted-foreground"></span></button>
+              <button type="button" data-queue="no-note" class="rounded-full border border-border px-2.5 py-1 text-xs">No note <span data-queue-n="no-note" class="text-muted-foreground"></span></button>
+              <button type="button" data-queue="missing-isbn" class="rounded-full border border-border px-2.5 py-1 text-xs">No ISBN <span data-queue-n="missing-isbn" class="text-muted-foreground"></span></button>
+            </div>
+            <p data-queue-count class="mb-2 text-xs text-muted-foreground"></p>
+            <ul data-results class="max-h-[min(70vh,40rem)] space-y-1.5 overflow-y-auto text-sm"></ul>
           </section>
+          </div>
 
-          <section data-book-editor class="hidden rounded-xl border border-border bg-card p-5">
-            <p data-book-meta class="mb-4 text-xs text-muted-foreground"></p>
-            <label class="mb-4 block text-sm font-medium text-foreground">
-              Title
-              <input data-book-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-            </label>
-            <label class="mb-4 block text-sm font-medium text-foreground">
-              Author
-              <input data-book-author class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-            </label>
-            <label class="mb-4 block text-sm font-medium text-foreground">
-              Genre on the site
-              <input data-book-genre class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-            </label>
-            <label class="mb-4 block text-sm font-medium text-foreground">
+          <div>
+          <p data-book-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
+            Pick a book to write a note, drop a cover, or feature it on Home.
+          </p>
+          <section data-book-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-40">
+            <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 data-book-heading class="font-display text-xl font-semibold text-foreground"></h2>
+                <p data-book-meta class="mt-1 text-xs text-muted-foreground"></p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <a
+                  data-book-view
+                  class="rounded border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:border-primary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on site
+                </a>
+                <button
+                  type="button"
+                  data-book-next
+                  class="hidden rounded border border-border px-3 py-1.5 text-sm text-foreground hover:border-primary"
+                >
+                  Next in list
+                </button>
+              </div>
+            </div>
+            <div class="mb-4 rounded-lg border border-border bg-background p-3">
+              <p class="mb-1 text-xs font-medium tracking-widest text-accent uppercase">For Instagram</p>
+              <p class="mb-2 text-xs text-muted-foreground">Paste into a Story link sticker.</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" data-copy="page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                  Copy page link
+                </button>
+                <button type="button" data-copy="bookshop" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                  Copy Bookshop
+                </button>
+                <button type="button" data-copy="amazon" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                  Copy Amazon
+                </button>
+              </div>
+            </div>
+            <label class="mb-1 block text-sm font-medium text-foreground">
               Public note
               <textarea
                 data-book-note
-                rows="6"
+                rows="7"
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               ></textarea>
             </label>
+            <p data-book-note-count class="mb-4 text-xs text-muted-foreground"></p>
             <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
               <input type="checkbox" data-book-featured />
               Feature on the home page
             </label>
-            <div class="mb-4 grid gap-4 sm:grid-cols-2">
-              <label class="block text-sm font-medium text-foreground">
-                Bookshop.org URL
-                <input
-                  data-book-bookshop
-                  placeholder="Leave blank to use ISBN"
-                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                />
-              </label>
-              <label class="block text-sm font-medium text-foreground">
-                Amazon URL
-                <input
-                  data-book-amazon
-                  placeholder="Leave blank to use ISBN"
-                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                />
-              </label>
-            </div>
             <p class="mb-2 text-sm font-medium text-foreground">Cover</p>
             <button
               type="button"
               data-book-drop
-              class="mb-4 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary"
+              class="mb-4 flex min-h-36 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-5 text-center text-sm text-muted-foreground hover:border-primary"
             >
               <img data-book-preview class="hidden max-h-40 rounded object-cover shadow" alt="" />
               <span data-book-drop-label>Drop a cover here, or click to choose a photo</span>
             </button>
             <input type="file" data-book-cover accept="image/jpeg,image/png,image/webp" class="hidden" />
+            <details class="mb-4 rounded-lg border border-border bg-background px-4 py-3">
+              <summary class="cursor-pointer text-sm font-medium text-foreground">Title, ISBN, and buy links</summary>
+              <div class="mt-4 space-y-4">
+                <label class="block text-sm font-medium text-foreground">
+                  Title
+                  <input data-book-title class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                </label>
+                <label class="block text-sm font-medium text-foreground">
+                  Author
+                  <input data-book-author class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                </label>
+                <label class="block text-sm font-medium text-foreground">
+                  Genre on the site
+                  <input data-book-genre class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                </label>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label class="block text-sm font-medium text-foreground">
+                    ISBN-13
+                    <input data-book-isbn class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                  </label>
+                  <label class="block text-sm font-medium text-foreground">
+                    ISBN-10
+                    <input data-book-isbn10 class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                  </label>
+                </div>
+                <div>
+                  <p class="mb-2 text-sm font-medium text-foreground">Generated buy links</p>
+                  <p data-book-buy class="text-sm text-muted-foreground"></p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label class="block text-sm font-medium text-foreground">
+                    Bookshop.org URL
+                    <input
+                      data-book-bookshop
+                      placeholder="Leave blank to use ISBN"
+                      class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                    />
+                  </label>
+                  <label class="block text-sm font-medium text-foreground">
+                    Amazon URL
+                    <input
+                      data-book-amazon
+                      placeholder="Leave blank to use ISBN"
+                      class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                    />
+                  </label>
+                </div>
+              </div>
+            </details>
             <button type="button" data-book-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
               Save book
             </button>
           </section>
+          </div>
+          </div>
         </div>
 
-        <div data-panel="art" class="hidden space-y-8">
-          <section class="rounded-xl border border-border bg-card p-5">
+        <div data-panel="art" class="hidden">
+          <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
+          <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-40">
             <div class="mb-4 flex items-center justify-between gap-3">
-              <h2 class="font-display text-xl font-semibold text-foreground">Paintings</h2>
+              <h2 class="font-display text-lg font-semibold text-foreground">Paintings</h2>
               <button
                 type="button"
                 data-art-new
                 class="rounded border border-border px-3 py-1.5 text-sm"
               >
-                New painting
+                New
               </button>
             </div>
+            <p class="mb-3 text-xs text-muted-foreground">
+              Drag the handle, or use the arrows. Order saves in one go and is the order on the Art page.
+            </p>
             <ul data-art-list class="space-y-2 text-sm"></ul>
           </section>
-
-          <section data-art-editor class="hidden rounded-xl border border-border bg-card p-5">
+          <div>
+          <p data-art-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
+            Pick a painting, or add a new one.
+          </p>
+          <section data-art-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-40">
             <label class="mb-4 block text-sm font-medium text-foreground">
               Title
               <input data-art-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
@@ -301,19 +505,18 @@ const stats = [
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               ></textarea>
             </label>
-            <div class="mb-4 grid gap-4 sm:grid-cols-2">
-              <label class="flex items-center gap-2 text-sm text-foreground">
-                <input type="checkbox" data-art-featured />
-                Feature on the home page
-              </label>
-              <label class="block text-sm font-medium text-foreground">
-                Order
-                <input
-                  type="number"
-                  data-art-order
-                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                />
-              </label>
+            <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" data-art-featured />
+              Feature on the home page
+            </label>
+            <input type="hidden" data-art-order />
+            <div class="mb-4 flex flex-wrap gap-2">
+              <button type="button" data-copy="art-page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                Copy painting link
+              </button>
+              <button type="button" data-copy="art-index" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                Copy Art page
+              </button>
             </div>
             <p class="mb-2 text-sm font-medium text-foreground">Photo</p>
             <button
@@ -338,25 +541,32 @@ const stats = [
               </button>
             </div>
           </section>
+          </div>
+          </div>
         </div>
 
-        <div data-panel="supply" class="hidden space-y-8">
-          <section class="rounded-xl border border-border bg-card p-5">
+        <div data-panel="supply" class="hidden">
+          <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
+          <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-40">
             <div class="mb-4 flex items-center justify-between gap-3">
-              <h2 class="font-display text-xl font-semibold text-foreground">Tools I recommend</h2>
+              <h2 class="font-display text-lg font-semibold text-foreground">Tools</h2>
               <button
                 type="button"
                 data-supply-new
                 class="rounded border border-border px-3 py-1.5 text-sm"
               >
-                New tool
+                New
               </button>
             </div>
-            <p class="mb-4 text-sm text-muted-foreground">
-              These appear on the Art page. Featured tools also show on Home.
+            <p class="mb-3 text-xs text-muted-foreground">
+              Drag the handle, or use the arrows. Order saves in one go. Featured tools also show on Home.
             </p>
             <ul data-supply-list class="space-y-2 text-sm"></ul>
           </section>
+          <div>
+          <p data-supply-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
+            Pick a tool to add an Amazon link, or add a new one.
+          </p>
 
           <section data-supply-editor class="hidden rounded-xl border border-border bg-card p-5">
             <label class="mb-4 block text-sm font-medium text-foreground">
@@ -377,6 +587,25 @@ const stats = [
                 />
               </label>
             </div>
+            <label class="mb-2 block text-sm font-medium text-foreground">
+              Amazon URL
+              <input
+                data-supply-amazon
+                placeholder="Paste the Amazon link with your tag"
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <div class="mb-4 flex flex-wrap gap-2">
+              <button type="button" data-copy="tool-amazon" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                Copy Amazon
+              </button>
+              <button type="button" data-copy="tool-page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                Copy tool link
+              </button>
+              <button type="button" data-copy="tools-index" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                Copy kit page
+              </button>
+            </div>
             <label class="mb-4 block text-sm font-medium text-foreground">
               Note
               <textarea
@@ -385,28 +614,11 @@ const stats = [
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               ></textarea>
             </label>
-            <div class="mb-4 grid gap-4 sm:grid-cols-2">
-              <label class="flex items-center gap-2 text-sm text-foreground">
-                <input type="checkbox" data-supply-featured />
-                Feature on the home page
-              </label>
-              <label class="block text-sm font-medium text-foreground">
-                Order
-                <input
-                  type="number"
-                  data-supply-order
-                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                />
-              </label>
-            </div>
-            <label class="mb-4 block text-sm font-medium text-foreground">
-              Amazon URL
-              <input
-                data-supply-amazon
-                placeholder="Leave blank until you have an affiliate link"
-                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              />
+            <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" data-supply-featured />
+              Feature on the home page
             </label>
+            <input type="hidden" data-supply-order />
             <div class="mb-4 grid gap-4 sm:grid-cols-2">
               <label class="block text-sm font-medium text-foreground">
                 Other shop URL
@@ -438,22 +650,9 @@ const stats = [
               </button>
             </div>
           </section>
+          </div>
+          </div>
         </div>
-
-        <details class="rounded-xl border border-border bg-card px-5 py-4 text-sm">
-          <summary class="cursor-pointer font-medium text-muted-foreground">
-            Advanced: import a Goodreads CSV
-          </summary>
-          <p class="mt-3 text-muted-foreground">
-            Only needed when ratings or new finished books should land on the site. Notes, covers, and featured
-            flags are kept.
-          </p>
-          <input type="file" data-csv accept=".csv" class="mt-4 block text-sm" />
-          <button type="button" data-import class="mt-3 rounded border border-border px-4 py-2 text-sm">
-            Import CSV
-          </button>
-          <pre data-log class="mt-3 overflow-x-auto text-xs text-muted-foreground"></pre>
-        </details>
       </div>
     </div>
   </div>
@@ -461,6 +660,7 @@ const stats = [
   <script is:inline type="application/json" id="book-catalog" set:html={JSON.stringify(books).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="art-catalog" set:html={JSON.stringify(art).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="supply-catalog" set:html={JSON.stringify(supplies).replace(/</g, "\\u003c")} />
+  <script is:inline type="application/json" id="affiliate-config" set:html={JSON.stringify(affiliateConfig).replace(/</g, "\\u003c")} />
 
   <script define:vars={{ api, isDev }}>
   const status = document.querySelector("[data-status]");
@@ -481,6 +681,14 @@ const stats = [
   let previewUrls = { book: "", art: "" };
   let activityTimer = 0;
   let activityLoading = false;
+  let currentTab = "overview";
+  let currentQueue = "currently-reading";
+  let bookSnapshot = "";
+  let saving = false;
+  let featuredBaseline = [];
+  const QUEUES = ["currently-reading", "featured", "five-star-no-note", "no-note", "missing-isbn"];
+  const TABS = ["overview", "book", "art", "supply"];
+  const MAX_NOTE = 8000;
 
   function formatWhen(value) {
     if (!value) return "not yet";
@@ -655,8 +863,11 @@ const stats = [
   function showApp(email) {
     login?.classList.add("hidden");
     app?.classList.remove("hidden");
+    featuredBaseline = books.filter((book) => book.featured).map((book) => book.slug);
     renderArtList();
     renderSupplyList();
+    renderFeaturedBoard();
+    renderInstagram();
     if (status) {
       if (email && email !== "local") {
         status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
@@ -667,10 +878,59 @@ const stats = [
       }
     }
     loadActivity();
-    setTab("overview");
+    applyUrlState();
   }
 
-  function setTab(kind) {
+  function defaultQueue() {
+    return books.some((book) => book.status === "currently-reading") ? "currently-reading" : "five-star-no-note";
+  }
+
+  function syncUrl() {
+    const params = new URLSearchParams();
+    params.set("tab", currentTab);
+    if (currentTab === "book") params.set("queue", currentQueue);
+    if (currentTab === "book" && currentBook?.slug) params.set("slug", currentBook.slug);
+    if (currentTab === "art" && currentArt?.slug && !currentArt.create) params.set("slug", currentArt.slug);
+    if (currentTab === "supply" && currentSupply?.slug && !currentSupply.create) params.set("slug", currentSupply.slug);
+    const next = `${window.location.pathname}?${params.toString()}`;
+    if (`${window.location.pathname}${window.location.search}` !== next) {
+      history.replaceState(null, "", next);
+    }
+  }
+
+  function applyUrlState() {
+    const params = new URLSearchParams(window.location.search);
+    let tab = params.get("tab") || "";
+    const queue = params.get("queue") || "";
+    const slug = params.get("slug") || "";
+    if (!TABS.includes(tab)) {
+      tab = slug || queue ? "book" : "overview";
+    }
+    currentTab = tab;
+    currentQueue = QUEUES.includes(queue) ? queue : defaultQueue();
+    paintTab(currentTab);
+    if (currentTab === "book") {
+      paintQueue();
+      renderQueue();
+      if (slug) {
+        const book = books.find((item) => item.slug === slug);
+        if (book) fillBook(book, { skipUrl: true });
+        else if (status) status.textContent = "That book is not on the site.";
+      }
+    } else if (currentTab === "art" && slug) {
+      const piece = artPieces.find((item) => item.slug === slug);
+      if (piece) fillArt({ ...piece, create: false });
+      else if (status) status.textContent = "That painting is not on the site.";
+    } else if (currentTab === "supply" && slug) {
+      const item = supplies.find((entry) => entry.slug === slug);
+      if (item) fillSupply({ ...item, create: false });
+      else if (status) status.textContent = "That tool is not on the site.";
+    }
+    syncUrl();
+  }
+
+  function paintTab(kind) {
+    currentTab = kind;
     document.querySelectorAll("[data-tab]").forEach((button) => {
       const on = button.dataset.tab === kind;
       button.classList.toggle("bg-primary", on);
@@ -682,6 +942,314 @@ const stats = [
     document.querySelectorAll("[data-panel]").forEach((panel) => {
       panel.classList.toggle("hidden", panel.dataset.panel !== kind);
     });
+  }
+
+  function setTab(kind) {
+    if (kind !== currentTab && !confirmLeave()) return;
+    if (kind !== "book") {
+      currentBook = null;
+      bookEditor?.classList.add("hidden");
+    }
+    paintTab(kind);
+    if (kind === "book") {
+      paintQueue();
+      renderQueue();
+      document.querySelector("[data-book-empty]")?.classList.toggle("hidden", Boolean(currentBook));
+    }
+    if (kind === "art") document.querySelector("[data-art-empty]")?.classList.toggle("hidden", Boolean(currentArt));
+    if (kind === "supply") document.querySelector("[data-supply-empty]")?.classList.toggle("hidden", Boolean(currentSupply));
+    syncUrl();
+  }
+
+  function confirmLeave() {
+    if (!isBookDirty()) return true;
+    return window.confirm("Discard unsaved changes?");
+  }
+
+  function bookFormState() {
+    return JSON.stringify({
+      title: document.querySelector("[data-book-title]")?.value || "",
+      author: document.querySelector("[data-book-author]")?.value || "",
+      genre: document.querySelector("[data-book-genre]")?.value || "",
+      note: document.querySelector("[data-book-note]")?.value || "",
+      featured: Boolean(document.querySelector("[data-book-featured]")?.checked),
+      isbn: document.querySelector("[data-book-isbn]")?.value || "",
+      isbn10: document.querySelector("[data-book-isbn10]")?.value || "",
+      bookshop: document.querySelector("[data-book-bookshop]")?.value || "",
+      amazon: document.querySelector("[data-book-amazon]")?.value || "",
+      cover: document.querySelector("[data-book-cover]")?.files?.[0]?.name || "",
+    });
+  }
+
+  function isBookDirty() {
+    return Boolean(currentBook) && !bookEditor?.classList.contains("hidden") && bookFormState() !== bookSnapshot;
+  }
+
+  function previewBuy({ isbn, isbn10, bookshop, amazon }) {
+    const asUrl = (value) => {
+      const raw = String(value || "").trim();
+      if (!raw || raw === "#") return "";
+      return /^https?:\/\//i.test(raw) ? raw : "";
+    };
+    const cleanIsbn = (value) => String(value || "").replace(/[^\dXx]/g, "");
+    const cfg = JSON.parse(document.getElementById("affiliate-config")?.textContent || "{}");
+    const isbn13 = cleanIsbn(isbn);
+    const isbn10c = cleanIsbn(isbn10);
+    const shop =
+      asUrl(bookshop) ||
+      (cfg.bookshopUkId && isbn13 ? `https://uk.bookshop.org/a/${cfg.bookshopUkId}/${isbn13}` : "");
+    const asin = isbn10c || isbn13;
+    const amazonUrl =
+      asUrl(amazon) ||
+      (cfg.amazonTag && asin
+        ? `https://www.amazon.co.uk/dp/${asin}/ref=nosim?tag=${encodeURIComponent(cfg.amazonTag)}`
+        : "");
+    return { bookshop: shop, amazon: amazonUrl };
+  }
+
+  function updateBuyPreview() {
+    const el = document.querySelector("[data-book-buy]");
+    if (!el) return;
+    const buy = previewBuy({
+      isbn: document.querySelector("[data-book-isbn]")?.value,
+      isbn10: document.querySelector("[data-book-isbn10]")?.value,
+      bookshop: document.querySelector("[data-book-bookshop]")?.value,
+      amazon: document.querySelector("[data-book-amazon]")?.value,
+    });
+    const parts = [];
+    if (buy.bookshop) {
+      parts.push(
+        `<a class="text-primary underline-offset-4 hover:underline" href="${escapeHtml(buy.bookshop)}" target="_blank" rel="sponsored noopener noreferrer">Bookshop.org</a>`,
+      );
+    }
+    if (buy.amazon) {
+      parts.push(
+        `<a class="text-primary underline-offset-4 hover:underline" href="${escapeHtml(buy.amazon)}" target="_blank" rel="sponsored noopener noreferrer">Amazon</a>`,
+      );
+    }
+    el.innerHTML = parts.length ? parts.join(" · ") : "Add an ISBN or a full URL to generate buy links.";
+  }
+
+  function updateNoteCount() {
+    const el = document.querySelector("[data-book-note-count]");
+    const n = (document.querySelector("[data-book-note]")?.value || "").length;
+    if (!el) return;
+    el.textContent = `${n} / ${MAX_NOTE}`;
+    el.classList.toggle("text-accent", n > MAX_NOTE);
+    el.classList.toggle("text-muted-foreground", n <= MAX_NOTE);
+  }
+
+  function siteOrigin() {
+    const cfg = JSON.parse(document.getElementById("affiliate-config")?.textContent || "{}");
+    return String(cfg.siteOrigin || "https://sashabookandbrush.com").replace(/\/$/, "");
+  }
+
+  function copyText(label, value) {
+    const text = String(value || "").trim();
+    if (!text) {
+      if (status) status.textContent = `No ${label} to copy yet.`;
+      return;
+    }
+    navigator.clipboard.writeText(text).then(
+      () => {
+        if (status) status.textContent = `Copied ${label}`;
+      },
+      () => {
+        if (status) status.textContent = "Could not copy — long-press the link instead.";
+      },
+    );
+  }
+
+  function copyChip(label, value) {
+    if (!value) return "";
+    return `<button type="button" class="rounded border border-border px-2.5 py-1 text-xs text-foreground hover:border-primary" data-copy-value="${escapeHtml(value)}" data-copy-label="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
+  }
+
+  function renderInstagram() {
+    const origin = siteOrigin();
+    const pages = document.querySelector("[data-ig-pages]");
+    const reading = document.querySelector("[data-ig-reading]");
+    if (pages) {
+      const links = [
+        ["Home", origin],
+        ["Currently reading", `${origin}/#currently-reading`],
+        ["Books", `${origin}/recommendations`],
+        ["Art", `${origin}/art`],
+        ["Tools", `${origin}/art#supplies`],
+        ["Work with me", `${origin}/work`],
+      ];
+      pages.innerHTML = links.map(([label, href]) => copyChip(label, href)).join("");
+    }
+    if (!reading) return;
+    const current = books.filter((book) => book.status === "currently-reading");
+    if (!current.length) {
+      reading.innerHTML = `<p class="text-sm text-muted-foreground">No currently-reading titles on the site.</p>`;
+      return;
+    }
+    reading.innerHTML = `<p class="mb-2 text-xs font-medium tracking-widest text-accent uppercase">Reading now</p>${current
+      .map((book) => {
+        const buy = previewBuy(book);
+        const page = `${origin}/books/${book.slug}`;
+        return `<div class="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2"><span class="min-w-0 flex-1 text-sm font-medium text-foreground">${escapeHtml(book.title)}</span>${copyChip("Page", page)}${copyChip("Bookshop", buy.bookshop)}${copyChip("Amazon", buy.amazon)}</div>`;
+      })
+      .join("")}`;
+  }
+
+  function nextFeaturedOrder() {
+    const max = books.reduce((high, book) => {
+      if (!book.featured) return high;
+      return Math.max(high, Number(book.order) || 0);
+    }, 0);
+    return max + 1;
+  }
+
+  function searchQuery() {
+    return (document.querySelector("[data-search]")?.value || "").trim().toLowerCase();
+  }
+
+  function queueCount(id) {
+    if (id === "currently-reading") return books.filter((book) => book.status === "currently-reading").length;
+    if (id === "featured") return books.filter((book) => book.featured).length;
+    if (id === "five-star-no-note") return books.filter((book) => book.rating === 5 && !String(book.note || "").trim()).length;
+    if (id === "no-note") return books.filter((book) => !String(book.note || "").trim()).length;
+    if (id === "missing-isbn") return books.filter((book) => !book.isbn && !book.isbn10).length;
+    return 0;
+  }
+
+  function queueBooks() {
+    const q = searchQuery();
+    if (q.length >= 2) {
+      return books.filter((book) => `${book.title} ${book.author} ${book.slug}`.toLowerCase().includes(q));
+    }
+    if (currentQueue === "currently-reading") return books.filter((book) => book.status === "currently-reading");
+    if (currentQueue === "featured") {
+      return books.filter((book) => book.featured).sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    }
+    if (currentQueue === "five-star-no-note") {
+      return books.filter((book) => book.rating === 5 && !String(book.note || "").trim());
+    }
+    if (currentQueue === "no-note") return books.filter((book) => !String(book.note || "").trim());
+    if (currentQueue === "missing-isbn") return books.filter((book) => !book.isbn && !book.isbn10);
+    return [];
+  }
+
+  function bookRow(book) {
+    const selected = currentBook?.slug === book.slug;
+    const badges = [];
+    if (book.rating > 0) badges.push(`${book.rating}★`);
+    badges.push(String(book.note || "").trim() ? "Note" : "No note");
+    if (book.featured) badges.push("Home");
+    if (!book.isbn && !book.isbn10) badges.push("No ISBN");
+    const badgeHtml = badges
+      .map((label) => {
+        const accent = label === "No note" || label === "No ISBN";
+        return `<span class="${accent ? "text-accent" : "text-muted-foreground"}">${escapeHtml(label)}</span>`;
+      })
+      .join(" · ");
+    const cover = book.coverUrl
+      ? `<img src="${escapeHtml(book.coverUrl)}" alt="" class="h-14 w-9 shrink-0 rounded object-cover bg-muted" />`
+      : `<span class="h-14 w-9 shrink-0 rounded bg-muted"></span>`;
+    const ring = selected ? "border-primary bg-muted" : "border-border hover:border-primary";
+    return `<li><button type="button" class="flex w-full items-start gap-3 rounded-lg border px-2 py-2 text-left ${ring}" data-slug="${escapeHtml(book.slug)}">${cover}<span class="min-w-0 flex-1"><span class="font-medium text-foreground">${escapeHtml(book.title)}</span><span class="mt-0.5 block text-xs text-muted-foreground">${escapeHtml(book.author)}</span><span class="mt-1 block text-xs">${badgeHtml}</span></span></button></li>`;
+  }
+
+  function paintQueue() {
+    document.querySelectorAll("[data-queue]").forEach((button) => {
+      const on = button.dataset.queue === currentQueue && searchQuery().length < 2;
+      button.classList.toggle("bg-primary", on);
+      button.classList.toggle("text-primary-foreground", on);
+      button.classList.toggle("border-border", !on);
+    });
+    document.querySelectorAll("[data-queue-n]").forEach((el) => {
+      el.textContent = String(queueCount(el.getAttribute("data-queue-n") || ""));
+    });
+  }
+
+  function renderQueue() {
+    if (!results) return;
+    paintQueue();
+    const matches = queueBooks();
+    const q = searchQuery();
+    const searching = q.length >= 2;
+    const cap = searching || currentQueue === "no-note" ? 40 : matches.length;
+    const shown = matches.slice(0, cap);
+    const count = document.querySelector("[data-queue-count]");
+    if (count) {
+      if (searching) {
+        count.textContent =
+          shown.length < matches.length
+            ? `${shown.length} of ${matches.length} matches`
+            : `${matches.length} match${matches.length === 1 ? "" : "es"}`;
+      } else {
+        count.textContent =
+          shown.length < matches.length
+            ? `Showing ${shown.length} of ${matches.length}`
+            : `${matches.length} book${matches.length === 1 ? "" : "s"}`;
+      }
+    }
+    results.innerHTML = shown.length
+      ? shown.map(bookRow).join("")
+      : `<li class="px-1 py-6 text-center text-muted-foreground">${searching ? "No titles match." : "Nothing in this list."}</li>`;
+    updateNextButton();
+  }
+
+  function setQueue(queue) {
+    if (!confirmLeave()) return;
+    currentQueue = QUEUES.includes(queue) ? queue : defaultQueue();
+    const search = document.querySelector("[data-search]");
+    if (search) search.value = "";
+    currentBook = null;
+    bookEditor?.classList.add("hidden");
+    document.querySelector("[data-book-empty]")?.classList.remove("hidden");
+    renderQueue();
+    syncUrl();
+  }
+
+  function nextInQueue() {
+    if (!currentBook) return null;
+    const list = queueBooks();
+    const index = list.findIndex((book) => book.slug === currentBook.slug);
+    if (index < 0) return list[0] || null;
+    return list[index + 1] || null;
+  }
+
+  function updateNextButton() {
+    const button = document.querySelector("[data-book-next]");
+    if (!button) return;
+    const next = nextInQueue();
+    button.classList.toggle("hidden", !next);
+    if (next) button.textContent = "Next →";
+  }
+
+  function featuredList() {
+    return books
+      .filter((book) => book.featured)
+      .sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+  }
+
+  function renderFeaturedBoard() {
+    const list = document.querySelector("[data-featured-board]");
+    const count = document.querySelector("[data-featured-count]");
+    const featured = featuredList();
+    if (count) {
+      count.textContent =
+        featured.length > 8
+          ? `Featured ${featured.length} / target 6–8 — maybe rotate one off before adding.`
+          : `Featured ${featured.length} / target 6–8`;
+    }
+    if (!list) return;
+    if (!featured.length) {
+      list.innerHTML = `<li class="text-muted-foreground">No featured books yet.</li>`;
+      return;
+    }
+    list.innerHTML = featured
+      .map((book, index) => {
+        const cover = book.coverUrl
+          ? `<img src="${escapeHtml(book.coverUrl)}" alt="" class="h-10 w-7 shrink-0 rounded object-cover bg-muted" />`
+          : `<span class="h-10 w-7 shrink-0 rounded bg-muted"></span>`;
+        return `<li class="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5" data-featured-slug="${escapeHtml(book.slug)}">${cover}<span class="w-4 text-xs text-muted-foreground">${index + 1}</span><button type="button" class="min-w-0 flex-1 truncate text-left text-sm font-medium text-foreground" data-featured-open>${escapeHtml(book.title)}</button><button type="button" class="rounded border border-border px-2 py-1 text-xs" data-featured-up ${index === 0 ? "disabled" : ""}>↑</button><button type="button" class="rounded border border-border px-2 py-1 text-xs" data-featured-down ${index === featured.length - 1 ? "disabled" : ""}>↓</button><button type="button" class="rounded border border-border px-2 py-1 text-xs" data-featured-off>Remove</button></li>`;
+      })
+      .join("");
   }
 
   function bindDrop(kind) {
@@ -750,11 +1318,23 @@ const stats = [
       artList.innerHTML = `<li class="text-muted-foreground">No paintings yet.</li>`;
       return;
     }
-    artList.innerHTML = artPieces
-      .map(
-        (piece) =>
-          `<li><button type="button" class="w-full rounded-lg border border-border px-3 py-2 text-left hover:border-primary" data-art-slug="${escapeHtml(piece.slug)}">${escapeHtml(piece.title)} <span class="text-muted-foreground">· ${escapeHtml(piece.medium)}</span></button></li>`,
-      )
+    const sorted = [...artPieces].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    artList.innerHTML = sorted
+      .map((piece, index) => {
+        const flags = [];
+        if (!piece.image) flags.push("No image");
+        if (!String(piece.note || "").trim()) flags.push("No note");
+        if (piece.featured) flags.push("Home");
+        const extra = flags.length
+          ? `<span class="mt-1 block text-xs ${flags.includes("Home") && flags.length === 1 ? "text-muted-foreground" : "text-accent"}">${escapeHtml(flags.join(" · "))}</span>`
+          : "";
+        const thumb = piece.imageUrl
+          ? `<img src="${escapeHtml(piece.imageUrl)}" alt="" class="h-12 w-12 shrink-0 rounded object-cover bg-muted" />`
+          : `<span class="h-12 w-12 shrink-0 rounded bg-muted"></span>`;
+        const selected = currentArt?.slug === piece.slug && !currentArt?.create;
+        const ring = selected ? "border-primary bg-muted" : "border-border";
+        return `<li class="flex items-center gap-2 rounded-lg border ${ring} px-2 py-2" draggable="false" data-art-slug="${escapeHtml(piece.slug)}"><button type="button" class="cursor-grab touch-none px-1 text-muted-foreground" data-drag aria-label="Drag to reorder">⋮⋮</button><span class="w-4 text-xs text-muted-foreground">${index + 1}</span>${thumb}<button type="button" class="min-w-0 flex-1 text-left" data-art-open><span class="font-medium text-foreground">${escapeHtml(piece.title)}</span><span class="mt-0.5 block text-xs text-muted-foreground">${escapeHtml(piece.medium)}</span>${extra}</button>${copyChip("Link", `${siteOrigin()}/art#${piece.slug}`)}<div class="flex flex-col gap-1"><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-art-up ${index === 0 ? "disabled" : ""}>↑</button><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-art-down ${index === sorted.length - 1 ? "disabled" : ""}>↓</button></div></li>`;
+      })
       .join("");
   }
 
@@ -764,35 +1344,64 @@ const stats = [
       supplyList.innerHTML = `<li class="text-muted-foreground">No tools yet.</li>`;
       return;
     }
-    supplyList.innerHTML = supplies
-      .map(
-        (item) =>
-          `<li><button type="button" class="w-full rounded-lg border border-border px-3 py-2 text-left hover:border-primary" data-supply-slug="${escapeHtml(item.slug)}">${escapeHtml(item.title)} <span class="text-muted-foreground">· ${escapeHtml(item.brand)}</span></button></li>`,
-      )
+    const sorted = [...supplies].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    supplyList.innerHTML = sorted
+      .map((item, index) => {
+        const flags = [];
+        if (!item.amazon) flags.push("No Amazon URL");
+        if (item.featured) flags.push("Home");
+        const extra = flags.length
+          ? `<span class="mt-1 block text-xs ${item.amazon ? "text-muted-foreground" : "text-accent"}">${escapeHtml(flags.join(" · "))}</span>`
+          : "";
+        const selected = currentSupply?.slug === item.slug && !currentSupply?.create;
+        const ring = selected ? "border-primary bg-muted" : "border-border";
+        return `<li class="flex items-center gap-2 rounded-lg border ${ring} px-2 py-2" data-supply-slug="${escapeHtml(item.slug)}"><button type="button" class="cursor-grab touch-none px-1 text-muted-foreground" data-drag aria-label="Drag to reorder">⋮⋮</button><span class="w-4 text-xs text-muted-foreground">${index + 1}</span><button type="button" class="min-w-0 flex-1 text-left" data-supply-open><span class="font-medium text-foreground">${escapeHtml(item.title)}</span><span class="mt-0.5 block text-xs text-muted-foreground">${escapeHtml(item.brand)}${item.category ? ` · ${escapeHtml(item.category)}` : ""}</span>${extra}</button>${copyChip("Amazon", item.amazon)}${copyChip("Link", `${siteOrigin()}/art#${item.slug}`)}<div class="flex flex-col gap-1"><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-supply-up ${index === 0 ? "disabled" : ""}>↑</button><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-supply-down ${index === sorted.length - 1 ? "disabled" : ""}>↓</button></div></li>`;
+      })
       .join("");
   }
 
-  function fillBook(book) {
+  function fillBook(book, options = {}) {
+    if (currentBook && currentBook.slug !== book.slug && !confirmLeave()) return;
     currentBook = book;
     bookEditor?.classList.remove("hidden");
+    document.querySelector("[data-book-empty]")?.classList.add("hidden");
+    const heading = document.querySelector("[data-book-heading]");
+    if (heading) heading.textContent = book.title;
     document.querySelector("[data-book-title]").value = book.title;
     document.querySelector("[data-book-author]").value = book.author;
     document.querySelector("[data-book-genre]").value = book.genre === "Read" || book.genre === "Currently reading" ? "" : book.genre;
-    document.querySelector("[data-book-note]").value = book.note;
+    document.querySelector("[data-book-note]").value = book.note || "";
     document.querySelector("[data-book-featured]").checked = book.featured;
+    document.querySelector("[data-book-isbn]").value = book.isbn || "";
+    document.querySelector("[data-book-isbn10]").value = book.isbn10 || "";
     document.querySelector("[data-book-bookshop]").value = displayUrl(book.bookshop);
     document.querySelector("[data-book-amazon]").value = displayUrl(book.amazon);
+    const view = document.querySelector("[data-book-view]");
+    if (view) view.href = `/books/${book.slug}`;
     const bits = [];
     if (book.rating) bits.push(`${book.rating}★ on Goodreads`);
     if (book.status === "currently-reading") bits.push("Currently reading");
     else if (book.dateRead) bits.push(`Read ${book.dateRead}`);
     document.querySelector("[data-book-meta]").textContent = bits.join(" · ");
-    resetDrop("book", "", book.cover ? `Current cover: ${book.cover}. Drop a new photo to replace it.` : "");
+    resetDrop(
+      "book",
+      book.coverUrl || "",
+      book.cover ? `Current cover: ${book.cover}. Drop a new photo to replace it.` : "",
+    );
+    updateBuyPreview();
+    updateNoteCount();
+    bookSnapshot = bookFormState();
+    renderQueue();
+    if (!options.skipUrl) syncUrl();
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      bookEditor?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
   function fillArt(piece) {
     currentArt = piece;
     artEditor?.classList.remove("hidden");
+    document.querySelector("[data-art-empty]")?.classList.add("hidden");
     document.querySelector("[data-art-title]").value = piece.title || "";
     document.querySelector("[data-art-medium]").value = piece.medium || "Acrylic";
     document.querySelector("[data-art-note]").value = piece.note || "";
@@ -800,11 +1409,14 @@ const stats = [
     document.querySelector("[data-art-order]").value = piece.order || 0;
     document.querySelector("[data-art-delete]")?.classList.toggle("hidden", Boolean(piece.create) || !piece.slug);
     resetDrop("art", piece.imageUrl || "", piece.image ? "Drop a new photo to replace it" : "");
+    renderArtList();
+    syncUrl();
   }
 
   function fillSupply(item) {
     currentSupply = item;
     supplyEditor?.classList.remove("hidden");
+    document.querySelector("[data-supply-empty]")?.classList.add("hidden");
     document.querySelector("[data-supply-title]").value = item.title || "";
     document.querySelector("[data-supply-brand]").value = item.brand || "";
     document.querySelector("[data-supply-category]").value = item.category || "";
@@ -815,6 +1427,95 @@ const stats = [
     document.querySelector("[data-supply-shop]").value = item.shop || "";
     document.querySelector("[data-supply-shop-label]").value = item.shopLabel || "";
     document.querySelector("[data-supply-delete]")?.classList.toggle("hidden", Boolean(item.create) || !item.slug);
+    renderSupplyList();
+    syncUrl();
+  }
+
+  function sortedArt() {
+    return [...artPieces].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+  }
+
+  function sortedSupply() {
+    return [...supplies].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+  }
+
+  async function persistKindOrder(kind) {
+    const items = kind === "art" ? sortedArt() : sortedSupply();
+    items.forEach((item, index) => {
+      item.order = index + 1;
+    });
+    await call("/order", {
+      method: "POST",
+      body: JSON.stringify({ kind, slugs: items.map((item) => item.slug) }),
+    });
+    if (kind === "art") renderArtList();
+    else renderSupplyList();
+    if (status) {
+      status.textContent = isDev
+        ? `Saved ${kind === "art" ? "painting" : "tool"} order. Refresh the site to see it.`
+        : `Saved ${kind === "art" ? "painting" : "tool"} order. It will show after the rebuild.`;
+    }
+    loadActivity();
+  }
+
+  function applyDomOrder(listEl, kind) {
+    const attr = kind === "art" ? "artSlug" : "supplySlug";
+    const items = kind === "art" ? artPieces : supplies;
+    const slugs = [...listEl.querySelectorAll("li[data-art-slug], li[data-supply-slug]")].map(
+      (row) => row.dataset[attr],
+    );
+    slugs.forEach((slug, index) => {
+      const item = items.find((entry) => entry.slug === slug);
+      if (item) item.order = index + 1;
+    });
+  }
+
+  function bindSortable(listEl, kind) {
+    if (!listEl) return;
+    let dragging = null;
+
+    listEl.addEventListener("pointerdown", (event) => {
+      const handle = event.target.closest("[data-drag]");
+      const row = handle?.closest("li");
+      if (!row) return;
+      row.draggable = true;
+    });
+
+    listEl.addEventListener("dragstart", (event) => {
+      const row = event.target.closest("li");
+      if (!row || !event.target.closest("[data-drag]")) {
+        event.preventDefault();
+        return;
+      }
+      dragging = row;
+      row.classList.add("opacity-60");
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", row.dataset.artSlug || row.dataset.supplySlug || "");
+    });
+
+    listEl.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      const over = event.target.closest("li");
+      if (!dragging || !over || over === dragging) return;
+      const rect = over.getBoundingClientRect();
+      const before = event.clientY < rect.top + rect.height / 2;
+      listEl.insertBefore(dragging, before ? over : over.nextSibling);
+    });
+
+    listEl.addEventListener("drop", (event) => {
+      event.preventDefault();
+    });
+
+    listEl.addEventListener("dragend", () => {
+      if (!dragging) return;
+      dragging.classList.remove("opacity-60");
+      dragging.draggable = false;
+      dragging = null;
+      applyDomOrder(listEl, kind);
+      persistKindOrder(kind).catch((error) => {
+        if (status) status.textContent = error.message;
+      });
+    });
   }
 
   async function boot() {
@@ -842,14 +1543,65 @@ const stats = [
   }
 
   document.addEventListener("click", (event) => {
-    const button = event.target instanceof Element ? event.target.closest("[data-activity-refresh]") : null;
-    if (!button || button.disabled) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+    const refresh = target.closest("[data-activity-refresh]");
+    if (refresh && !refresh.disabled) {
+      event.preventDefault();
+      loadActivity({ manual: true });
+      return;
+    }
+    const valued = target.closest("[data-copy-value]");
+    if (valued) {
+      event.preventDefault();
+      copyText(valued.dataset.copyLabel || "link", valued.dataset.copyValue || "");
+      return;
+    }
+    const copy = target.closest("[data-copy]");
+    if (!copy) return;
     event.preventDefault();
-    loadActivity({ manual: true });
+    const origin = siteOrigin();
+    const which = copy.dataset.copy;
+    if (which === "page" && currentBook) copyText("page link", `${origin}/books/${currentBook.slug}`);
+    if (which === "bookshop" && currentBook) copyText("Bookshop link", previewBuy(readBookBuyFields()).bookshop);
+    if (which === "amazon" && currentBook) copyText("Amazon link", previewBuy(readBookBuyFields()).amazon);
+    if (which === "art-page" && currentArt?.slug) copyText("painting link", `${origin}/art#${currentArt.slug}`);
+    if (which === "art-index") copyText("Art page", `${origin}/art`);
+    if (which === "tool-page" && currentSupply?.slug) copyText("tool link", `${origin}/art#${currentSupply.slug}`);
+    if (which === "tool-amazon") copyText("Amazon link", displayUrl(document.querySelector("[data-supply-amazon]")?.value || currentSupply?.amazon || ""));
+    if (which === "tools-index") copyText("kit page", `${origin}/art#supplies`);
   });
+
+  function readBookBuyFields() {
+    return {
+      isbn: document.querySelector("[data-book-isbn]")?.value,
+      isbn10: document.querySelector("[data-book-isbn10]")?.value,
+      bookshop: document.querySelector("[data-book-bookshop]")?.value,
+      amazon: document.querySelector("[data-book-amazon]")?.value,
+    };
+  }
 
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => setTab(button.dataset.tab));
+  });
+
+  document.querySelectorAll("[data-queue]").forEach((button) => {
+    button.addEventListener("click", () => setQueue(button.dataset.queue || defaultQueue()));
+  });
+
+  document.querySelectorAll("[data-health-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.healthTab || "overview";
+      const queue = button.dataset.healthQueue || "";
+      setTab(tab);
+      if (tab === "book" && queue) setQueue(queue);
+    });
+  });
+
+  window.addEventListener("beforeunload", (event) => {
+    if (!isBookDirty()) return;
+    event.preventDefault();
+    event.returnValue = "";
   });
 
   bindDrop("book");
@@ -866,22 +1618,105 @@ const stats = [
     }
   });
 
-  document.querySelector("[data-search]")?.addEventListener("input", (event) => {
-    const q = event.target.value.trim().toLowerCase();
-    if (!results) return;
-    if (q.length < 2) {
-      results.innerHTML = "";
+  document.querySelector("[data-search]")?.addEventListener("input", () => {
+    renderQueue();
+  });
+  document.querySelector("[data-search]")?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    const first = queueBooks()[0];
+    if (first) fillBook(first);
+  });
+
+  document.querySelector("[data-book-next]")?.addEventListener("click", () => {
+    const next = nextInQueue();
+    if (next) fillBook(next);
+  });
+
+  ["data-book-isbn", "data-book-isbn10", "data-book-bookshop", "data-book-amazon"].forEach((attr) => {
+    document.querySelector(`[${attr}]`)?.addEventListener("input", updateBuyPreview);
+  });
+  document.querySelector("[data-book-note]")?.addEventListener("input", updateNoteCount);
+
+  document.querySelector("[data-featured-board]")?.addEventListener("click", (event) => {
+    const row = event.target.closest("[data-featured-slug]");
+    if (!row) return;
+    const slug = row.dataset.featuredSlug;
+    const featured = featuredList();
+    const index = featured.findIndex((book) => book.slug === slug);
+    if (index < 0) return;
+    if (event.target.closest("[data-featured-up]") && index > 0) {
+      const swap = featured[index - 1];
+      featured[index - 1] = featured[index];
+      featured[index] = swap;
+      featured.forEach((book, i) => {
+        book.order = i + 1;
+      });
+      renderFeaturedBoard();
       return;
     }
-    const matches = books
-      .filter((book) => `${book.title} ${book.author} ${book.slug}`.toLowerCase().includes(q))
-      .slice(0, 40);
-    results.innerHTML = matches
-      .map(
-        (book) =>
-          `<li><button type="button" class="w-full rounded-lg border border-border px-3 py-2 text-left hover:border-primary" data-slug="${escapeHtml(book.slug)}">${escapeHtml(book.title)} <span class="text-muted-foreground">· ${escapeHtml(book.author)}</span></button></li>`,
-      )
-      .join("");
+    if (event.target.closest("[data-featured-down]") && index < featured.length - 1) {
+      const swap = featured[index + 1];
+      featured[index + 1] = featured[index];
+      featured[index] = swap;
+      featured.forEach((book, i) => {
+        book.order = i + 1;
+      });
+      renderFeaturedBoard();
+      return;
+    }
+    if (event.target.closest("[data-featured-off]")) {
+      unfeatureBook(featured[index]);
+      return;
+    }
+    if (event.target.closest("[data-featured-open]")) {
+      fillBook(featured[index]);
+    }
+  });
+
+  async function unfeatureBook(book) {
+    try {
+      await call("/featured", { method: "POST", body: JSON.stringify({ books: [{ slug: book.slug, featured: false }] }) });
+      book.featured = false;
+      featuredBaseline = featuredBaseline.filter((slug) => slug !== book.slug);
+      renderFeaturedBoard();
+      renderQueue();
+      if (status) status.textContent = `Removed ${book.title} from Home. Live after rebuild.`;
+      loadActivity();
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    }
+  }
+
+  document.querySelector("[data-featured-save]")?.addEventListener("click", async () => {
+    const button = document.querySelector("[data-featured-save]");
+    const payload = featuredList().map((book) => ({ slug: book.slug, featured: true }));
+    if (!payload.length) return;
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Saving…";
+    }
+    try {
+      await call("/featured", { method: "POST", body: JSON.stringify({ books: payload.slice(0, 20) }) });
+      featuredList().forEach((book, index) => {
+        book.order = index + 1;
+      });
+      featuredBaseline = featuredList().map((book) => book.slug);
+      renderFeaturedBoard();
+      if (status) {
+        status.textContent = isDev
+          ? "Featured order saved. Refresh the site to see it."
+          : "Featured order saved. It will show on the site after the rebuild.";
+      }
+      loadActivity();
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Save order";
+      }
+    }
   });
 
   results?.addEventListener("click", (event) => {
@@ -892,10 +1727,30 @@ const stats = [
   });
 
   artList?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-art-slug]");
-    if (!button) return;
-    const piece = artPieces.find((item) => item.slug === button.dataset.artSlug);
-    if (piece) fillArt({ ...piece, create: false });
+    if (event.target.closest("[data-copy-value], [data-drag]")) return;
+    const row = event.target.closest("[data-art-slug]");
+    if (!row) return;
+    const sorted = [...artPieces].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const index = sorted.findIndex((item) => item.slug === row.dataset.artSlug);
+    if (index < 0) return;
+    if (event.target.closest("[data-art-up]") || event.target.closest("[data-art-down]")) {
+      event.preventDefault();
+      const dir = event.target.closest("[data-art-up]") ? -1 : 1;
+      const next = index + dir;
+      if (!sorted[next]) return;
+      const moved = sorted[index];
+      sorted[index] = sorted[next];
+      sorted[next] = moved;
+      sorted.forEach((item, i) => {
+        item.order = i + 1;
+      });
+      renderArtList();
+      persistKindOrder("art").catch((error) => {
+        if (status) status.textContent = error.message;
+      });
+      return;
+    }
+    fillArt({ ...sorted[index], create: false });
   });
 
   document.querySelector("[data-art-new]")?.addEventListener("click", () => {
@@ -913,10 +1768,30 @@ const stats = [
   });
 
   supplyList?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-supply-slug]");
-    if (!button) return;
-    const item = supplies.find((entry) => entry.slug === button.dataset.supplySlug);
-    if (item) fillSupply({ ...item, create: false });
+    if (event.target.closest("[data-copy-value], [data-drag]")) return;
+    const row = event.target.closest("[data-supply-slug]");
+    if (!row) return;
+    const sorted = [...supplies].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const index = sorted.findIndex((item) => item.slug === row.dataset.supplySlug);
+    if (index < 0) return;
+    if (event.target.closest("[data-supply-up]") || event.target.closest("[data-supply-down]")) {
+      event.preventDefault();
+      const dir = event.target.closest("[data-supply-up]") ? -1 : 1;
+      const next = index + dir;
+      if (!sorted[next]) return;
+      const moved = sorted[index];
+      sorted[index] = sorted[next];
+      sorted[next] = moved;
+      sorted.forEach((item, i) => {
+        item.order = i + 1;
+      });
+      renderSupplyList();
+      persistKindOrder("supply").catch((error) => {
+        if (status) status.textContent = error.message;
+      });
+      return;
+    }
+    fillSupply({ ...sorted[index], create: false });
   });
 
   document.querySelector("[data-supply-new]")?.addEventListener("click", () => {
@@ -938,15 +1813,25 @@ const stats = [
   });
 
   document.querySelector("[data-book-save]")?.addEventListener("click", async () => {
-    if (!currentBook) return;
+    if (!currentBook || saving) return;
+    const button = document.querySelector("[data-book-save]");
+    saving = true;
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Saving…";
+    }
     try {
+      const wasFeatured = Boolean(currentBook.featured);
       currentBook.title = document.querySelector("[data-book-title]").value;
       currentBook.author = document.querySelector("[data-book-author]").value;
       currentBook.genre = document.querySelector("[data-book-genre]").value;
       currentBook.note = document.querySelector("[data-book-note]").value;
       currentBook.featured = document.querySelector("[data-book-featured]").checked;
+      currentBook.isbn = document.querySelector("[data-book-isbn]").value;
+      currentBook.isbn10 = document.querySelector("[data-book-isbn10]").value;
       currentBook.bookshop = document.querySelector("[data-book-bookshop]").value;
       currentBook.amazon = document.querySelector("[data-book-amazon]").value;
+      if (currentBook.featured && !wasFeatured) currentBook.order = nextFeaturedOrder();
       await call("/book", {
         method: "POST",
         body: JSON.stringify({
@@ -956,6 +1841,9 @@ const stats = [
           genre: currentBook.genre,
           note: currentBook.note,
           featured: currentBook.featured,
+          order: currentBook.featured ? currentBook.order : undefined,
+          isbn: currentBook.isbn,
+          isbn10: currentBook.isbn10,
           bookshop: currentBook.bookshop,
           amazon: currentBook.amazon,
         }),
@@ -973,16 +1861,32 @@ const stats = [
           }),
         });
         currentBook.cover = file.name;
-        resetDrop("book", "", `Saved ${file.name}`);
+        resetDrop("book", previewUrls.book || currentBook.coverUrl || "", `Saved ${file.name}`);
       }
+      const catalog = books.find((item) => item.slug === currentBook.slug);
+      if (catalog) Object.assign(catalog, currentBook);
+      featuredBaseline = books.filter((book) => book.featured).map((book) => book.slug);
+      bookSnapshot = bookFormState();
+      renderFeaturedBoard();
+      renderQueue();
+      const liveLink = `/books/${currentBook.slug}`;
+      const next = nextInQueue();
+      const nextHint = next ? ` Next up: ${escapeHtml(next.title)}.` : "";
       if (status) {
-        status.textContent = isDev
-          ? `Saved ${currentBook.title}. Refresh the site to see it.`
-          : `Saved ${currentBook.title}. It will show on the site after the rebuild.`;
+        status.innerHTML = isDev
+          ? `Saved ${escapeHtml(currentBook.title)}. <a class="text-primary underline-offset-4 hover:underline" href="${liveLink}" target="_blank" rel="noopener noreferrer">View on site</a>.${nextHint}`
+          : `Saved ${escapeHtml(currentBook.title)}. <a class="text-primary underline-offset-4 hover:underline" href="${liveLink}" target="_blank" rel="noopener noreferrer">View on site</a> after rebuild (~1 min).${nextHint}`;
       }
+      updateNextButton();
       loadActivity();
     } catch (error) {
       if (status) status.textContent = error.message;
+    } finally {
+      saving = false;
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Save book";
+      }
     }
   });
 
@@ -1052,9 +1956,10 @@ const stats = [
       });
       const index = artPieces.findIndex((item) => item.slug === currentArt.slug);
       if (index >= 0) artPieces.splice(index, 1);
+      currentArt = null;
       renderArtList();
       artEditor?.classList.add("hidden");
-      currentArt = null;
+      document.querySelector("[data-art-empty]")?.classList.remove("hidden");
       if (status) {
         status.textContent = isDev
           ? `Deleted ${title}. Refresh the site to see it gone.`
@@ -1123,9 +2028,10 @@ const stats = [
       });
       const index = supplies.findIndex((item) => item.slug === currentSupply.slug);
       if (index >= 0) supplies.splice(index, 1);
+      currentSupply = null;
       renderSupplyList();
       supplyEditor?.classList.add("hidden");
-      currentSupply = null;
+      document.querySelector("[data-supply-empty]")?.classList.remove("hidden");
       if (status) {
         status.textContent = isDev
           ? `Deleted ${title}. Refresh the site to see it gone.`
@@ -1153,6 +2059,8 @@ const stats = [
     }
   });
 
+  bindSortable(artList, "art");
+  bindSortable(supplyList, "supply");
   boot();
 </script>
 </BaseLayout>

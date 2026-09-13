@@ -9,6 +9,8 @@ interface Props {
   description?: string;
   image?: string;
   imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   transparentHeader?: boolean;
   noindex?: boolean;
 }
@@ -18,6 +20,8 @@ const {
   description = site.description,
   image = site.share.image,
   imageAlt = site.share.imageAlt,
+  imageWidth = 1200,
+  imageHeight = 630,
   transparentHeader = false,
   noindex = false,
 } = Astro.props;
@@ -43,14 +47,14 @@ const shareImage = new URL(image, Astro.site);
     <meta name="theme-color" content="#8c3340" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1c1210" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={"SashaBook&Brush"} />
+    <meta property="og:site_name" content={site.brand} />
     <meta property="og:locale" content="en_GB" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={shareImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:width" content={String(imageWidth)} />
+    <meta property="og:image:height" content={String(imageHeight)} />
     <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />

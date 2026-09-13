@@ -21,7 +21,9 @@ const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order -
       <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {
           pieces.map((piece) => (
-            <ArtCard {...piece.data} />
+            <div id={piece.id} class="scroll-mt-24">
+              <ArtCard {...piece.data} />
+            </div>
           ))
         }
       </div>
@@ -44,7 +46,9 @@ const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order -
         <div class="grid gap-4 md:grid-cols-2">
           {
             supplies.map((item) => (
-              <SupplyCard {...item.data} />
+              <div id={item.id} class="scroll-mt-24">
+                <SupplyCard {...item.data} slug={item.id} />
+              </div>
             ))
           }
         </div>

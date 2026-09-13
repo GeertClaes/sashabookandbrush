@@ -11,6 +11,7 @@ import {
   parseActivityLog,
   stringifyActivity,
 } from "./lib/activity.mjs";
+import { emptyAffiliateUrl } from "../functions/admin/api/_lib/frontmatter.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -41,6 +42,7 @@ const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
 const ART_IMAGES_DIR = path.join(ROOT, "src", "assets", "art");
 const DATA_DIR = path.join(ROOT, "data");
 const PORT = Number(process.env.ADMIN_PORT || 8787);
+const SITE = String(process.env.PUBLIC_SITE_URL || "http://127.0.0.1:4321").replace(/\/$/, "");
 const PASSWORD = process.env.ADMIN_PASSWORD || "";
 const TOKEN = createHash("sha256").update(`sbb:${PASSWORD || "local"}`).digest("hex");
 
@@ -110,10 +112,6 @@ function applyYamlFields(text, updates) {
     }
   }
   return next;
-}
-
-function affiliateValue(value) {
-  return String(value || "").trim();
 }
 
 function slugFromTitle(title) {
@@ -204,6 +202,19 @@ const server = createServer(async (req, res) => {
   const pathname = url.pathname.replace(/^\/admin(?=\/)/, "") || "/";
 
   try {
+    if (req.method === "GET" && (pathname === "/" || pathname === "/admin" || pathname === "/admin/")) {
+      const dest = new URL("/admin", SITE);
+      dest.search = url.search;
+      res.writeHead(302, {
+        Location: dest.href,
+        "Content-Type": "text/html; charset=utf-8",
+      });
+      res.end(
+        `<!doctype html><p>The studio editor is at <a href="${dest.href}">${dest.href}</a>. This port is the save API only.</p>`,
+      );
+      return;
+    }
+
     if ((pathname === "/health" || pathname === "/api/health") && req.method === "GET") {
       json(res, 200, { ok: true, email: "local", auth: Boolean(PASSWORD) || "localhost-open" });
       return;
@@ -282,8 +293,11 @@ const server = createServer(async (req, res) => {
       if (typeof body.genre === "string") updates.genre = body.genre.trim() || "Read";
       if (typeof body.note === "string") updates.note = body.note;
       if (typeof body.featured === "boolean") updates.featured = body.featured;
-      if (typeof body.bookshop === "string") updates.bookshop = affiliateValue(body.bookshop);
-      if (typeof body.amazon === "string") updates.amazon = affiliateValue(body.amazon);
+      if (body.featured !== false && Number.isFinite(Number(body.order))) updates.order = Number(body.order);
+      if (typeof body.isbn === "string") updates.isbn = String(body.isbn).replace(/[^\dXx]/g, "");
+      if (typeof body.isbn10 === "string") updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
+      if (typeof body.bookshop === "string") updates.bookshop = emptyAffiliateUrl(body.bookshop);
+      if (typeof body.amazon === "string") updates.amazon = emptyAffiliateUrl(body.amazon);
       text = applyYamlFields(text, updates);
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       await recordLocalActivity({
@@ -292,6 +306,92 @@ const server = createServer(async (req, res) => {
         detail: "Saved on this computer. Refresh the site to see it.",
       });
       json(res, 200, { ok: true });
+      return;
+    }
+
+    if (pathname === "/api/featured" && req.method === "POST") {
+      const body = JSON.parse((await readBody(req)) || "{}");
+      const rows = Array.isArray(body.books) ? body.books : [];
+      if (!rows.length || rows.length > 20) {
+        json(res, 400, { error: "Send between 1 and 20 books" });
+        return;
+      }
+      const prepared = [];
+      for (const row of rows) {
+        const slug = path.basename(String(row.slug || ""));
+        if (!slug) {
+          json(res, 400, { error: "Invalid name" });
+          return;
+        }
+        const file = path.join(BOOKS_DIR, `${slug}.md`);
+        let text = null;
+        try {
+          text = await readFile(file, "utf8");
+        } catch {
+          json(res, 400, { error: `Unknown book: ${slug}` });
+          return;
+        }
+        prepared.push({ slug, file, text, featured: Boolean(row.featured) });
+      }
+      let featuredIndex = 0;
+      for (const row of prepared) {
+        const updates = { featured: row.featured };
+        if (row.featured) {
+          featuredIndex += 1;
+          updates.order = featuredIndex;
+        }
+        const text = applyYamlFields(row.text, updates);
+        await writeFile(row.file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+      }
+      await recordLocalActivity({
+        type: "admin",
+        title: `Updated featured board (${featuredIndex} on Home)`,
+        detail: "Saved on this computer. Refresh the site to see it.",
+      });
+      json(res, 200, { ok: true, featured: featuredIndex });
+      return;
+    }
+
+    if (pathname === "/api/order" && req.method === "POST") {
+      const body = JSON.parse((await readBody(req)) || "{}");
+      const dir = body.kind === "art" ? ART_DIR : body.kind === "supply" ? SUPPLIES_DIR : "";
+      const label = body.kind === "art" ? "paintings" : body.kind === "supply" ? "tools" : "";
+      const slugs = Array.isArray(body.slugs) ? body.slugs : [];
+      if (!dir || !label) {
+        json(res, 400, { error: "Unknown list" });
+        return;
+      }
+      if (!slugs.length || slugs.length > 40) {
+        json(res, 400, { error: "Send between 1 and 40 items" });
+        return;
+      }
+      const prepared = [];
+      for (const raw of slugs) {
+        const slug = path.basename(String(raw || ""));
+        if (!slug) {
+          json(res, 400, { error: "Invalid name" });
+          return;
+        }
+        const file = path.join(dir, `${slug}.md`);
+        let text = null;
+        try {
+          text = await readFile(file, "utf8");
+        } catch {
+          json(res, 400, { error: `Unknown item: ${slug}` });
+          return;
+        }
+        prepared.push({ file, text });
+      }
+      for (const [index, row] of prepared.entries()) {
+        const text = applyYamlFields(row.text, { order: index + 1 });
+        await writeFile(row.file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+      }
+      await recordLocalActivity({
+        type: "admin",
+        title: `Reordered ${label}`,
+        detail: "Saved on this computer. Refresh the site to see it.",
+      });
+      json(res, 200, { ok: true, count: prepared.length });
       return;
     }
 
@@ -416,8 +516,8 @@ ${image ? `image: ${yamlString(image)}\n` : ""}---
       const brand = String(body.brand || "").trim();
       const category = String(body.category || "Studio").trim() || "Studio";
       const note = typeof body.note === "string" ? body.note : "";
-      const amazon = affiliateValue(body.amazon);
-      const shop = String(body.shop || "").trim();
+      const amazon = emptyAffiliateUrl(body.amazon);
+      const shop = emptyAffiliateUrl(body.shop);
       const shopLabel = String(body.shopLabel || "").trim();
       const featured = Boolean(body.featured);
       const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
@@ -428,8 +528,7 @@ title: ${yamlString(title)}
 brand: ${yamlString(brand)}
 category: ${yamlString(category)}
 note: ${yamlString(note)}
-amazon: ${yamlString(amazon)}
-${shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : ""}featured: ${featured}
+${amazon ? `amazon: ${yamlString(amazon)}\n` : ""}${shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : ""}featured: ${featured}
 order: ${order}
 ---
 `;
@@ -504,5 +603,6 @@ if (!PASSWORD) {
 }
 
 server.listen(PORT, "127.0.0.1", () => {
-  console.log(`Admin API on http://127.0.0.1:${PORT} — open /admin on the site while this is running.`);
+  console.log(`Admin API on http://127.0.0.1:${PORT}`);
+  console.log(`Open the studio at ${SITE}/admin (npm run dev). This port is the save API only.`);
 });

@@ -1,8 +1,8 @@
-name = "sashabookandbrush-rebuild"
+name = "pages-cron-deploy"
 main = "index.js"
 compatibility_date = "2026-09-08"
 workers_dev = false
 
-# Every 6 hours UTC. Daily instead: "0 6 * * *"
+# Daily at 00:00 UTC. Matches the live Worker. Do not go back to 6-hourly.
 [triggers]
-crons = ["0 */6 * * *"]
+crons = ["0 0 * * *"]
