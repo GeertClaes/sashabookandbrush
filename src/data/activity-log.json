@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-13T17:36:16.154Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Deleted painting studio-still",
+      "detail": "It leaves the Art page after the site rebuilds (about a minute).",
+      "by": "geert.wl.claes@gmail.com"
+    },
+    {
       "at": "2026-09-12T08:11:33.867Z",
       "type": "admin",
       "ok": true,
