@@ -1,5 +1,5 @@
 ---
-title: "Liquitex Basics acrylics"
+title: "Liquitex professional heavy body acrylics"
 brand: "Liquitex"
 category: "Paint"
 note: "Some of my most used acrylic paints. "
