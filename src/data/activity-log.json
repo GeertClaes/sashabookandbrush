@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-13T19:38:24.144Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Added Velaris",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-13T19:35:44.119Z",
       "type": "admin",
       "ok": true,
