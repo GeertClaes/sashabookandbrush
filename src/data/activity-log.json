@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-13T19:49:23.512Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Nicpro paintbrushes",
+      "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-09-13T19:47:52.821Z",
       "type": "admin",
       "ok": true,

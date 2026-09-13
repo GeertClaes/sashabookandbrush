@@ -1,8 +1,7 @@
 ---
-title: "Synthetic filbert brushes"
-brand: "Princeton"
+title: "Nicpro paintbrushes"
+brand: "Nicpro"
 category: "Brushes"
-note: "A small set of filberts does most of the work — skies, mountains, and the soft edges I keep coming back to."
 featured: true
 order: 2
 ---
