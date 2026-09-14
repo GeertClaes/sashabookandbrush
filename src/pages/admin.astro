@@ -49,6 +49,9 @@ const art = (await getCollection("art"))
     image: piece.data.image || "",
     imageUrl: artImageUrl(piece.data.image || ""),
     order: piece.data.order || 0,
+    available: Boolean(piece.data.available),
+    shop: piece.data.shop || "",
+    shopLabel: piece.data.shopLabel || "",
   }))
   .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 const supplies = (await getCollection("supplies"))
@@ -476,7 +479,7 @@ const affiliateConfig = {
               </button>
             </div>
             <p class="mb-3 text-xs text-muted-foreground">
-              Drag the handle, or use the arrows. Order saves in one go and is the order on the Art page.
+              Drag the handle, or use the arrows. Order saves in one go and is the order on the Art page. Most pieces stay display-only — tick For sale only on originals she wants to sell.
             </p>
             <ul data-art-list class="space-y-2 text-sm"></ul>
           </section>
@@ -509,10 +512,38 @@ const affiliateConfig = {
               <input type="checkbox" data-art-featured />
               Feature on the home page
             </label>
+            <label class="mb-1 flex items-center gap-2 text-sm text-foreground">
+              <input type="checkbox" data-art-available />
+              For sale
+            </label>
+            <p class="mb-4 text-xs text-muted-foreground">
+              Off by default. Fan pieces and anything she is not selling stay on the wall — no buy button, no sale link.
+            </p>
             <input type="hidden" data-art-order />
+            <div data-art-sale-fields class="hidden">
+              <label class="mb-4 block text-sm font-medium text-foreground">
+                Sale link (optional)
+                <input
+                  data-art-shop
+                  placeholder="Etsy, Gumroad… leave blank to send people to Instagram"
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+              <label class="mb-4 block text-sm font-medium text-foreground">
+                Button label
+                <input
+                  data-art-shop-label
+                  placeholder="Available — DM me"
+                  class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
             <div class="mb-4 flex flex-wrap gap-2">
               <button type="button" data-copy="art-page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
                 Copy painting link
+              </button>
+              <button type="button" data-copy="art-shop" class="hidden rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                Copy sale link
               </button>
               <button type="button" data-copy="art-index" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
                 Copy Art page
@@ -591,9 +622,12 @@ const affiliateConfig = {
               Amazon URL
               <input
                 data-supply-amazon
-                placeholder="Paste the Amazon link with your tag"
+                placeholder="Paste any Amazon.co.uk product link"
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               />
+              <span class="mt-1 block text-xs font-normal text-muted-foreground">
+                Open the product on Amazon, copy the address bar, paste here. Your tag is added on save.
+              </span>
             </label>
             <div class="mb-4 flex flex-wrap gap-2">
               <button type="button" data-copy="tool-amazon" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
@@ -1325,6 +1359,7 @@ const affiliateConfig = {
         if (!piece.image) flags.push("No image");
         if (!String(piece.note || "").trim()) flags.push("No note");
         if (piece.featured) flags.push("Home");
+        if (piece.available) flags.push("For sale");
         const extra = flags.length
           ? `<span class="mt-1 block text-xs ${flags.includes("Home") && flags.length === 1 ? "text-muted-foreground" : "text-accent"}">${escapeHtml(flags.join(" · "))}</span>`
           : "";
@@ -1406,11 +1441,21 @@ const affiliateConfig = {
     document.querySelector("[data-art-medium]").value = piece.medium || "Acrylic";
     document.querySelector("[data-art-note]").value = piece.note || "";
     document.querySelector("[data-art-featured]").checked = Boolean(piece.featured);
+    document.querySelector("[data-art-available]").checked = Boolean(piece.available);
+    document.querySelector("[data-art-shop]").value = piece.shop || "";
+    document.querySelector("[data-art-shop-label]").value = piece.shopLabel || "";
     document.querySelector("[data-art-order]").value = piece.order || 0;
     document.querySelector("[data-art-delete]")?.classList.toggle("hidden", Boolean(piece.create) || !piece.slug);
     resetDrop("art", piece.imageUrl || "", piece.image ? "Drop a new photo to replace it" : "");
+    syncArtSaleFields();
     renderArtList();
     syncUrl();
+  }
+
+  function syncArtSaleFields() {
+    const onSale = Boolean(document.querySelector("[data-art-available]")?.checked);
+    document.querySelector("[data-art-sale-fields]")?.classList.toggle("hidden", !onSale);
+    document.querySelector('[data-copy="art-shop"]')?.classList.toggle("hidden", !onSale);
   }
 
   function fillSupply(item) {
@@ -1566,6 +1611,11 @@ const affiliateConfig = {
     if (which === "bookshop" && currentBook) copyText("Bookshop link", previewBuy(readBookBuyFields()).bookshop);
     if (which === "amazon" && currentBook) copyText("Amazon link", previewBuy(readBookBuyFields()).amazon);
     if (which === "art-page" && currentArt?.slug) copyText("painting link", `${origin}/art#${currentArt.slug}`);
+    if (which === "art-shop") {
+      const onSale = Boolean(document.querySelector("[data-art-available]")?.checked ?? currentArt?.available);
+      const shop = displayUrl(document.querySelector("[data-art-shop]")?.value || currentArt?.shop || "");
+      copyText("sale link", onSale ? shop || "https://instagram.com/sashabookandbrush" : "");
+    }
     if (which === "art-index") copyText("Art page", `${origin}/art`);
     if (which === "tool-page" && currentSupply?.slug) copyText("tool link", `${origin}/art#${currentSupply.slug}`);
     if (which === "tool-amazon") copyText("Amazon link", displayUrl(document.querySelector("[data-supply-amazon]")?.value || currentSupply?.amazon || ""));
@@ -1753,6 +1803,8 @@ const affiliateConfig = {
     fillArt({ ...sorted[index], create: false });
   });
 
+  document.querySelector("[data-art-available]")?.addEventListener("change", syncArtSaleFields);
+
   document.querySelector("[data-art-new]")?.addEventListener("click", () => {
     fillArt({
       slug: "",
@@ -1760,6 +1812,9 @@ const affiliateConfig = {
       medium: "Acrylic",
       note: "",
       featured: false,
+      available: false,
+      shop: "",
+      shopLabel: "",
       image: "",
       order: artPieces.length + 1,
       create: true,
@@ -1897,6 +1952,9 @@ const affiliateConfig = {
       currentArt.medium = document.querySelector("[data-art-medium]").value;
       currentArt.note = document.querySelector("[data-art-note]").value;
       currentArt.featured = document.querySelector("[data-art-featured]").checked;
+      currentArt.available = document.querySelector("[data-art-available]").checked;
+      currentArt.shop = currentArt.available ? document.querySelector("[data-art-shop]").value : "";
+      currentArt.shopLabel = currentArt.available ? document.querySelector("[data-art-shop-label]").value : "";
       currentArt.order = Number(document.querySelector("[data-art-order]").value || 0);
       const file = document.querySelector("[data-art-image]").files[0];
       const photo = file ? await preparePhoto(file) : null;
@@ -1909,6 +1967,9 @@ const affiliateConfig = {
           medium: currentArt.medium,
           note: currentArt.note,
           featured: currentArt.featured,
+          available: currentArt.available,
+          shop: currentArt.shop,
+          shopLabel: currentArt.shopLabel,
           order: currentArt.order,
           ...(photo || {}),
         }),

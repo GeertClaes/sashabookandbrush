@@ -1,5 +1,5 @@
 ---
-import { realUrl } from "../lib/affiliates";
+import { realUrl, taggedAmazon } from "../lib/affiliates";
 
 interface Props {
   amazon?: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { amazon = "", shop = "", shopLabel = "Shop", title = "", slug = "" } = Astro.props;
-const amazonUrl = realUrl(amazon);
+const amazonUrl = taggedAmazon(amazon) || realUrl(amazon);
 const shopUrl = realUrl(shop);
 const hasLinks = Boolean(amazonUrl || shopUrl);
 const affiliateRel = "sponsored noopener noreferrer";

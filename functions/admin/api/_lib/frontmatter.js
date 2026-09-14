@@ -4,6 +4,28 @@ export function emptyAffiliateUrl(value) {
   return trimmed;
 }
 
+export function taggedAmazonUrl(value, tag) {
+  const raw = emptyAffiliateUrl(value);
+  if (!raw) return "";
+  if (!/^https?:\/\//i.test(raw)) return "";
+  if (!tag) return raw;
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    return raw;
+  }
+  const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+  if (host !== "amazon.co.uk" && host !== "amazon.com") return raw;
+  const match = url.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i);
+  if (match) {
+    const domain = host === "amazon.com" ? "www.amazon.com" : "www.amazon.co.uk";
+    return `https://${domain}/dp/${match[1]}/ref=nosim?tag=${encodeURIComponent(tag)}`;
+  }
+  url.searchParams.set("tag", tag);
+  return url.toString();
+}
+
 export function yamlString(value) {
   return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n")}"`;
 }

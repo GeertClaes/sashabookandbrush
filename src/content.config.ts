@@ -37,6 +37,9 @@ const art = defineCollection({
     note: z.string(),
     featured: z.boolean().default(false),
     order: z.number().default(0),
+    available: z.boolean().default(false),
+    shop: z.string().optional().default(""),
+    shopLabel: z.string().optional().default(""),
   }),
 });
 

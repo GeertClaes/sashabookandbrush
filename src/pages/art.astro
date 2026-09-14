@@ -6,6 +6,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
 const pieces = (await getCollection("art")).sort((a, b) => a.data.order - b.data.order);
+const forSale = pieces.filter((piece) => piece.data.available);
+const gallery = pieces.filter((piece) => !piece.data.available);
 const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order - b.data.order);
 ---
 
@@ -18,15 +20,40 @@ const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order -
         <p class="leading-relaxed text-muted-foreground">{site.art.lede}</p>
       </div>
 
-      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          pieces.map((piece) => (
-            <div id={piece.id} class="scroll-mt-24">
-              <ArtCard {...piece.data} />
+      {
+        forSale.length > 0 && (
+          <section class="mb-16">
+            <h2 class="font-display mb-2 text-xl font-semibold text-foreground">Originals for sale</h2>
+            <p class="mb-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Only these. Everything else on this page is display-only.
+            </p>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {forSale.map((piece) => (
+                <div id={piece.id} class="scroll-mt-24">
+                  <ArtCard {...piece.data} />
+                </div>
+              ))}
             </div>
-          ))
-        }
-      </div>
+          </section>
+        )
+      }
+
+      {
+        gallery.length > 0 && (
+          <section>
+            {forSale.length > 0 && (
+              <h2 class="font-display mb-6 text-xl font-semibold text-foreground">On the wall</h2>
+            )}
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {gallery.map((piece) => (
+                <div id={piece.id} class="scroll-mt-24">
+                  <ArtCard {...piece.data} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
 
       <p class="mt-8 mb-20 max-w-xl text-sm leading-relaxed text-muted-foreground">
         More paintings as they come off the easel. Until the photos are up, this is the work already

@@ -11,7 +11,7 @@ import {
   parseActivityLog,
   stringifyActivity,
 } from "./lib/activity.mjs";
-import { emptyAffiliateUrl } from "../functions/admin/api/_lib/frontmatter.js";
+import { emptyAffiliateUrl, taggedAmazonUrl } from "../functions/admin/api/_lib/frontmatter.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -441,6 +441,9 @@ const server = createServer(async (req, res) => {
       const medium = String(body.medium || "Acrylic").trim() || "Acrylic";
       const note = typeof body.note === "string" ? body.note : "";
       const featured = Boolean(body.featured);
+      const available = Boolean(body.available);
+      const shop = available ? emptyAffiliateUrl(body.shop) : "";
+      const shopLabel = available ? String(body.shopLabel || "").trim() : "";
       const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
       const parsed = parseImageUpload(body, slug);
       if (!parsed.ok) {
@@ -457,10 +460,11 @@ medium: ${yamlString(medium)}
 note: ${yamlString(note)}
 featured: ${featured}
 order: ${order}
-${image ? `image: ${yamlString(image)}\n` : ""}---
+available: ${available}
+${shop ? `shop: ${yamlString(shop)}\n` : ""}${shopLabel ? `shopLabel: ${yamlString(shopLabel)}\n` : ""}${image ? `image: ${yamlString(image)}\n` : ""}---
 `;
       } else {
-        const updates = { title, medium, note, featured, order };
+        const updates = { title, medium, note, featured, order, available, shop, shopLabel };
         if (image) updates.image = image;
         text = applyYamlFields(text, updates);
       }
@@ -516,7 +520,7 @@ ${image ? `image: ${yamlString(image)}\n` : ""}---
       const brand = String(body.brand || "").trim();
       const category = String(body.category || "Studio").trim() || "Studio";
       const note = typeof body.note === "string" ? body.note : "";
-      const amazon = emptyAffiliateUrl(body.amazon);
+      const amazon = taggedAmazonUrl(body.amazon, "sashabookandb-21");
       const shop = emptyAffiliateUrl(body.shop);
       const shopLabel = String(body.shopLabel || "").trim();
       const featured = Boolean(body.featured);

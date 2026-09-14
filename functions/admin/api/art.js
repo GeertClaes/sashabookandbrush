@@ -1,4 +1,4 @@
-import { applyYamlFields, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
+import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { parseImageUpload } from "./_lib/photo.js";
 import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
@@ -45,15 +45,18 @@ async function deletePainting(env, slug, email = "") {
   return json({ ok: true, slug, deleted: true });
 }
 
-function artMarkdown({ title, medium, note, featured, order, image }) {
+function artMarkdown({ title, medium, note, featured, order, image, available, shop, shopLabel }) {
   const imageLine = image ? `image: ${yamlString(image)}\n` : "";
+  const shopLine = shop ? `shop: ${yamlString(shop)}\n` : "";
+  const labelLine = shopLabel ? `shopLabel: ${yamlString(shopLabel)}\n` : "";
   return `---
 title: ${yamlString(title)}
 medium: ${yamlString(medium)}
 note: ${yamlString(note)}
 featured: ${featured}
 order: ${order}
-${imageLine}---
+available: ${available}
+${shopLine}${labelLine}${imageLine}---
 `;
 }
 
@@ -84,6 +87,9 @@ export async function onRequestPost(context) {
 
     const medium = String(body.medium || "Acrylic").trim() || "Acrylic";
     const featured = Boolean(body.featured);
+    const available = Boolean(body.available);
+    const shop = available ? emptyAffiliateUrl(body.shop) : "";
+    const shopLabel = available ? String(body.shopLabel || "").trim() : "";
     const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
     const parsed = parseImageUpload(body, slug);
     if (!parsed.ok) return json({ error: parsed.error }, 400);
@@ -92,9 +98,9 @@ export async function onRequestPost(context) {
 
     let text = existing;
     if (!text) {
-      text = artMarkdown({ title, medium, note, featured, order, image });
+      text = artMarkdown({ title, medium, note, featured, order, image, available, shop, shopLabel });
     } else {
-      const updates = { title, medium, note, featured, order };
+      const updates = { title, medium, note, featured, order, available, shop, shopLabel };
       if (image) updates.image = image;
       text = applyYamlFields(text, updates);
     }

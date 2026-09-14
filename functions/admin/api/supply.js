@@ -1,4 +1,4 @@
-import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
+import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug, slugFromTitle, taggedAmazonUrl, yamlString } from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, tryGetTextFile } from "./_lib/github.js";
 
@@ -58,7 +58,7 @@ export async function onRequestPost(context) {
 
     const brand = String(body.brand || "").trim();
     const category = String(body.category || "Studio").trim() || "Studio";
-    const amazon = emptyAffiliateUrl(body.amazon);
+    const amazon = taggedAmazonUrl(emptyAffiliateUrl(body.amazon), "sashabookandb-21");
     const shop = emptyAffiliateUrl(body.shop);
     const shopLabel = String(body.shopLabel || "").trim();
     const featured = Boolean(body.featured);
