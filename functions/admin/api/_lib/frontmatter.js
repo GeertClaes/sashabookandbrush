@@ -1,13 +1,26 @@
+const INVISIBLE = /[\u200B-\u200D\uFEFF\u00AD]/g;
+
 export function emptyAffiliateUrl(value) {
-  const trimmed = String(value || "").trim();
+  const trimmed = String(value || "").replace(INVISIBLE, "").trim();
   if (!trimmed || trimmed === "#") return "";
   return trimmed;
 }
 
+export function firstHttpUrl(value) {
+  const text = emptyAffiliateUrl(value);
+  if (!text) return "";
+  const http = text.match(/https?:\/\/[^\s<>"')\]]+/i);
+  if (http) return http[0].replace(/[.,);]+$/g, "");
+  const amazon = text.match(/(?:www\.)?amazon\.(?:co\.uk|com)\/[^\s<>"')\]]+/i);
+  if (amazon) return `https://${amazon[0]}`.replace(/[.,);]+$/g, "");
+  const short = text.match(/(?:amzn\.(?:eu|to|asia)|a\.co)\/[^\s<>"')\]]+/i);
+  if (short) return `https://${short[0]}`.replace(/[.,);]+$/g, "");
+  return "";
+}
+
 export function taggedAmazonUrl(value, tag) {
-  const raw = emptyAffiliateUrl(value);
+  const raw = firstHttpUrl(value);
   if (!raw) return "";
-  if (!/^https?:\/\//i.test(raw)) return "";
   if (!tag) return raw;
   let url;
   try {
@@ -32,9 +45,11 @@ export function yamlString(value) {
 
 export function upsertField(text, key, line) {
   if (new RegExp(`^${key}:`, "m").test(text)) {
-    return text.replace(new RegExp(`^${key}:.*$`, "m"), line);
+    return text.replace(new RegExp(`^${key}:.*$`, "m"), () => line);
   }
-  return text.replace(/\n---\s*$/, `\n${line}\n---`);
+  const replaced = text.replace(/\n---\s*$/, `\n${line}\n---`);
+  if (replaced !== text) return replaced;
+  return text.replace(/^(---\n[\s\S]*?)\n---/, (_, front) => `${front}\n${line}\n---`);
 }
 
 export function removeField(text, key) {

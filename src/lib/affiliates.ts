@@ -12,9 +12,14 @@ function cleanIsbn(value?: string) {
 }
 
 export function realUrl(value?: string) {
-  const raw = String(value || "").trim();
+  const raw = String(value || "")
+    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, "")
+    .trim();
   if (!raw || raw === "#") return "";
-  return /^https?:\/\//i.test(raw) ? raw : "";
+  const http = raw.match(/https?:\/\/[^\s<>"')\]]+/i);
+  if (http) return http[0].replace(/[.,);]+$/g, "");
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return "";
 }
 
 export function taggedAmazon(value?: string, tag = site.affiliates?.amazonTag || "") {

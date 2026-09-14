@@ -1,22 +1,22 @@
 {
-  "updated": "2026-09-09T15:12:10.474Z",
+  "updated": "2026-09-14T05:54:23.948Z",
   "lastSync": {
-    "at": "2026-09-09T15:12:10.474Z",
+    "at": "2026-09-14T05:54:23.948Z",
     "ok": true,
-    "source": "pages-build",
-    "readingCount": 5,
+    "source": "local",
+    "readingCount": 4,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Started Heartless Hunter (The Crimson Moth, #1)",
+      "Left currently reading: Wild Card (Rose Hill, #4)",
+      "Left currently reading: The Last Witch"
+    ],
     "warning": null,
     "error": null,
     "reading": [
       {
-        "title": "Wild Card (Rose Hill, #4)",
-        "progress": 75
-      },
-      {
-        "title": "The Last Witch",
-        "progress": 45
+        "title": "Heartless Hunter (The Crimson Moth, #1)",
+        "progress": null
       },
       {
         "title": "The Secret Paris Ingredient",
@@ -34,20 +34,12 @@
   },
   "currentlyReading": [
     {
-      "title": "Wild Card (Rose Hill, #4)",
-      "author": "Elsie Silver",
-      "goodreadsId": "227997554",
-      "isbn": "0349441685",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1757825133l/227997554.jpg",
-      "progress": 75
-    },
-    {
-      "title": "The Last Witch",
-      "author": "C.J.  Cooke",
-      "goodreadsId": "231769822",
-      "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1751515024l/231769822._SY475_.jpg",
-      "progress": 45
+      "title": "Heartless Hunter (The Crimson Moth, #1)",
+      "author": "Kristen Ciccarelli",
+      "goodreadsId": "127305713",
+      "isbn": "1250866901",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1683734080l/127305713.jpg",
+      "progress": null
     },
     {
       "title": "The Secret Paris Ingredient",

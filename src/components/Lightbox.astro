@@ -1,0 +1,71 @@
+---
+---
+
+<div
+  data-lightbox-root
+  class="fixed inset-0 z-[80] hidden items-center justify-center bg-background/90 p-4 backdrop-blur-sm"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Artwork"
+>
+  <button
+    type="button"
+    data-lightbox-close
+    class="absolute top-4 right-4 rounded border border-border bg-card px-3 py-1.5 text-sm text-foreground hover:border-primary"
+  >
+    Close
+  </button>
+  <img data-lightbox-img alt="" class="max-h-[88vh] max-w-full object-contain shadow-2xl" />
+  <p data-lightbox-caption class="absolute bottom-4 left-1/2 max-w-xl -translate-x-1/2 text-center text-sm text-foreground"></p>
+</div>
+
+<script>
+  function root() {
+    return document.querySelector("[data-lightbox-root]");
+  }
+
+  function closeLightbox() {
+    const el = root();
+    if (!el) return;
+    el.classList.add("hidden");
+    el.classList.remove("flex");
+    document.body.classList.remove("overflow-hidden");
+    const img = el.querySelector("[data-lightbox-img]");
+    if (img instanceof HTMLImageElement) img.removeAttribute("src");
+  }
+
+  function openLightbox(src, alt) {
+    const el = root();
+    if (!el || !src) return;
+    const img = el.querySelector("[data-lightbox-img]");
+    const caption = el.querySelector("[data-lightbox-caption]");
+    if (img instanceof HTMLImageElement) {
+      img.src = src;
+      img.alt = alt || "";
+    }
+    if (caption) caption.textContent = alt || "";
+    el.classList.remove("hidden");
+    el.classList.add("flex");
+    document.body.classList.add("overflow-hidden");
+    el.querySelector("[data-lightbox-close]")?.focus();
+  }
+
+  document.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+    const trigger = target.closest("[data-lightbox]");
+    if (trigger) {
+      event.preventDefault();
+      const img = trigger.querySelector("img");
+      const src = img instanceof HTMLImageElement ? img.currentSrc || img.src : trigger.getAttribute("data-lightbox-src") || "";
+      const alt = trigger.getAttribute("data-lightbox-alt") || (img instanceof HTMLImageElement ? img.alt : "");
+      openLightbox(src, alt);
+      return;
+    }
+    if (target.closest("[data-lightbox-close]") || target === root()) closeLightbox();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeLightbox();
+  });
+</script>

@@ -11,7 +11,7 @@ import {
   parseActivityLog,
   stringifyActivity,
 } from "./lib/activity.mjs";
-import { emptyAffiliateUrl, taggedAmazonUrl } from "../functions/admin/api/_lib/frontmatter.js";
+import { applyYamlFields, emptyAffiliateUrl, taggedAmazonUrl, yamlString } from "../functions/admin/api/_lib/frontmatter.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -40,6 +40,7 @@ const ART_DIR = path.join(ROOT, "src", "content", "art");
 const SUPPLIES_DIR = path.join(ROOT, "src", "content", "supplies");
 const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
 const ART_IMAGES_DIR = path.join(ROOT, "src", "assets", "art");
+const SUPPLY_IMAGES_DIR = path.join(ROOT, "src", "assets", "supplies");
 const DATA_DIR = path.join(ROOT, "data");
 const PORT = Number(process.env.ADMIN_PORT || 8787);
 const SITE = String(process.env.PUBLIC_SITE_URL || "http://127.0.0.1:4321").replace(/\/$/, "");
@@ -55,7 +56,7 @@ function json(res, status, body) {
 
 function cors(req, res) {
   const origin = req.headers.origin || "";
-  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+  if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -74,44 +75,12 @@ function unescapeYaml(value) {
   return String(value).replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
 }
 
-function yamlString(value) {
-  return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n")}"`;
-}
-
 function frontField(text, key) {
   const match = text.match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
   if (!match) return "";
   let value = match[1].trim();
   if (value.startsWith('"') && value.endsWith('"')) return unescapeYaml(value.slice(1, -1));
   return value;
-}
-
-function upsertField(text, key, line) {
-  if (new RegExp(`^${key}:`, "m").test(text)) {
-    return text.replace(new RegExp(`^${key}:.*$`, "m"), line);
-  }
-  return text.replace(/\n---\s*$/, `\n${line}\n---`);
-}
-
-function removeField(text, key) {
-  return text.replace(new RegExp(`^${key}:.*\\r?\\n`, "m"), "");
-}
-
-function applyYamlFields(text, updates) {
-  let next = text;
-  for (const [key, value] of Object.entries(updates)) {
-    if (value === undefined) continue;
-    if (value === "" || value === null) {
-      next = removeField(next, key);
-      continue;
-    }
-    if (typeof value === "boolean" || typeof value === "number") {
-      next = upsertField(next, key, `${key}: ${value}`);
-    } else {
-      next = upsertField(next, key, `${key}: ${yamlString(value)}`);
-    }
-  }
-  return next;
 }
 
 function slugFromTitle(title) {
@@ -520,11 +489,23 @@ ${shop ? `shop: ${yamlString(shop)}\n` : ""}${shopLabel ? `shopLabel: ${yamlStri
       const brand = String(body.brand || "").trim();
       const category = String(body.category || "Studio").trim() || "Studio";
       const note = typeof body.note === "string" ? body.note : "";
-      const amazon = taggedAmazonUrl(body.amazon, "sashabookandb-21");
+      const pastedAmazon = emptyAffiliateUrl(body.amazon);
+      const amazon = taggedAmazonUrl(pastedAmazon, "sashabookandb-21");
+      if (pastedAmazon && !amazon) {
+        json(res, 400, { error: "That doesn't look like an Amazon product link. Paste the address from the product page." });
+        return;
+      }
       const shop = emptyAffiliateUrl(body.shop);
       const shopLabel = String(body.shopLabel || "").trim();
       const featured = Boolean(body.featured);
       const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
+      const parsed = parseImageUpload(body, slug);
+      if (!parsed.ok) {
+        json(res, 400, { error: parsed.error });
+        return;
+      }
+      const photo = parsed.photo;
+      const image = photo?.publicPath || (typeof body.image === "string" ? body.image.trim() : "");
       let text = existing;
       if (!text) {
         text = `---
@@ -532,26 +513,22 @@ title: ${yamlString(title)}
 brand: ${yamlString(brand)}
 category: ${yamlString(category)}
 note: ${yamlString(note)}
-${amazon ? `amazon: ${yamlString(amazon)}\n` : ""}${shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : ""}featured: ${featured}
+${amazon ? `amazon: ${yamlString(amazon)}\n` : ""}${shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : ""}${image ? `image: ${yamlString(image)}\n` : ""}featured: ${featured}
 order: ${order}
 ---
 `;
       } else {
-        text = applyYamlFields(text, {
-          title,
-          brand,
-          category,
-          note,
-          amazon,
-          shop,
-          shopLabel,
-          featured,
-          order,
-        });
+        const updates = { title, brand, category, note, amazon, shop, shopLabel, featured, order };
+        if (image) updates.image = image;
+        text = applyYamlFields(text, updates);
       }
       await mkdir(SUPPLIES_DIR, { recursive: true });
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-      json(res, 200, { ok: true, slug });
+      if (photo) {
+        await mkdir(SUPPLY_IMAGES_DIR, { recursive: true });
+        await writeFile(path.join(SUPPLY_IMAGES_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
+      }
+      json(res, 200, { ok: true, slug, amazon, image: image || undefined });
       return;
     }
 

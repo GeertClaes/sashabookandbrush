@@ -27,6 +27,7 @@ export function parseImageUpload(body, slug) {
       publicPath: filename,
       artRepoPath: `src/assets/art/${filename}`,
       bookRepoPath: `src/assets/covers/${filename}`,
+      supplyRepoPath: `src/assets/supplies/${filename}`,
     },
   };
 }

@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-14T05:54:23.954Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "4 currently reading, 8 up next. Started Heartless Hunter (The Crimson Moth, #1); Left currently reading: Wild Card (Rose Hill, #4); Left currently reading: The Last Witch",
+      "by": "local"
+    },
+    {
       "at": "2026-09-14T05:28:45.265Z",
       "type": "admin",
       "ok": true,

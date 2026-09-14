@@ -10,9 +10,17 @@ import { getCollection } from "astro:content";
 const artImages = import.meta.glob<{ default: ImageMetadata }>("../assets/art/*.{jpg,jpeg,png,webp}", {
   eager: true,
 });
+const supplyImages = import.meta.glob<{ default: ImageMetadata }>("../assets/supplies/*.{jpg,jpeg,png,webp}", {
+  eager: true,
+});
 const artImageUrl = (imagePath: string) => {
   const filename = (imagePath || "").split("/").pop() || "";
   const match = filename ? Object.entries(artImages).find(([key]) => key.endsWith(`/${filename}`)) : undefined;
+  return match?.[1].default.src || "";
+};
+const supplyImageUrl = (imagePath: string) => {
+  const filename = (imagePath || "").split("/").pop() || "";
+  const match = filename ? Object.entries(supplyImages).find(([key]) => key.endsWith(`/${filename}`)) : undefined;
   return match?.[1].default.src || "";
 };
 
@@ -64,6 +72,8 @@ const supplies = (await getCollection("supplies"))
     amazon: realUrl(item.data.amazon),
     shop: item.data.shop || "",
     shopLabel: item.data.shopLabel || "",
+    image: item.data.image || "",
+    imageUrl: supplyImageUrl(item.data.image || ""),
     featured: Boolean(item.data.featured),
     order: item.data.order || 0,
   }))
@@ -162,7 +172,14 @@ const affiliateConfig = {
         }
       </p>
 
-      <p data-status class="sticky top-16 z-40 mb-6 rounded-lg border border-transparent bg-background/95 px-3 py-2 text-sm text-muted-foreground backdrop-blur-sm">Checking the editor…</p>
+      <p
+        data-status
+        role="status"
+        aria-live="polite"
+        class="sticky top-16 z-40 mb-6 rounded-lg border border-transparent bg-background/95 px-3 py-2 text-sm text-muted-foreground backdrop-blur-sm"
+      >
+        Checking the editor…
+      </p>
 
       {
         isDev && (
@@ -625,21 +642,24 @@ const affiliateConfig = {
                 placeholder="Paste any Amazon.co.uk product link"
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               />
-              <span class="mt-1 block text-xs font-normal text-muted-foreground">
-                Open the product on Amazon, copy the address bar, paste here. Your tag is added on save.
+              <span data-supply-amazon-preview class="mt-1 block text-xs font-normal text-muted-foreground">
+                Paste the product page address — a long Amazon link is fine. We tidy it and add your tag on save.
               </span>
             </label>
             <div class="mb-4 flex flex-wrap gap-2">
-              <button type="button" data-copy="tool-amazon" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+              <button type="button" data-copy="tool-amazon" title="Clean Amazon affiliate link for a Story sticker" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
                 Copy Amazon
               </button>
-              <button type="button" data-copy="tool-page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+              <button type="button" data-copy="tool-page" title="This tool on the Art page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
                 Copy tool link
               </button>
-              <button type="button" data-copy="tools-index" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
-                Copy kit page
+              <button type="button" data-copy="tools-index" title="The Tools I recommend section" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+                Copy tools page
               </button>
             </div>
+            <p class="mb-4 text-xs text-muted-foreground">
+              Copy Amazon is the shop link. Copy tool link is this item on the site. Copy tools page is the whole kit section.
+            </p>
             <label class="mb-4 block text-sm font-medium text-foreground">
               Note
               <textarea
@@ -653,6 +673,16 @@ const affiliateConfig = {
               Feature on the home page
             </label>
             <input type="hidden" data-supply-order />
+            <p class="mb-2 text-sm font-medium text-foreground">Product photo</p>
+            <button
+              type="button"
+              data-supply-drop
+              class="mb-4 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary"
+            >
+              <img data-supply-preview class="hidden max-h-48 rounded object-cover shadow" alt="" />
+              <span data-supply-drop-label>Drop a product photo here, or click to choose. Large phone photos are resized.</span>
+            </button>
+            <input type="file" data-supply-image accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="hidden" />
             <div class="mb-4 grid gap-4 sm:grid-cols-2">
               <label class="block text-sm font-medium text-foreground">
                 Other shop URL
@@ -712,17 +742,179 @@ const affiliateConfig = {
   let currentBook = null;
   let currentArt = null;
   let currentSupply = null;
-  let previewUrls = { book: "", art: "" };
+  let previewUrls = { book: "", art: "", supply: "" };
   let activityTimer = 0;
   let activityLoading = false;
   let currentTab = "overview";
   let currentQueue = "currently-reading";
   let bookSnapshot = "";
   let saving = false;
+  let saveWatch = 0;
   let featuredBaseline = [];
   const QUEUES = ["currently-reading", "featured", "five-star-no-note", "no-note", "missing-isbn"];
   const TABS = ["overview", "book", "art", "supply"];
   const MAX_NOTE = 8000;
+
+  function setBanner(kind, message) {
+    if (!status) return;
+    status.className =
+      "sticky top-16 z-40 mb-6 rounded-lg bg-background/95 px-3 py-2 text-sm backdrop-blur-sm " +
+      (kind === "error"
+        ? "border border-accent text-accent"
+        : kind === "busy"
+          ? "border border-primary text-foreground"
+          : kind === "ok"
+            ? "border border-primary text-foreground"
+            : "border border-transparent text-muted-foreground");
+    status.innerHTML = message;
+  }
+
+  function saveSteps({ title, editor, github, live, hint }) {
+    const pill = (state, label) => {
+      const cls =
+        state === "done"
+          ? "text-foreground"
+          : state === "busy"
+            ? "text-primary"
+            : state === "error"
+              ? "text-accent"
+              : "text-muted-foreground";
+      const mark = state === "done" ? "✓" : state === "busy" ? "…" : state === "error" ? "!" : "·";
+      return `<span class="${cls}">${mark} ${label}</span>`;
+    };
+    return `<p class="font-medium">${title}</p><p class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">${pill(editor, "This editor")}${pill(github, "GitHub")}${pill(live, "Live site")}</p>${hint ? `<p class="mt-1 text-xs text-muted-foreground">${hint}</p>` : ""}`;
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  async function watchRebuild(label) {
+    const id = ++saveWatch;
+    for (let i = 0; i < 18; i++) {
+      await wait(i === 0 ? 4000 : 8000);
+      if (id !== saveWatch) return;
+      try {
+        const data = await call("/activity");
+        renderActivity(data);
+        const site = data.site || {};
+        if (site.building) {
+          setBanner(
+            "busy",
+            saveSteps({
+              title: `Saved ${escapeHtml(label)}`,
+              editor: "done",
+              github: "done",
+              live: "busy",
+              hint: "Cloudflare is rebuilding. The public site still shows the old version until this finishes (usually about a minute).",
+            }),
+          );
+          continue;
+        }
+        if (site.state === "failed") {
+          setBanner(
+            "error",
+            saveSteps({
+              title: `Saved ${escapeHtml(label)} to GitHub, but the rebuild failed.`,
+              editor: "done",
+              github: "done",
+              live: "error",
+              hint: "Try Save again, or check Cloudflare Pages.",
+            }),
+          );
+          return;
+        }
+        if (site.live || site.deploymentsAvailable === false) {
+          setBanner(
+            "ok",
+            saveSteps({
+              title: `Saved ${escapeHtml(label)}`,
+              editor: "done",
+              github: "done",
+              live: site.deploymentsAvailable === false ? "busy" : "done",
+              hint:
+                site.deploymentsAvailable === false
+                  ? "GitHub has it. Refresh the public page in about a minute."
+                  : "Live. Refresh the public page to see the change.",
+            }),
+          );
+          if (site.live) return;
+        }
+      } catch {
+        // Keep waiting — activity is best-effort.
+      }
+    }
+    if (id !== saveWatch) return;
+    setBanner(
+      "ok",
+      saveSteps({
+        title: `Saved ${escapeHtml(label)} to GitHub`,
+        editor: "done",
+        github: "done",
+        live: "busy",
+        hint: "Cloudflare can take a couple of minutes. Refresh the public page shortly.",
+      }),
+    );
+  }
+
+  async function withSave(button, idleLabel, work) {
+    if (saving) {
+      setBanner("busy", "Already saving — wait for GitHub to finish this one.");
+      return;
+    }
+    saving = true;
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Saving…";
+    }
+    setBanner(
+      "busy",
+      saveSteps({
+        title: isDev ? "Saving on this computer…" : "Saving to GitHub… this can take a few seconds.",
+        editor: "busy",
+        github: isDev ? "wait" : "busy",
+        live: "wait",
+        hint: isDev ? "The public site on this computer updates after you refresh." : "Then Cloudflare rebuilds the live site — usually about a minute.",
+      }),
+    );
+    try {
+      const result = await work();
+      const label = result?.label || "changes";
+      if (isDev) {
+        setBanner(
+          "ok",
+          saveSteps({
+            title: `Saved ${escapeHtml(label)}`,
+            editor: "done",
+            github: "wait",
+            live: "wait",
+            hint: result?.hint || "Refresh the site on this computer to see it.",
+          }),
+        );
+      } else {
+        setBanner(
+          "ok",
+          saveSteps({
+            title: `Saved ${escapeHtml(label)} to GitHub`,
+            editor: "done",
+            github: "done",
+            live: "busy",
+            hint: "Cloudflare is rebuilding the live site — usually about a minute. This editor already has your edits.",
+          }),
+        );
+        watchRebuild(label);
+      }
+      loadActivity();
+    } catch (error) {
+      setBanner("error", error instanceof Error ? error.message : "Save failed.");
+    } finally {
+      saving = false;
+      if (button) {
+        button.disabled = false;
+        button.textContent = idleLabel;
+      }
+    }
+  }
 
   function formatWhen(value) {
     if (!value) return "not yet";
@@ -872,6 +1064,64 @@ const affiliateConfig = {
 
   function displayUrl(value) {
     return value && value !== "#" ? value : "";
+  }
+
+  function firstHttpUrl(value) {
+    const text = String(value || "")
+      .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, "")
+      .trim();
+    if (!text || text === "#") return "";
+    const http = text.match(/https?:\/\/[^\s<>"')\]]+/i);
+    if (http) return http[0].replace(/[.,);]+$/g, "");
+    const amazon = text.match(/(?:www\.)?amazon\.(?:co\.uk|com)\/[^\s<>"')\]]+/i);
+    if (amazon) return `https://${amazon[0]}`.replace(/[.,);]+$/g, "");
+    const short = text.match(/(?:amzn\.(?:eu|to|asia)|a\.co)\/[^\s<>"')\]]+/i);
+    if (short) return `https://${short[0]}`.replace(/[.,);]+$/g, "");
+    return "";
+  }
+
+  function taggedAmazon(value) {
+    const raw = firstHttpUrl(value);
+    if (!raw) return "";
+    const tag = JSON.parse(document.getElementById("affiliate-config")?.textContent || "{}").amazonTag || "";
+    if (!tag) return raw;
+    let url;
+    try {
+      url = new URL(raw);
+    } catch {
+      return raw;
+    }
+    const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+    if (host !== "amazon.co.uk" && host !== "amazon.com") return raw;
+    const match = url.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i);
+    if (match) {
+      const domain = host === "amazon.com" ? "www.amazon.com" : "www.amazon.co.uk";
+      return `https://${domain}/dp/${match[1]}/ref=nosim?tag=${encodeURIComponent(tag)}`;
+    }
+    url.searchParams.set("tag", tag);
+    return url.toString();
+  }
+
+  function updateAmazonPreview() {
+    const el = document.querySelector("[data-supply-amazon-preview]");
+    if (!el) return;
+    const raw = document.querySelector("[data-supply-amazon]")?.value || "";
+    const cleaned = taggedAmazon(raw);
+    const pasted = String(raw)
+      .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, "")
+      .trim();
+    if (!pasted || pasted === "#") {
+      el.textContent = "Paste the product page address — a long Amazon link is fine. We tidy it and add your tag on save.";
+      el.classList.remove("text-accent");
+      return;
+    }
+    if (!cleaned) {
+      el.textContent = "That doesn't look like an Amazon link yet.";
+      el.classList.add("text-accent");
+      return;
+    }
+    el.textContent = `Will save as ${cleaned}`;
+    el.classList.remove("text-accent");
   }
 
   async function call(path, options = {}) {
@@ -1034,7 +1284,7 @@ const affiliateConfig = {
       (cfg.bookshopUkId && isbn13 ? `https://uk.bookshop.org/a/${cfg.bookshopUkId}/${isbn13}` : "");
     const asin = isbn10c || isbn13;
     const amazonUrl =
-      asUrl(amazon) ||
+      taggedAmazon(amazon) ||
       (cfg.amazonTag && asin
         ? `https://www.amazon.co.uk/dp/${asin}/ref=nosim?tag=${encodeURIComponent(cfg.amazonTag)}`
         : "");
@@ -1288,7 +1538,9 @@ const affiliateConfig = {
 
   function bindDrop(kind) {
     const drop = document.querySelector(`[data-${kind}-drop]`);
-    const input = document.querySelector(kind === "book" ? "[data-book-cover]" : "[data-art-image]");
+    const input = document.querySelector(
+      kind === "book" ? "[data-book-cover]" : kind === "supply" ? "[data-supply-image]" : "[data-art-image]",
+    );
     const preview = document.querySelector(`[data-${kind}-preview]`);
     const label = document.querySelector(`[data-${kind}-drop-label]`);
     if (!drop || !input) return;
@@ -1326,7 +1578,9 @@ const affiliateConfig = {
   }
 
   function resetDrop(kind, existingSrc, existingLabel) {
-    const input = document.querySelector(kind === "book" ? "[data-book-cover]" : "[data-art-image]");
+    const input = document.querySelector(
+      kind === "book" ? "[data-book-cover]" : kind === "supply" ? "[data-supply-image]" : "[data-art-image]",
+    );
     const preview = document.querySelector(`[data-${kind}-preview]`);
     const label = document.querySelector(`[data-${kind}-drop-label]`);
     if (input) input.value = "";
@@ -1472,6 +1726,8 @@ const affiliateConfig = {
     document.querySelector("[data-supply-shop]").value = item.shop || "";
     document.querySelector("[data-supply-shop-label]").value = item.shopLabel || "";
     document.querySelector("[data-supply-delete]")?.classList.toggle("hidden", Boolean(item.create) || !item.slug);
+    resetDrop("supply", item.imageUrl || "", item.image ? "Drop a new photo to replace it" : "");
+    updateAmazonPreview();
     renderSupplyList();
     syncUrl();
   }
@@ -1618,8 +1874,8 @@ const affiliateConfig = {
     }
     if (which === "art-index") copyText("Art page", `${origin}/art`);
     if (which === "tool-page" && currentSupply?.slug) copyText("tool link", `${origin}/art#${currentSupply.slug}`);
-    if (which === "tool-amazon") copyText("Amazon link", displayUrl(document.querySelector("[data-supply-amazon]")?.value || currentSupply?.amazon || ""));
-    if (which === "tools-index") copyText("kit page", `${origin}/art#supplies`);
+    if (which === "tool-amazon") copyText("Amazon link", taggedAmazon(document.querySelector("[data-supply-amazon]")?.value || currentSupply?.amazon || ""));
+    if (which === "tools-index") copyText("tools page", `${origin}/art#supplies`);
   });
 
   function readBookBuyFields() {
@@ -1656,6 +1912,8 @@ const affiliateConfig = {
 
   bindDrop("book");
   bindDrop("art");
+  bindDrop("supply");
+  document.querySelector("[data-supply-amazon]")?.addEventListener("input", updateAmazonPreview);
 
   login?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1860,6 +2118,7 @@ const affiliateConfig = {
       amazon: "",
       shop: "",
       shopLabel: "",
+      image: "",
       featured: false,
       order: nextOrder,
       create: true,
@@ -1868,14 +2127,11 @@ const affiliateConfig = {
   });
 
   document.querySelector("[data-book-save]")?.addEventListener("click", async () => {
-    if (!currentBook || saving) return;
-    const button = document.querySelector("[data-book-save]");
-    saving = true;
-    if (button) {
-      button.disabled = true;
-      button.textContent = "Saving…";
+    if (!currentBook) {
+      setBanner("error", "Pick a book first.");
+      return;
     }
-    try {
+    await withSave(document.querySelector("[data-book-save]"), "Save book", async () => {
       const wasFeatured = Boolean(currentBook.featured);
       currentBook.title = document.querySelector("[data-book-title]").value;
       currentBook.author = document.querySelector("[data-book-author]").value;
@@ -1924,30 +2180,17 @@ const affiliateConfig = {
       bookSnapshot = bookFormState();
       renderFeaturedBoard();
       renderQueue();
-      const liveLink = `/books/${currentBook.slug}`;
-      const next = nextInQueue();
-      const nextHint = next ? ` Next up: ${escapeHtml(next.title)}.` : "";
-      if (status) {
-        status.innerHTML = isDev
-          ? `Saved ${escapeHtml(currentBook.title)}. <a class="text-primary underline-offset-4 hover:underline" href="${liveLink}" target="_blank" rel="noopener noreferrer">View on site</a>.${nextHint}`
-          : `Saved ${escapeHtml(currentBook.title)}. <a class="text-primary underline-offset-4 hover:underline" href="${liveLink}" target="_blank" rel="noopener noreferrer">View on site</a> after rebuild (~1 min).${nextHint}`;
-      }
       updateNextButton();
-      loadActivity();
-    } catch (error) {
-      if (status) status.textContent = error.message;
-    } finally {
-      saving = false;
-      if (button) {
-        button.disabled = false;
-        button.textContent = "Save book";
-      }
-    }
+      return { label: currentBook.title };
+    });
   });
 
   document.querySelector("[data-art-save]")?.addEventListener("click", async () => {
-    if (!currentArt) return;
-    try {
+    if (!currentArt) {
+      setBanner("error", "Pick a painting first.");
+      return;
+    }
+    await withSave(document.querySelector("[data-art-save]"), "Save painting", async () => {
       currentArt.title = document.querySelector("[data-art-title]").value;
       currentArt.medium = document.querySelector("[data-art-medium]").value;
       currentArt.note = document.querySelector("[data-art-note]").value;
@@ -1989,21 +2232,10 @@ const affiliateConfig = {
           preview.src = previewUrls.art;
           preview.classList.remove("hidden");
         }
-        if (label) {
-          label.textContent = isDev
-            ? "Photo saved. Refresh the Art page to see it."
-            : "Photo saved. It shows on the site after the rebuild.";
-        }
+        if (label) label.textContent = "Photo saved with the painting.";
       }
-      if (status) {
-        status.textContent = isDev
-          ? `Saved ${currentArt.title}. Refresh the site to see it.`
-          : `Saved ${currentArt.title}. It will show on the site after the rebuild.`;
-      }
-      loadActivity();
-    } catch (error) {
-      if (status) status.textContent = error.message;
-    }
+      return { label: currentArt.title };
+    });
   });
 
   document.querySelector("[data-art-delete]")?.addEventListener("click", async () => {
@@ -2032,17 +2264,27 @@ const affiliateConfig = {
   });
 
   document.querySelector("[data-supply-save]")?.addEventListener("click", async () => {
-    if (!currentSupply) return;
-    try {
+    if (!currentSupply) {
+      setBanner("error", "Pick a tool first, or click New.");
+      return;
+    }
+    await withSave(document.querySelector("[data-supply-save]"), "Save tool", async () => {
       currentSupply.title = document.querySelector("[data-supply-title]").value;
       currentSupply.brand = document.querySelector("[data-supply-brand]").value;
       currentSupply.category = document.querySelector("[data-supply-category]").value;
       currentSupply.note = document.querySelector("[data-supply-note]").value;
       currentSupply.featured = document.querySelector("[data-supply-featured]").checked;
       currentSupply.order = Number(document.querySelector("[data-supply-order]").value || 0);
-      currentSupply.amazon = document.querySelector("[data-supply-amazon]").value;
+      const pasted = document.querySelector("[data-supply-amazon]").value;
+      const cleaned = taggedAmazon(pasted);
+      if (String(pasted || "").replace(/[\u200B-\u200D\uFEFF\u00AD]/g, "").trim() && pasted.trim() !== "#" && !cleaned) {
+        throw new Error("That doesn't look like an Amazon product link. Paste the address from the product page.");
+      }
+      currentSupply.amazon = cleaned;
       currentSupply.shop = document.querySelector("[data-supply-shop]").value;
       currentSupply.shopLabel = document.querySelector("[data-supply-shop-label]").value;
+      const file = document.querySelector("[data-supply-image]")?.files?.[0];
+      const photo = file ? await preparePhoto(file) : null;
       const created = await call("/supply", {
         method: "POST",
         body: JSON.stringify({
@@ -2057,25 +2299,32 @@ const affiliateConfig = {
           amazon: currentSupply.amazon,
           shop: currentSupply.shop,
           shopLabel: currentSupply.shopLabel,
+          ...(photo || {}),
         }),
       });
       currentSupply.slug = created.slug || currentSupply.slug;
       currentSupply.create = false;
+      currentSupply.amazon = created.amazon ?? currentSupply.amazon;
+      document.querySelector("[data-supply-amazon]").value = currentSupply.amazon || "";
+      updateAmazonPreview();
+      if (created.image) currentSupply.image = created.image;
       document.querySelector("[data-supply-delete]")?.classList.remove("hidden");
       const existing = supplies.find((item) => item.slug === currentSupply.slug);
       if (existing) Object.assign(existing, currentSupply);
       else supplies.push({ ...currentSupply });
       supplies.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
       renderSupplyList();
-      if (status) {
-        status.textContent = isDev
-          ? `Saved ${currentSupply.title}. Refresh the site to see it.`
-          : `Saved ${currentSupply.title}. It will show on the site after the rebuild.`;
+      if (file) {
+        const preview = document.querySelector("[data-supply-preview]");
+        const label = document.querySelector("[data-supply-drop-label]");
+        if (preview && previewUrls.supply) {
+          preview.src = previewUrls.supply;
+          preview.classList.remove("hidden");
+        }
+        if (label) label.textContent = "Photo saved with the tool.";
       }
-      loadActivity();
-    } catch (error) {
-      if (status) status.textContent = error.message;
-    }
+      return { label: currentSupply.title };
+    });
   });
 
   document.querySelector("[data-supply-delete]")?.addEventListener("click", async () => {

@@ -24,13 +24,21 @@ const saleLabel = shopLabel || (shopUrl ? "Buy" : "Available — DM me");
   <div class="aspect-[4/5] overflow-hidden bg-muted">
     {
       image ? (
-        <ArtImage
-          image={image}
-          alt={title}
-          class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          width={600}
-          height={750}
-        />
+        <button
+          type="button"
+          data-lightbox
+          data-lightbox-alt={title}
+          class="block h-full w-full cursor-zoom-in"
+          aria-label={`View ${title} larger`}
+        >
+          <ArtImage
+            image={image}
+            alt={title}
+            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            width={600}
+            height={750}
+          />
+        </button>
       ) : (
         <ArtImage
           image=""
