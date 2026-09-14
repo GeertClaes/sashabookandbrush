@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-14T13:15:44.393Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Liquitex Basics acrylics",
+      "detail": "Tool and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "geert.wl.claes@gmail.com"
+    },
+    {
       "at": "2026-09-14T05:54:23.954Z",
       "type": "goodreads",
       "ok": true,
