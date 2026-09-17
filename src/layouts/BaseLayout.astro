@@ -101,6 +101,16 @@ const shareImage = new URL(image, Astro.site);
             data-website-id="5e18d8a9-27f1-49f3-9827-83081b9d5fec"
             data-domains="sashabookandbrush.com"
             data-before-send="umamiBeforeSend"></script>
+          <script is:inline>
+            !function (b, e, t, r) {
+              b[t] = b[t] || function (...args) { (b[t].q = b[t].q || []).push(args); };
+              b[t].l = +new Date;
+              var s = e.createElement("script"); s.async = 1; s.crossOrigin = "anonymous";
+              s.src = "https://betterstack.net/b.js?t=" + r;
+              (e.head || e.getElementsByTagName("head")[0]).appendChild(s);
+            }(window, document, "betterstack", "6moA3uVX3VxDkg5tZj5eKPvB");
+            betterstack("init", { environment: "production" });
+          </script>
         </>
       )
     }
