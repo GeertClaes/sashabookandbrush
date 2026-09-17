@@ -10,7 +10,7 @@ import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { affiliateLinks } from "../lib/affiliates";
 import { bookHref } from "../lib/books";
-import { liveProgress } from "../lib/live";
+import { findLocalForLive, liveProgress } from "../lib/live";
 import { getCollection } from "astro:content";
 
 const books = await getCollection("books");
@@ -19,14 +19,34 @@ const featured = books
   .filter((book) => book.data.featured)
   .sort((a, b) => a.data.order - b.data.order);
 
-const currentlyReading = books
-  .filter((book) => book.data.status === "currently-reading")
-  .sort((a, b) => (b.data.dateAdded || "").localeCompare(a.data.dateAdded || ""));
+function liveIsbn(item: { isbn?: string }, local?: (typeof books)[number]) {
+  const raw = String(item.isbn || "").replace(/[^\dXx]/g, "");
+  return {
+    isbn: local?.data.isbn || (raw.length === 13 ? raw : ""),
+    isbn10: local?.data.isbn10 || (raw.length === 10 ? raw : ""),
+    bookshop: local?.data.bookshop,
+    amazon: local?.data.amazon,
+  };
+}
 
-const byGoodreadsId = new Map(books.filter((book) => book.data.goodreadsId).map((book) => [book.data.goodreadsId, book]));
-const byTitle = new Map(books.map((book) => [book.data.title.toLowerCase(), book]));
+const currentlyReading = (live.currentlyReading || []).map((item) => {
+  const local = findLocalForLive(item, books);
+  const progress = liveProgress(live, item.title, item.goodreadsId);
+  return {
+    title: item.title,
+    author: item.author,
+    href: local ? bookHref(local.id) : `https://www.goodreads.com/book/show/${item.goodreadsId}`,
+    local: Boolean(local),
+    cover: local?.data.cover || "",
+    remoteCover: item.image || "",
+    slug: local?.id || "",
+    progress,
+    buy: affiliateLinks(liveIsbn(item, local)),
+  };
+});
+
 const upNext = (live.upNext || []).slice(0, 8).map((item) => {
-  const local = (item.goodreadsId && byGoodreadsId.get(item.goodreadsId)) || byTitle.get(item.title.toLowerCase());
+  const local = findLocalForLive(item, books);
   return {
     title: item.title,
     author: item.author,
@@ -109,46 +129,67 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
             Affiliate links. I earn a small commission at no extra cost to you.
           </p>
           <div class="grid grid-cols-2 items-stretch gap-5 sm:grid-cols-3 xl:grid-cols-5">
-            {currentlyReading.map((book) => {
-              const progress = liveProgress(live, book.data.title, book.data.goodreadsId);
-              const buy = affiliateLinks(book.data);
-              return (
-                <article class="flex min-w-0 flex-col">
-                  <a href={bookHref(book.id)} class="group min-w-0">
+            {currentlyReading.map((book) => (
+              <article class="flex min-w-0 flex-col">
+                <a
+                  href={book.href}
+                  class="group min-w-0"
+                  rel={book.local ? undefined : "noopener noreferrer"}
+                  target={book.local ? undefined : "_blank"}
+                >
+                  {book.cover ? (
                     <CoverImage
-                      cover={book.data.cover}
-                      alt={`${book.data.title} by ${book.data.author}`}
+                      cover={book.cover}
+                      alt={`${book.title} by ${book.author}`}
                       class="mb-3 aspect-2/3 w-full rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5"
                       width={180}
                       height={270}
                       sizes="(min-width: 1280px) 12vw, (min-width: 640px) 22vw, 45vw"
                     />
-                    <h2 class="font-display line-clamp-2 text-base font-semibold leading-snug text-cream">
-                      {book.data.title}
-                    </h2>
-                    <p class="mt-1 line-clamp-1 text-sm text-sage">{book.data.author}</p>
-                    {typeof progress === "number" && (
-                      <div class="mt-3">
-                        <div class="h-1.5 overflow-hidden rounded-full bg-cream/20">
-                          <div class="h-full rounded-full bg-sage" style={`width: ${progress}%`}></div>
-                        </div>
-                        <p class="mt-1 text-xs text-sage">{progress}%</p>
-                      </div>
-                    )}
-                  </a>
-                  <div class="mt-auto pt-3">
-                    <AffiliateButtons
-                      bookshop={buy.bookshop}
-                      amazon={buy.amazon}
-                      slug={book.id}
-                      title={book.data.title}
-                      tone="dark"
-                      hideHint
+                  ) : book.remoteCover ? (
+                    <img
+                      src={book.remoteCover}
+                      alt={`${book.title} by ${book.author}`}
+                      class="mb-3 aspect-2/3 w-full rounded object-cover shadow-xl transition-transform duration-300 group-hover:-translate-y-0.5"
+                      width="180"
+                      height="270"
+                      loading="lazy"
+                      decoding="async"
+                      referrerpolicy="no-referrer"
                     />
-                  </div>
-                </article>
-              );
-            })}
+                  ) : (
+                    <MediaPlaceholder
+                      kind="book"
+                      class="mb-3 aspect-2/3 w-full rounded shadow-xl"
+                      width={180}
+                      height={270}
+                    />
+                  )}
+                  <h2 class="font-display line-clamp-2 text-base font-semibold leading-snug text-cream">
+                    {book.title}
+                  </h2>
+                  <p class="mt-1 line-clamp-1 text-sm text-sage">{book.author}</p>
+                  {typeof book.progress === "number" && (
+                    <div class="mt-3">
+                      <div class="h-1.5 overflow-hidden rounded-full bg-cream/20">
+                        <div class="h-full rounded-full bg-sage" style={`width: ${book.progress}%`}></div>
+                      </div>
+                      <p class="mt-1 text-xs text-sage">{book.progress}%</p>
+                    </div>
+                  )}
+                </a>
+                <div class="mt-auto pt-3">
+                  <AffiliateButtons
+                    bookshop={book.buy.bookshop}
+                    amazon={book.buy.amazon}
+                    slug={book.slug}
+                    title={book.title}
+                    tone="dark"
+                    hideHint
+                  />
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>

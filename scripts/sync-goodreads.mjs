@@ -54,14 +54,49 @@ function rssItems(xml) {
 
 function progressFromUpdates(xml) {
   const progress = {};
-  const titles = [...xml.matchAll(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/g)].map((match) =>
-    match[1].replace(/\s+/g, " ").trim(),
+  const titles = [...xml.matchAll(/<title\b[^>]*>\s*(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))\s*<\/title>/gi)].map(
+    (match) => (match[1] || match[2] || "").replace(/\s+/g, " ").trim(),
   );
   for (const title of titles) {
-    const match = title.match(/is\s+(\d+)%\s+done with\s+(.+)$/i);
-    if (match) progress[match[2].trim().toLowerCase()] = Number(match[1]);
+    const percentMatch = title.match(/is\s+(\d+)%\s+done with\s+(.+)$/i);
+    const pageMatch = percentMatch ? null : title.match(/is\s+on page\s+(\d+)\s+of\s+(\d+)\s+of\s+(.+)$/i);
+    let percent;
+    let bookTitle = "";
+    if (percentMatch) {
+      percent = Number(percentMatch[1]);
+      bookTitle = percentMatch[2].trim().toLowerCase();
+    } else if (pageMatch) {
+      const page = Number(pageMatch[1]);
+      const total = Number(pageMatch[2]);
+      if (total > 0) percent = Math.min(100, Math.round((page / total) * 100));
+      bookTitle = pageMatch[3].trim().toLowerCase();
+    }
+    if (typeof percent === "number" && Number.isFinite(percent) && bookTitle && progress[bookTitle] == null) {
+      progress[bookTitle] = percent;
+    }
   }
   return progress;
+}
+
+function lookupProgress(progress, book) {
+  const title = book.title.toLowerCase();
+  const base = baseTitle(book.title);
+  if (typeof progress[title] === "number") return progress[title];
+  if (typeof progress[base] === "number") return progress[base];
+  const fuzzy = Object.entries(progress).find(
+    ([name]) => base.includes(baseTitle(name)) || baseTitle(name).includes(base),
+  );
+  return typeof fuzzy?.[1] === "number" ? fuzzy[1] : undefined;
+}
+
+function previousProgress(previousBooks, book) {
+  const list = previousBooks || [];
+  const prev =
+    (book.goodreadsId && list.find((item) => item.goodreadsId === book.goodreadsId)) ||
+    list.find(
+      (item) => baseTitle(item.title) === baseTitle(book.title) || item.title.toLowerCase() === book.title.toLowerCase(),
+    );
+  return typeof prev?.progress === "number" ? prev.progress : undefined;
 }
 
 function baseTitle(value) {
@@ -127,13 +162,7 @@ try {
 
   const progress = progressFromUpdates(updatesXml);
   const currentlyReading = rssItems(readingXml).map((book) => {
-    const percent =
-      progress[book.title.toLowerCase()] ??
-      progress[baseTitle(book.title)] ??
-      Object.entries(progress).find(
-        ([name]) =>
-          baseTitle(book.title).includes(baseTitle(name)) || baseTitle(name).includes(baseTitle(book.title)),
-      )?.[1];
+    const percent = lookupProgress(progress, book) ?? previousProgress(previous.currentlyReading, book);
     return { ...book, progress: typeof percent === "number" ? percent : null };
   });
 

@@ -8,7 +8,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { affiliateLinks } from "../../lib/affiliates";
 import { bookHref, formatFullDate, pageLength, rereadLabel } from "../../lib/books";
 import { coverModule } from "../../lib/covers";
-import { liveProgress } from "../../lib/live";
+import { liveProgress, liveReadingStatus } from "../../lib/live";
 import { getImage } from "astro:assets";
 import { getCollection } from "astro:content";
 
@@ -22,7 +22,7 @@ export async function getStaticPaths() {
 
 const { book } = Astro.props;
 const { data } = book;
-const reading = data.status === "currently-reading";
+const reading = liveReadingStatus(live, data.title, data.goodreadsId, data.status) === "currently-reading";
 const genericGenre = data.genre === "Read" || data.genre === "Currently reading" || !data.genre;
 const label = reading ? "Currently reading" : genericGenre ? "" : data.genre;
 const description = data.note
@@ -252,7 +252,8 @@ const og = cover ? await getImage({ src: cover, width: 800, height: 1200, format
                         </div>
                       )}
                       <p class="mt-1 text-sm text-muted-foreground">
-                        {entry.data.status === "currently-reading"
+                        {liveReadingStatus(live, entry.data.title, entry.data.goodreadsId, entry.data.status) ===
+                        "currently-reading"
                           ? "Reading now"
                           : entry.data.dateRead
                             ? `Read ${formatFullDate(entry.data.dateRead)}`

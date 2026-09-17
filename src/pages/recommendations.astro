@@ -1,20 +1,28 @@
 ---
 import BookCard from "../components/BookCard.astro";
 import CoverWall from "../components/CoverWall.astro";
+import live from "../data/goodreads-live.json";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { bookHref } from "../lib/books";
+import { liveReadingStatus } from "../lib/live";
 import { groupSeries } from "../lib/series";
 import { getCollection } from "astro:content";
 
-const books = (await getCollection("books")).sort((a, b) => {
-  if (a.data.status !== b.data.status) {
-    return a.data.status === "currently-reading" ? -1 : 1;
-  }
-  const aDate = a.data.status === "currently-reading" ? a.data.dateAdded : a.data.dateRead || a.data.dateAdded;
-  const bDate = b.data.status === "currently-reading" ? b.data.dateAdded : b.data.dateRead || b.data.dateAdded;
-  return (bDate || "").localeCompare(aDate || "");
-});
+const books = (await getCollection("books"))
+  .map((book) => {
+    const status = liveReadingStatus(live, book.data.title, book.data.goodreadsId, book.data.status);
+    if (status === book.data.status) return book;
+    return { ...book, data: { ...book.data, status } };
+  })
+  .sort((a, b) => {
+    if (a.data.status !== b.data.status) {
+      return a.data.status === "currently-reading" ? -1 : 1;
+    }
+    const aDate = a.data.status === "currently-reading" ? a.data.dateAdded : a.data.dateRead || a.data.dateAdded;
+    const bDate = b.data.status === "currently-reading" ? b.data.dateAdded : b.data.dateRead || b.data.dateAdded;
+    return (bDate || "").localeCompare(aDate || "");
+  });
 const fiveStars = books.filter((book) => book.data.rating === 5);
 const seriesGroups = groupSeries(books, 3);
 const years = [...new Set(books.map((book) => book.data.dateRead?.slice(0, 4)).filter(Boolean) as string[])].sort(
