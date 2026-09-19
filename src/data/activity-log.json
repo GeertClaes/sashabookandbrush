@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-19T16:21:00.689Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Windsor & Newton Gesso primer",
+      "detail": "Tool and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "geert.wl.claes@gmail.com"
+    },
+    {
       "at": "2026-09-19T16:18:14.365Z",
       "type": "admin",
       "ok": true,
@@ -311,14 +319,6 @@
       "title": "Updated The Mountains of Velaris",
       "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-09T15:12:10.478Z",
-      "type": "goodreads",
-      "ok": true,
-      "title": "Goodreads RSS sync",
-      "detail": "5 currently reading, 8 up next. No changes to currently reading.",
-      "by": "pages-build"
     }
   ]
 }
