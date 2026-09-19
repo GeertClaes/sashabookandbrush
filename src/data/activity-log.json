@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-09-19T16:07:32.569Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Nicpro Artist Paint Brush Set",
+      "detail": "Tool and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "geert.wl.claes@gmail.com"
+    },
+    {
       "at": "2026-09-17T09:33:25.478Z",
       "type": "goodreads",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Goodreads RSS sync",
       "detail": "5 currently reading, 8 up next. No changes to currently reading.",
-      "by": "pages-build"
-    },
-    {
-      "at": "2026-09-09T14:00:43.207Z",
-      "type": "goodreads",
-      "ok": true,
-      "title": "Goodreads RSS sync",
-      "detail": "5 currently reading, 8 up next. Wild Card (Rose Hill, #4): — → 75%; The Last Witch: 30% → 45%",
       "by": "pages-build"
     }
   ]
