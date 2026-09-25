@@ -17,8 +17,8 @@ async function png(svgPath, outPath, width, height = width) {
 
 await mkdir(path.join(publicDir, "images"), { recursive: true });
 
-await png(path.join(publicDir, "favicon.svg"), path.join(publicDir, "favicon-32.png"), 32);
-const icon = path.join(publicDir, "icon.svg");
+const icon = path.join(publicDir, "favicon.svg");
+await png(icon, path.join(publicDir, "favicon-32.png"), 32);
 await png(icon, path.join(publicDir, "apple-touch-icon.png"), 180);
 await png(icon, path.join(publicDir, "icon-192.png"), 192);
 await png(icon, path.join(publicDir, "icon-512.png"), 512);
