@@ -43,6 +43,10 @@ const currentlyReading = (live.currentlyReading || []).map((item) => {
     progress,
     buy: affiliateLinks(liveIsbn(item, local)),
   };
+}).sort((a, b) => {
+  const left = typeof a.progress === "number" ? a.progress : -1;
+  const right = typeof b.progress === "number" ? b.progress : -1;
+  return right - left;
 });
 
 const upNext = (live.upNext || []).slice(0, 8).map((item) => {

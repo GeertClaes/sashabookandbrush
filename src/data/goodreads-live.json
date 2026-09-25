@@ -1,17 +1,21 @@
 {
-  "updated": "2026-09-17T09:33:25.472Z",
+  "updated": "2026-09-25T10:53:52.371Z",
   "lastSync": {
-    "at": "2026-09-17T09:33:25.472Z",
+    "at": "2026-09-25T10:53:52.371Z",
     "ok": true,
-    "source": "local",
+    "source": "pages-build",
     "readingCount": 4,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Started Free Falling (Sweetwater Peak, #2)",
+      "A Court of Wings and Ruin (A Court of Thorns and Roses, #3): — → 40%",
+      "Left currently reading: Heartless Hunter (The Crimson Moth, #1)"
+    ],
     "warning": null,
     "error": null,
     "reading": [
       {
-        "title": "Heartless Hunter (The Crimson Moth, #1)",
+        "title": "Free Falling (Sweetwater Peak, #2)",
         "progress": null
       },
       {
@@ -20,7 +24,7 @@
       },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
-        "progress": null
+        "progress": 40
       },
       {
         "title": "Crown of Midnight (Throne of Glass, #2)",
@@ -30,11 +34,11 @@
   },
   "currentlyReading": [
     {
-      "title": "Heartless Hunter (The Crimson Moth, #1)",
-      "author": "Kristen Ciccarelli",
-      "goodreadsId": "127305713",
-      "isbn": "1250866901",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1683734080l/127305713.jpg",
+      "title": "Free Falling (Sweetwater Peak, #2)",
+      "author": "Lyla Sage",
+      "goodreadsId": "249550125",
+      "isbn": "0593977793",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1773803052l/249550125._SY475_.jpg",
       "progress": null
     },
     {
@@ -51,7 +55,7 @@
       "goodreadsId": "50659472",
       "isbn": "1635575605",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1585623092l/50659472.jpg",
-      "progress": null
+      "progress": 40
     },
     {
       "title": "Crown of Midnight (Throne of Glass, #2)",
