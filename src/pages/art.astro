@@ -69,11 +69,14 @@ const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order -
             {site.art.suppliesHeadline}
           </h2>
           <p class="leading-relaxed text-muted-foreground">{site.art.suppliesLede}</p>
+          <p class="mt-3 text-[11px] leading-snug text-muted-foreground">
+            Affiliate links. I earn a small commission at no extra cost to you.
+          </p>
         </div>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {
             supplies.map((item) => (
-              <div id={item.id} class="scroll-mt-24">
+              <div id={item.id} class="h-full scroll-mt-24">
                 <SupplyCard {...item.data} slug={item.id} />
               </div>
             ))

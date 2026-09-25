@@ -5,7 +5,7 @@ import live from "../data/goodreads-live.json";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { bookHref } from "../lib/books";
-import { liveReadingStatus } from "../lib/live";
+import { liveProgress, liveReadingStatus } from "../lib/live";
 import { groupSeries } from "../lib/series";
 import { getCollection } from "astro:content";
 
@@ -19,6 +19,13 @@ const books = (await getCollection("books"))
     if (a.data.status !== b.data.status) {
       return a.data.status === "currently-reading" ? -1 : 1;
     }
+    if (a.data.status === "currently-reading") {
+      const left = liveProgress(live, a.data.title, a.data.goodreadsId);
+      const right = liveProgress(live, b.data.title, b.data.goodreadsId);
+      const leftProgress = typeof left === "number" ? left : -1;
+      const rightProgress = typeof right === "number" ? right : -1;
+      if (leftProgress !== rightProgress) return rightProgress - leftProgress;
+    }
     const aDate = a.data.status === "currently-reading" ? a.data.dateAdded : a.data.dateRead || a.data.dateAdded;
     const bDate = b.data.status === "currently-reading" ? b.data.dateAdded : b.data.dateRead || b.data.dateAdded;
     return (bDate || "").localeCompare(aDate || "");
@@ -29,20 +36,11 @@ const years = [...new Set(books.map((book) => book.data.dateRead?.slice(0, 4)).f
   (a, b) => b.localeCompare(a),
 );
 const shelves = [
-  { id: "all", label: "All" },
-  { id: "currently-reading", label: "Reading now" },
+  { id: "currently-reading", label: "Now" },
   { id: "read", label: "Read" },
 ];
-const ratings = [
-  { id: "all", label: "Any rating" },
-  { id: "5", label: "5 stars" },
-  { id: "4", label: "4+" },
-  { id: "3", label: "3+" },
-  { id: "reviewed", label: "Has a review" },
-];
 const genreChips = [
-  "All",
-  ...(books.some((book) => book.data.genre === "Read") ? ["Unshelved"] : []),
+  ...(books.some((book) => book.data.genre === "Read") ? ["Other"] : []),
   ...[...new Set(
     books
       .map((book) => book.data.genre)
@@ -51,7 +49,18 @@ const genreChips = [
 ];
 const total = books.length;
 const selectClass =
-  "min-w-0 w-full rounded-lg border border-border bg-card px-2.5 py-2 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none";
+  "min-w-0 rounded-lg border border-border bg-card px-2.5 py-2 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none";
+const sorts = [
+  { id: "reading", label: "Reading first" },
+  { id: "read-desc", label: "Recently read" },
+  { id: "read-asc", label: "Oldest read" },
+  { id: "added-desc", label: "Just added" },
+  { id: "rating-desc", label: "Top rated" },
+  { id: "title-asc", label: "Title" },
+  { id: "author-asc", label: "Author" },
+  { id: "year-desc", label: "Newest published" },
+  { id: "pages-desc", label: "Longest" },
+];
 ---
 
 <BaseLayout
@@ -181,10 +190,10 @@ const selectClass =
       <div id="panel-library" role="tabpanel" aria-labelledby="tab-library" data-view-panel="library" hidden>
       <h2 class="font-display mb-3 text-2xl font-semibold text-foreground sm:hidden">Library</h2>
       <div
-        class="sticky top-16 z-30 mb-8 border-b border-border bg-background/95 py-3 backdrop-blur-sm"
+        class="z-30 mb-8 border-b border-border bg-background/95 py-3 backdrop-blur-sm md:sticky md:top-16"
         data-library-controls
       >
-        <div class="flex flex-col gap-2 sm:flex-row">
+        <div class="flex flex-col gap-2 lg:flex-row lg:items-center">
           <label class="relative min-w-0 flex-1">
             <span class="sr-only">Search books by title, author, or note</span>
             <svg
@@ -208,54 +217,88 @@ const selectClass =
               class="min-w-0 w-full rounded-lg border border-border bg-card py-2 pr-3 pl-10 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
             />
           </label>
-          <label class="sm:w-48">
-            <span class="sr-only">Sort books</span>
-            <select id="book-sort" class={selectClass}>
-              <option value="reading">Reading first</option>
-              <option value="read-desc">Recently read</option>
-              <option value="read-asc">Oldest read</option>
-              <option value="added-desc">Recently added</option>
-              <option value="rating-desc">Highest rated</option>
-              <option value="title-asc">Title A–Z</option>
-              <option value="author-asc">Author A–Z</option>
-              <option value="year-desc">Newest published</option>
-              <option value="pages-desc">Longest</option>
-            </select>
-          </label>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              data-filter-group="note"
+              data-filter-value="1"
+              aria-pressed="false"
+              class="shrink-0 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary"
+            >
+              With a note
+            </button>
+            <label>
+              <span class="sr-only">Sort books</span>
+              <select id="book-sort" class:list={[selectClass, "w-full sm:w-44"]}>
+                {sorts.map((item) => <option value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
+            <label>
+              <span class="sr-only">Year read</span>
+              <select id="book-year" class:list={[selectClass, "w-full sm:w-36"]}>
+                <option value="all">Any year</option>
+                {years.map((year) => <option value={year}>Read in {year}</option>)}
+              </select>
+            </label>
+          </div>
         </div>
 
-        <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <label>
-            <span class="sr-only">Shelf</span>
-            <select id="book-shelf" class={selectClass}>
-              {shelves.map((item) => <option value={item.id}>{item.label}</option>)}
-            </select>
-          </label>
-          <label>
-            <span class="sr-only">Rating</span>
-            <select id="book-rating" class={selectClass}>
-              {ratings.map((item) => <option value={item.id}>{item.label}</option>)}
-            </select>
-          </label>
-          <label>
-            <span class="sr-only">Genre</span>
-            <select id="book-genre" class={selectClass}>
+        <div class="mt-3 grid gap-2 md:grid-cols-[auto_auto_minmax(0,1fr)]">
+          <fieldset class="w-full rounded-lg border border-border px-3 pt-1 pb-2.5 md:w-fit">
+            <legend class="px-1 text-[10px] font-medium tracking-widest text-accent uppercase">Shelf</legend>
+            <div class="flex flex-wrap gap-1.5" role="group" aria-label="Shelf">
               {
-                genreChips.map((genre) => (
-                  <option value={genre === "Unshelved" ? "Read" : genre}>
-                    {genre === "All" ? "Any genre" : genre}
-                  </option>
+                shelves.map((item) => (
+                  <button
+                    type="button"
+                    data-filter-group="shelf"
+                    data-filter-value={item.id}
+                    aria-pressed="false"
+                    class="shrink-0 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary"
+                  >
+                    {item.label}
+                  </button>
                 ))
               }
-            </select>
-          </label>
-          <label>
-            <span class="sr-only">Year read</span>
-            <select id="book-year" class={selectClass}>
-              <option value="all">Any year</option>
-              {years.map((year) => <option value={year}>Read in {year}</option>)}
-            </select>
-          </label>
+            </div>
+          </fieldset>
+          <fieldset class="w-full rounded-lg border border-border px-3 pt-1 pb-2.5 md:w-fit">
+            <legend class="px-1 text-[10px] font-medium tracking-widest text-accent uppercase">Rating</legend>
+            <div class="flex flex-wrap gap-1.5" role="group" aria-label="Rating">
+              {
+                [5, 4, 3, 2, 1].map((stars) => (
+                  <button
+                    type="button"
+                    data-filter-group="rating"
+                    data-filter-value={String(stars)}
+                    aria-pressed="false"
+                    class="shrink-0 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary"
+                  >
+                    <span class="sr-only">{stars} {stars === 1 ? "star" : "stars"}</span>
+                    <span aria-hidden="true">{stars} ★</span>
+                  </button>
+                ))
+              }
+            </div>
+          </fieldset>
+          <fieldset class="min-w-0 rounded-lg border border-border px-3 pt-1 pb-2.5">
+            <legend class="px-1 text-[10px] font-medium tracking-widest text-accent uppercase">Genre</legend>
+            <div class="flex flex-wrap gap-1.5" role="group" aria-label="Genre">
+              {
+                genreChips.map((genre) => (
+                  <button
+                    type="button"
+                    data-filter-group="genre"
+                    data-filter-value={genre === "Other" ? "Read" : genre}
+                    aria-pressed="false"
+                    class="shrink-0 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary"
+                  >
+                    {genre}
+                  </button>
+                ))
+              }
+            </div>
+          </fieldset>
         </div>
 
         <p class="mt-2 text-xs text-muted-foreground" data-result-count>
@@ -263,26 +306,31 @@ const selectClass =
         </p>
       </div>
 
-      <div class="grid gap-4" data-book-list>
+      <div class="grid grid-cols-2 items-stretch gap-4 md:grid-cols-3 lg:grid-cols-4" data-book-list>
         {
-          books.map((book) => (
-            <div
-              data-book-genre={book.data.genre}
-              data-book-status={book.data.status}
-              data-has-note={book.data.note ? "1" : "0"}
-              data-sort-read={book.data.dateRead || ""}
-              data-sort-added={book.data.dateAdded || ""}
-              data-sort-title={book.data.title.toLowerCase()}
-              data-sort-author={book.data.author.toLowerCase()}
-              data-sort-rating={String(book.data.rating)}
-              data-sort-year={String(book.data.yearPublished || book.data.originalYear || "")}
-              data-sort-pages={String(book.data.pages || "")}
-              data-read-year={book.data.dateRead?.slice(0, 4) || ""}
-              data-book-search={`${book.data.title} ${book.data.author} ${book.data.genre} ${book.data.note} ${book.data.isbn || ""} ${book.data.publisher || ""}`.toLowerCase()}
-            >
-              <BookCard {...book.data} href={bookHref(book.id)} variant="row" />
-            </div>
-          ))
+          books.map((book) => {
+            const progress = liveProgress(live, book.data.title, book.data.goodreadsId);
+            return (
+              <div
+                class="h-full min-w-0"
+                data-book-genre={book.data.genre}
+                data-book-status={book.data.status}
+                data-has-note={book.data.note ? "1" : "0"}
+                data-sort-read={book.data.dateRead || ""}
+                data-sort-added={book.data.dateAdded || ""}
+                data-sort-title={book.data.title.toLowerCase()}
+                data-sort-author={book.data.author.toLowerCase()}
+                data-sort-rating={String(book.data.rating)}
+                data-sort-year={String(book.data.yearPublished || book.data.originalYear || "")}
+                data-sort-pages={String(book.data.pages || "")}
+                data-sort-progress={progress === null ? "" : String(progress)}
+                data-read-year={book.data.dateRead?.slice(0, 4) || ""}
+                data-book-search={`${book.data.title} ${book.data.author} ${book.data.genre} ${book.data.note} ${book.data.isbn || ""} ${book.data.publisher || ""}`.toLowerCase()}
+              >
+                <BookCard {...book.data} href={bookHref(book.id)} progress={progress} />
+              </div>
+            );
+          })
         }
       </div>
 
@@ -296,11 +344,7 @@ const selectClass =
 
 <script>
   const search = document.querySelector<HTMLInputElement>("#book-search");
-  const sort = document.querySelector<HTMLSelectElement>("#book-sort");
-  const shelf = document.querySelector<HTMLSelectElement>("#book-shelf");
-  const rating = document.querySelector<HTMLSelectElement>("#book-rating");
-  const genre = document.querySelector<HTMLSelectElement>("#book-genre");
-  const year = document.querySelector<HTMLSelectElement>("#book-year");
+  const controls = document.querySelector<HTMLElement>("[data-library-controls]");
   const list = document.querySelector<HTMLElement>("[data-book-list]");
   const cards = document.querySelectorAll<HTMLElement>("[data-book-search]");
   const empty = document.querySelector<HTMLElement>("[data-empty]");
@@ -309,6 +353,15 @@ const selectClass =
   const panels = document.querySelectorAll<HTMLElement>("[data-view-panel]");
   const total = cards.length;
   const views = new Set(["library", "series", "stars"]);
+  const sortControl = document.querySelector<HTMLSelectElement>("#book-sort");
+  const yearControl = document.querySelector<HTMLSelectElement>("#book-year");
+  const filters = {
+    shelf: "",
+    rating: "",
+    genre: "",
+    year: "all",
+    note: false,
+  };
 
   function setView(view: string) {
     const next = views.has(view) ? view : "stars";
@@ -340,15 +393,38 @@ const selectClass =
     return oldest ? a.localeCompare(b) : b.localeCompare(a);
   }
 
+  function progressOf(card: HTMLElement) {
+    const raw = card.dataset.sortProgress;
+    if (!raw) return -1;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : -1;
+  }
+
+  function paintGroup(group: string, value: string) {
+    document.querySelectorAll<HTMLButtonElement>(`[data-filter-group="${group}"]`).forEach((button) => {
+      const on = button.dataset.filterValue === value;
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+      button.classList.toggle("border-primary", on);
+      button.classList.toggle("bg-primary", on);
+      button.classList.toggle("text-primary-foreground", on);
+      button.classList.toggle("border-border", !on);
+      button.classList.toggle("bg-card", !on);
+      button.classList.toggle("text-foreground", !on);
+      button.classList.toggle("hover:border-primary", !on);
+    });
+  }
+
   function sortCards() {
     if (!list) return;
-    const mode = sort?.value ?? "reading";
+    const mode = sortControl?.value ?? "reading";
     const items = [...list.children] as HTMLElement[];
     items.sort((left, right) => {
       if (mode === "reading") {
         const leftReading = left.dataset.bookStatus === "currently-reading" ? 0 : 1;
         const rightReading = right.dataset.bookStatus === "currently-reading" ? 0 : 1;
         if (leftReading !== rightReading) return leftReading - rightReading;
+        const byProgress = progressOf(right) - progressOf(left);
+        if (byProgress) return byProgress;
         return compareDate(left.dataset.sortAdded ?? "", right.dataset.sortAdded ?? "");
       }
       if (mode === "read-desc") return compareDate(left.dataset.sortRead ?? "", right.dataset.sortRead ?? "");
@@ -366,25 +442,21 @@ const selectClass =
 
   function apply() {
     const query = (search?.value ?? "").trim().toLowerCase();
-    const shelfValue = shelf?.value ?? "all";
-    const ratingValue = rating?.value ?? "all";
-    const genreValue = genre?.value ?? "All";
-    const yearValue = year?.value ?? "all";
+    const shelfValue = filters.shelf;
+    const ratingValue = filters.rating;
+    const genreValue = filters.genre;
+    const yearValue = filters.year;
     let visible = 0;
 
     cards.forEach((card) => {
-      const shelfMatch = shelfValue === "all" || card.dataset.bookStatus === shelfValue;
-      const genreMatch = genreValue === "All" || card.dataset.bookGenre === genreValue;
+      const shelfMatch = !shelfValue || card.dataset.bookStatus === shelfValue;
+      const genreMatch = !genreValue || card.dataset.bookGenre === genreValue;
       const yearMatch = yearValue === "all" || card.dataset.readYear === yearValue;
+      const noteMatch = !filters.note || card.dataset.hasNote === "1";
       const stars = Number(card.dataset.sortRating || 0);
-      const ratingMatch =
-        ratingValue === "all" ||
-        (ratingValue === "reviewed" && card.dataset.hasNote === "1") ||
-        (ratingValue === "5" && stars === 5) ||
-        (ratingValue === "4" && stars >= 4) ||
-        (ratingValue === "3" && stars >= 3);
+      const ratingMatch = !ratingValue || stars === Number(ratingValue);
       const textMatch = !query || (card.dataset.bookSearch ?? "").includes(query);
-      const show = shelfMatch && genreMatch && ratingMatch && textMatch && yearMatch;
+      const show = shelfMatch && genreMatch && ratingMatch && noteMatch && textMatch && yearMatch;
       card.classList.toggle("hidden", !show);
       if (show) visible += 1;
     });
@@ -395,9 +467,10 @@ const selectClass =
       const idle =
         visible === total &&
         !query &&
-        shelfValue === "all" &&
-        ratingValue === "all" &&
-        genreValue === "All" &&
+        !shelfValue &&
+        !ratingValue &&
+        !genreValue &&
+        !filters.note &&
         yearValue === "all";
       count.textContent = idle
         ? `${total} ${total === 1 ? "book" : "books"}`
@@ -406,18 +479,36 @@ const selectClass =
   }
 
   search?.addEventListener("input", apply);
-  sort?.addEventListener("change", sortCards);
-  shelf?.addEventListener("change", apply);
-  rating?.addEventListener("change", apply);
-  genre?.addEventListener("change", apply);
-  year?.addEventListener("change", apply);
+  sortControl?.addEventListener("change", sortCards);
+  yearControl?.addEventListener("change", () => {
+    filters.year = yearControl.value || "all";
+    apply();
+  });
+  controls?.addEventListener("click", (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLButtonElement>("[data-filter-group]");
+    if (!button) return;
+    const group = button.dataset.filterGroup;
+    const value = button.dataset.filterValue || "";
+    if (group === "note") {
+      filters.note = !filters.note;
+      paintGroup("note", filters.note ? "1" : "");
+      apply();
+      return;
+    }
+    if (group !== "shelf" && group !== "rating" && group !== "genre") return;
+    filters[group] = filters[group] === value ? "" : value;
+    paintGroup(group, filters[group]);
+    apply();
+  });
 
   const params = new URLSearchParams(window.location.search);
   const yearParam = params.get("year");
   const viewParam = params.get("view");
-  if (yearParam && year) {
-    year.value = yearParam;
+  if (yearParam && /^\d{4}$/.test(yearParam) && yearControl?.querySelector(`option[value="${yearParam}"]`)) {
+    yearControl.value = yearParam;
+    filters.year = yearParam;
     apply();
   }
+  sortCards();
   setView(yearParam ? "library" : viewParam || "stars");
 </script>

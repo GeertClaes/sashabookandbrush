@@ -322,9 +322,14 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
       </div>
       <div class="mt-12">
         <div class="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-          <h3 class="font-display text-2xl font-semibold text-foreground">
-            {site.art.suppliesHeadline}
-          </h3>
+          <div>
+            <h3 class="font-display text-2xl font-semibold text-foreground">
+              {site.art.suppliesHeadline}
+            </h3>
+            <p class="mt-2 text-[11px] leading-snug text-muted-foreground">
+              Affiliate links. I earn a small commission at no extra cost to you.
+            </p>
+          </div>
           <a
             href="/art#supplies"
             class="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -332,10 +337,12 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
             Full kit →
           </a>
         </div>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {
             featuredSupplies.map((item) => (
-              <SupplyCard {...item.data} slug={item.id} />
+              <div class="h-full">
+                <SupplyCard {...item.data} slug={item.id} />
+              </div>
             ))
           }
         </div>

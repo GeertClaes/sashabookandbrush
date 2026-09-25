@@ -41,11 +41,13 @@ const buyHref = taggedAmazon(amazon) || realUrl(amazon) || realUrl(shop);
       )
     )
   }
-  <span class="mb-1 block text-[10px] font-medium tracking-widest text-accent uppercase">
-    {category}
-  </span>
-  <h3 class="font-display mb-0.5 text-sm font-semibold leading-snug text-foreground">{title}</h3>
-  {brand && <p class="mb-2 text-xs text-muted-foreground">{brand}</p>}
-  {note && <p class="text-xs leading-relaxed text-foreground">{note}</p>}
-  <SupplyButtons amazon={amazon} shop={shop} shopLabel={shopLabel} title={title} slug={slug} />
+  <div class="flex min-w-0 flex-1 flex-col">
+    <span class="mb-1 block text-[10px] font-medium tracking-widest text-accent uppercase">
+      {category}
+    </span>
+    <h3 class="font-display mb-0.5 text-sm font-semibold leading-snug text-foreground">{title}</h3>
+    {brand && <p class="mb-2 text-xs text-muted-foreground">{brand}</p>}
+    {note && <p class="text-xs leading-relaxed text-foreground">{note}</p>}
+    <SupplyButtons amazon={amazon} shop={shop} shopLabel={shopLabel} title={title} slug={slug} />
+  </div>
 </article>

@@ -23,6 +23,7 @@ interface Props {
   href?: string;
   slug?: string;
   showBuy?: boolean;
+  progress?: number | null;
 }
 
 const {
@@ -42,7 +43,9 @@ const {
   href,
   slug = "",
   showBuy = false,
+  progress = null,
 } = Astro.props;
+const progressWidth = typeof progress === "number" ? Math.min(100, Math.max(0, Math.round(progress))) : null;
 
 const isRow = variant === "row";
 const reading = status === "currently-reading";
@@ -127,6 +130,14 @@ const cardClass = [
                 {title}
               </h3>
               <p class="mt-0.5 mb-2 line-clamp-1 text-xs text-muted-foreground">{author}</p>
+              {reading && progressWidth !== null && (
+                <div class="mb-2">
+                  <div class="h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div class="h-full rounded-full bg-secondary" style={`width: ${progressWidth}%`}></div>
+                  </div>
+                  <p class="mt-1 text-xs text-muted-foreground">{progressWidth}% read</p>
+                </div>
+              )}
               {rating > 0 && <StarRating rating={rating} />}
               {note && (
                 <p class="mt-3 line-clamp-2 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
@@ -161,6 +172,14 @@ const cardClass = [
                 {title}
               </h3>
               <p class="mt-0.5 mb-2 text-xs text-muted-foreground">{author}</p>
+              {reading && progressWidth !== null && (
+                <div class="mb-2">
+                  <div class="h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div class="h-full rounded-full bg-secondary" style={`width: ${progressWidth}%`}></div>
+                  </div>
+                  <p class="mt-1 text-xs text-muted-foreground">{progressWidth}% read</p>
+                </div>
+              )}
               {rating > 0 && <StarRating rating={rating} />}
               {note && (
                 <p class="mt-3 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
