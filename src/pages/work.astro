@@ -27,21 +27,34 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
                 height="800"
               />
             </div>
-            <p class="text-sm leading-relaxed text-muted-foreground">
-              The nook, the lamps, the shelves. This is where your book would sit.
-            </p>
+            {
+              work.photoCaption && (
+                <p class="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{work.photoCaption}</p>
+              )
+            }
           </div>
         </div>
 
         <div class="md:col-span-3">
-          <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{work.eyebrow}</p>
+          {
+            work.eyebrow && (
+              <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{work.eyebrow}</p>
+            )
+          }
           <h1 class="font-display mb-6 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
-            {work.headline}<br />
-            <em class="font-light italic">{work.headlineItalic}</em>
+            {work.headline}
+            {
+              work.headlineItalic && (
+                <>
+                  <br />
+                  <em class="font-light italic">{work.headlineItalic}</em>
+                </>
+              )
+            }
           </h1>
           <div class="max-w-none space-y-4 leading-relaxed text-foreground">
-            <p>{work.lede}</p>
-            <p>{work.note}</p>
+            <p class="whitespace-pre-line">{work.lede}</p>
+            {work.note && <p class="whitespace-pre-line">{work.note}</p>}
           </div>
           <a
             href={instagram}
@@ -70,58 +83,87 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
         }
       </dl>
 
-      <section class="mt-16">
-        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">What I like making</p>
-        <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">The same energy as the grid</h2>
-        <p class="mb-8 max-w-2xl leading-relaxed text-muted-foreground">
-          Small, bookish, a bit painterly. If it wouldn't look at home next to a Maas stack or a wet canvas, it
-          probably isn't for me — and that's alright.
-        </p>
-        <div class="grid gap-4 sm:grid-cols-2">
-          {
-            offers.map((offer) => (
-              <div class="rounded-lg border border-border bg-card p-5">
-                <h3 class="font-display text-lg font-semibold text-foreground">{offer.title}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-foreground/80">{offer.desc}</p>
-              </div>
-            ))
-          }
-        </div>
-      </section>
+      {
+        (work.offersEyebrow || work.offersHeadline || work.offersLede || offers.length > 0) && (
+          <section class="mt-16">
+            {work.offersEyebrow && (
+              <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{work.offersEyebrow}</p>
+            )}
+            {work.offersHeadline && (
+              <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">{work.offersHeadline}</h2>
+            )}
+            {work.offersLede && (
+              <p class="mb-8 max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground">{work.offersLede}</p>
+            )}
+            {
+              offers.length > 0 && (
+                <div class="grid gap-4 sm:grid-cols-2">
+                  {offers.map((offer) => (
+                    <div class="rounded-lg border border-border bg-card p-5">
+                      <h3 class="font-display text-lg font-semibold text-foreground">{offer.title}</h3>
+                      {offer.desc && <p class="mt-2 text-sm leading-relaxed whitespace-pre-line text-foreground/80">{offer.desc}</p>}
+                    </div>
+                  ))}
+                </div>
+              )
+            }
+          </section>
+        )
+      }
 
-      <section class="mt-16">
-        <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">If we work together</p>
-        <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">A few ways it can look</h2>
-        <p class="mb-8 max-w-2xl leading-relaxed text-muted-foreground">
-          These are starting points, not a menu I recite. Tell me the book and we'll shape it around what actually
-          suits.
-        </p>
-        <div class="grid gap-4 md:grid-cols-3">
-          {
-            packages.map((item) => (
-              <div class="rounded-lg border border-border bg-card p-5">
-                <h3 class="font-display text-lg font-semibold text-foreground">{item.title}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-foreground/80">{item.desc}</p>
-              </div>
-            ))
-          }
-        </div>
-        <p class="mt-5 text-sm leading-relaxed text-muted-foreground">
-          I don't put prices on the internet. Slide into {handle} and we'll figure out what fits.
-        </p>
-      </section>
+      {
+        (work.packagesEyebrow || work.packagesHeadline || work.packagesLede || work.pricesNote || packages.length > 0) && (
+          <section class="mt-16">
+            {work.packagesEyebrow && (
+              <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">{work.packagesEyebrow}</p>
+            )}
+            {work.packagesHeadline && (
+              <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">{work.packagesHeadline}</h2>
+            )}
+            {work.packagesLede && (
+              <p class="mb-8 max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground">{work.packagesLede}</p>
+            )}
+            {
+              packages.length > 0 && (
+                <div class="grid gap-4 md:grid-cols-3">
+                  {packages.map((item) => (
+                    <div class="rounded-lg border border-border bg-card p-5">
+                      <h3 class="font-display text-lg font-semibold text-foreground">{item.title}</h3>
+                      {item.desc && <p class="mt-2 text-sm leading-relaxed whitespace-pre-line text-foreground/80">{item.desc}</p>}
+                    </div>
+                  ))}
+                </div>
+              )
+            }
+            {work.pricesNote && (
+              <p class="mt-5 text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{work.pricesNote}</p>
+            )}
+          </section>
+        )
+      }
 
-      <section class="mt-16 rounded-lg border border-border bg-card p-6">
-        <p class="text-xs font-medium tracking-widest text-accent uppercase">{credentials.title}</p>
-        <p class="mt-2 leading-relaxed text-foreground">{credentials.org}</p>
-      </section>
+      {
+        (credentials.title || credentials.org) && (
+          <section class="mt-16 rounded-lg border border-border bg-card p-6">
+            {credentials.title && (
+              <p class="text-xs font-medium tracking-widest text-accent uppercase">{credentials.title}</p>
+            )}
+            {credentials.org && <p class="mt-2 leading-relaxed whitespace-pre-line text-foreground">{credentials.org}</p>}
+          </section>
+        )
+      }
 
       <section class="mt-16 max-w-2xl">
-        <h2 class="font-display mb-4 text-2xl font-semibold text-foreground">Come say hi</h2>
-        <p class="mb-6 leading-relaxed text-foreground">
-          If a title belongs on these shelves, I'd rather hear about it in a DM than a cold pitch deck. Bring the
-          book. I'll bring the nook, the Kindle, and probably a cat in the background.
-        </p>
+        {
+          work.closeHeadline && (
+            <h2 class="font-display mb-4 text-2xl font-semibold text-foreground">{work.closeHeadline}</h2>
+          )
+        }
+        {
+          work.closeLede && (
+            <p class="mb-6 leading-relaxed whitespace-pre-line text-foreground">{work.closeLede}</p>
+          )
+        }
         <a
           href={instagram}
           class="inline-flex items-center gap-2 rounded bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"

@@ -13,6 +13,7 @@ import {
 } from "./lib/activity.mjs";
 import { applyYamlFields, emptyAffiliateUrl, taggedAmazonUrl, yamlString } from "../functions/admin/api/_lib/frontmatter.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
+import { applySiteCopy, stringifySite } from "../functions/admin/api/_lib/site-copy.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -562,6 +563,31 @@ order: ${order}
       text = applyYamlFields(text, { cover: photo.filename });
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       json(res, 200, { ok: true, cover: photo.filename });
+      return;
+    }
+
+    if (pathname === "/api/copy" && req.method === "POST") {
+      const body = JSON.parse((await readBody(req)) || "{}");
+      const file = path.join(ROOT, "src", "data", "site.json");
+      const raw = await readFile(file, "utf8");
+      let next;
+      try {
+        next = applySiteCopy(JSON.parse(raw), body);
+      } catch (error) {
+        json(res, 400, { error: error instanceof Error ? error.message : "Check the page text" });
+        return;
+      }
+      const content = stringifySite(next);
+      const current = raw.endsWith("\n") ? raw : `${raw}\n`;
+      if (content !== current) {
+        await writeFile(file, content, "utf8");
+        await recordLocalActivity({
+          type: "admin",
+          title: "Updated page text",
+          detail: "Saved on this computer. Refresh Home, About, and Work with me to see it.",
+        });
+      }
+      json(res, 200, { ok: true, unchanged: content === current });
       return;
     }
 

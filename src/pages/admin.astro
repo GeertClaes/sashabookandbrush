@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import type { ImageMetadata } from "astro";
+import { editableCopy } from "../../functions/admin/api/_lib/site-copy.js";
 import live from "../data/goodreads-live.json";
 import site from "../data/site.json";
 import { affiliateLinks, realUrl } from "../lib/affiliates";
@@ -147,6 +148,7 @@ const affiliateConfig = {
   bookshopUkId: site.affiliates?.bookshopUkId || "",
   siteOrigin: "https://sashabookandbrush.com",
 };
+const pageCopy = editableCopy(site);
 ---
 
 <BaseLayout
@@ -160,6 +162,7 @@ const affiliateConfig = {
       <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Studio editor</h1>
       <p class="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground">
         Ratings and progress stay on Goodreads. Notes, covers, featured cards, paintings, and tools live here.
+        Home, About, and Work with me wording is under Pages.
         {
           isDev ? (
             <>
@@ -228,6 +231,13 @@ const affiliateConfig = {
             class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
           >
             Tools
+          </button>
+          <button
+            type="button"
+            data-tab="copy"
+            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
+          >
+            Pages
           </button>
         </div>
 
@@ -717,10 +727,22 @@ const affiliateConfig = {
           </div>
           </div>
         </div>
+
+        <div data-panel="copy" class="hidden space-y-6">
+          <p class="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Rewrite the Home hero, the About page, and Work with me so it sounds like you. Navigation, photos,
+            stats, the reading challenge, and the shop page stay as they are.
+          </p>
+          <div data-copy-root class="space-y-6"></div>
+          <button type="button" data-copy-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+            Save page text
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
+  <script is:inline type="application/json" id="page-copy" set:html={JSON.stringify(pageCopy).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="book-catalog" set:html={JSON.stringify(books).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="art-catalog" set:html={JSON.stringify(art).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="supply-catalog" set:html={JSON.stringify(supplies).replace(/</g, "\\u003c")} />
@@ -752,8 +774,264 @@ const affiliateConfig = {
   let saveWatch = 0;
   let featuredBaseline = [];
   const QUEUES = ["currently-reading", "featured", "five-star-no-note", "no-note", "missing-isbn"];
-  const TABS = ["overview", "book", "art", "supply"];
+  const TABS = ["overview", "book", "art", "supply", "copy"];
   const MAX_NOTE = 8000;
+  const pageCopy = JSON.parse(document.getElementById("page-copy")?.textContent || "{}");
+  let copySnapshot = "";
+  const COPY_MAX = { short: 160, medium: 800, long: 2000, items: 8 };
+
+  function copyInputClass() {
+    return "mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-normal";
+  }
+
+  function labelledField(label, value, options = {}) {
+    const wrap = document.createElement("label");
+    wrap.className = "mb-4 block text-sm font-medium text-foreground";
+    wrap.append(document.createTextNode(label));
+    const input = document.createElement(options.long ? "textarea" : "input");
+    input.className = copyInputClass();
+    if (options.long) input.rows = options.rows || 4;
+    input.maxLength = options.max || COPY_MAX.short;
+    input.value = value || "";
+    if (options.path) input.dataset.copyPath = options.path;
+    if (options.key) input.dataset.copyKey = options.key;
+    wrap.append(input);
+    if (options.hint) {
+      const hint = document.createElement("span");
+      hint.className = "mt-1 block text-xs font-normal text-muted-foreground";
+      hint.textContent = options.hint;
+      wrap.append(hint);
+    }
+    return wrap;
+  }
+
+  function copySection(title, hint) {
+    const section = document.createElement("section");
+    section.className = "rounded-xl border border-border bg-card p-5";
+    const heading = document.createElement("h2");
+    heading.className = "font-display mb-1 text-xl font-semibold text-foreground";
+    heading.textContent = title;
+    const note = document.createElement("p");
+    note.className = "mb-4 text-sm text-muted-foreground";
+    note.textContent = hint;
+    section.append(heading, note);
+    return section;
+  }
+
+  function copySubhead(text) {
+    const heading = document.createElement("h3");
+    heading.className = "font-display mt-2 mb-3 text-lg font-semibold text-foreground";
+    heading.textContent = text;
+    return heading;
+  }
+
+  function copyRemoveButton(name) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.copyRemove = name;
+    button.className = "text-xs text-muted-foreground hover:text-foreground";
+    button.textContent = "Remove";
+    return button;
+  }
+
+  function paragraphRow(value) {
+    const row = document.createElement("div");
+    row.dataset.copyItem = "paragraphs";
+    row.className = "mb-3 rounded-lg border border-border p-3";
+    const field = labelledField("Paragraph", value, { long: true, max: COPY_MAX.long, rows: 5, key: "body" });
+    field.classList.remove("mb-4");
+    row.append(field, copyRemoveButton("paragraphs"));
+    return row;
+  }
+
+  function cardRow(name, item) {
+    const row = document.createElement("div");
+    row.dataset.copyItem = name;
+    row.className = "mb-3 rounded-lg border border-border p-3";
+    const title = labelledField("Title", item.title, { key: "title" });
+    const text = labelledField("Text", item.desc, { long: true, max: COPY_MAX.long, rows: 3, key: "desc" });
+    text.classList.remove("mb-4");
+    row.append(title, text, copyRemoveButton(name));
+    return row;
+  }
+
+  function listBlock(name, addLabel, items, renderItem) {
+    const block = document.createElement("div");
+    block.dataset.copyBlock = name;
+    block.className = "mb-4";
+    const list = document.createElement("div");
+    list.dataset.copyList = name;
+    items.forEach((item) => list.append(renderItem(item)));
+    const add = document.createElement("button");
+    add.type = "button";
+    add.dataset.copyAdd = name;
+    add.className = "rounded border border-border px-3 py-1.5 text-sm text-foreground hover:border-primary";
+    add.textContent = addLabel;
+    block.append(list, add);
+    return block;
+  }
+
+  function onCopyClick(event) {
+    const add = event.target.closest("[data-copy-add]");
+    const remove = event.target.closest("[data-copy-remove]");
+    if (add) {
+      const name = add.dataset.copyAdd;
+      const list = add.closest("[data-copy-block]")?.querySelector("[data-copy-list]");
+      if (!list) return;
+      if (list.children.length >= COPY_MAX.items) {
+        setBanner("error", "That's as many as this page can hold.");
+        return;
+      }
+      list.append(name === "paragraphs" ? paragraphRow("") : cardRow(name, { title: "", desc: "" }));
+      return;
+    }
+    if (!remove) return;
+    const card = remove.closest("[data-copy-item]");
+    if (remove.dataset.copyRemove === "paragraphs" && card?.parentElement?.children.length <= 1) {
+      setBanner("error", "About needs at least one paragraph.");
+      return;
+    }
+    card?.remove();
+  }
+
+  function copyValue(path) {
+    return document.querySelector(`[data-copy-path="${CSS.escape(path)}"]`)?.value ?? "";
+  }
+
+  function readCards(name) {
+    return [...document.querySelectorAll(`[data-copy-item="${name}"]`)]
+      .map((card) => ({
+        title: card.querySelector('[data-copy-key="title"]')?.value.trim() || "",
+        desc: card.querySelector('[data-copy-key="desc"]')?.value.trim() || "",
+      }))
+      .filter((item) => item.title || item.desc);
+  }
+
+  function readCopy() {
+    const work = {};
+    [
+      "eyebrow",
+      "headline",
+      "headlineItalic",
+      "lede",
+      "note",
+      "photoCaption",
+      "offersEyebrow",
+      "offersHeadline",
+      "offersLede",
+      "packagesEyebrow",
+      "packagesHeadline",
+      "packagesLede",
+      "pricesNote",
+      "closeHeadline",
+      "closeLede",
+    ].forEach((key) => {
+      work[key] = copyValue(`work.${key}`).trim();
+    });
+    return {
+      hero: {
+        eyebrow: copyValue("hero.eyebrow").trim(),
+        headline: copyValue("hero.headline").trim(),
+        headlineItalic: copyValue("hero.headlineItalic").trim(),
+        lede: copyValue("hero.lede").trim(),
+      },
+      about: {
+        eyebrow: copyValue("about.eyebrow").trim(),
+        headline: copyValue("about.headline").trim(),
+        headlineItalic: copyValue("about.headlineItalic").trim(),
+        paragraphs: [...document.querySelectorAll('[data-copy-item="paragraphs"] [data-copy-key="body"]')]
+          .map((el) => el.value.trim())
+          .filter(Boolean),
+      },
+      workIntro: copyValue("workIntro").trim(),
+      work,
+      offers: readCards("offers"),
+      packages: readCards("packages"),
+      credentials: {
+        title: copyValue("credentials.title").trim(),
+        org: copyValue("credentials.org").trim(),
+      },
+    };
+  }
+
+  function copyState() {
+    const root = document.querySelector("[data-copy-root]");
+    if (!root || !root.childElementCount) return "";
+    return JSON.stringify(readCopy());
+  }
+
+  function isCopyDirty() {
+    return Boolean(copySnapshot) && copyState() !== copySnapshot;
+  }
+
+  function renderCopyEditor() {
+    const root = document.querySelector("[data-copy-root]");
+    if (!root || root.childElementCount) {
+      if (!copySnapshot) copySnapshot = copyState();
+      return;
+    }
+    const hero = pageCopy.hero || {};
+    const about = pageCopy.about || {};
+    const work = pageCopy.work || {};
+    const credentials = pageCopy.credentials || {};
+
+    const home = copySection("Home", "The big words on the first screen. The buttons stay as they are.");
+    home.append(
+      labelledField("Small line above the title", hero.eyebrow, { path: "hero.eyebrow" }),
+      labelledField("Headline", hero.headline, { path: "hero.headline" }),
+      labelledField("Italic line", hero.headlineItalic, { path: "hero.headlineItalic" }),
+      labelledField("Intro", hero.lede, { path: "hero.lede", long: true, max: COPY_MAX.medium, rows: 4 }),
+    );
+
+    const aboutSection = copySection(
+      "About",
+      "The bio on the About page. Each box is its own paragraph. Photos and the fact chips stay as they are.",
+    );
+    aboutSection.append(
+      labelledField("Small line above the title", about.eyebrow, { path: "about.eyebrow" }),
+      labelledField("Headline", about.headline, { path: "about.headline" }),
+      labelledField("Italic line", about.headlineItalic, { path: "about.headlineItalic" }),
+      listBlock("paragraphs", "Add paragraph", about.paragraphs?.length ? about.paragraphs : [""], (value) => paragraphRow(value)),
+    );
+
+    const workSection = copySection("Work with me", "The words on Work with me. The Instagram buttons stay as they are.");
+    workSection.append(
+      labelledField("Short summary", pageCopy.workIntro || "", {
+        path: "workIntro",
+        long: true,
+        max: COPY_MAX.medium,
+        rows: 3,
+        hint: "Used for search and link previews. It does not show as a heading on the page.",
+      }),
+      labelledField("Small line above the title", work.eyebrow, { path: "work.eyebrow" }),
+      labelledField("Headline", work.headline, { path: "work.headline" }),
+      labelledField("Italic line", work.headlineItalic, { path: "work.headlineItalic" }),
+      labelledField("Intro", work.lede, { path: "work.lede", long: true, max: COPY_MAX.long, rows: 4 }),
+      labelledField("Second paragraph", work.note, { path: "work.note", long: true, max: COPY_MAX.long, rows: 4 }),
+      labelledField("Line under the photo", work.photoCaption, { path: "work.photoCaption", long: true, max: COPY_MAX.medium, rows: 2 }),
+      copySubhead("What I like making"),
+      labelledField("Small line", work.offersEyebrow, { path: "work.offersEyebrow" }),
+      labelledField("Heading", work.offersHeadline, { path: "work.offersHeadline" }),
+      labelledField("Intro", work.offersLede, { path: "work.offersLede", long: true, max: COPY_MAX.long, rows: 3 }),
+      listBlock("offers", "Add offer", pageCopy.offers || [], (item) => cardRow("offers", item)),
+      copySubhead("Ways it can look"),
+      labelledField("Small line", work.packagesEyebrow, { path: "work.packagesEyebrow" }),
+      labelledField("Heading", work.packagesHeadline, { path: "work.packagesHeadline" }),
+      labelledField("Intro", work.packagesLede, { path: "work.packagesLede", long: true, max: COPY_MAX.long, rows: 3 }),
+      listBlock("packages", "Add a way of working", pageCopy.packages || [], (item) => cardRow("packages", item)),
+      labelledField("Note under those cards", work.pricesNote, { path: "work.pricesNote", long: true, max: COPY_MAX.medium, rows: 2 }),
+      copySubhead("Also"),
+      labelledField("Small heading", credentials.title, { path: "credentials.title" }),
+      labelledField("Text", credentials.org, { path: "credentials.org", long: true, max: COPY_MAX.long, rows: 3 }),
+      copySubhead("Closing"),
+      labelledField("Heading", work.closeHeadline, { path: "work.closeHeadline" }),
+      labelledField("Paragraph", work.closeLede, { path: "work.closeLede", long: true, max: COPY_MAX.long, rows: 4 }),
+    );
+
+    root.append(home, aboutSection, workSection);
+    root.addEventListener("click", onCopyClick);
+    copySnapshot = copyState();
+  }
 
   function setBanner(kind, message) {
     if (!status) return;
@@ -1152,6 +1430,7 @@ const affiliateConfig = {
     renderSupplyList();
     renderFeaturedBoard();
     renderInstagram();
+    renderCopyEditor();
     if (status) {
       if (email && email !== "local") {
         status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
@@ -1246,7 +1525,7 @@ const affiliateConfig = {
   }
 
   function confirmLeave() {
-    if (!isBookDirty()) return true;
+    if (!isBookDirty() && !isCopyDirty()) return true;
     return window.confirm("Discard unsaved changes?");
   }
 
@@ -1905,9 +2184,22 @@ const affiliateConfig = {
   });
 
   window.addEventListener("beforeunload", (event) => {
-    if (!isBookDirty()) return;
+    if (!isBookDirty() && !isCopyDirty()) return;
     event.preventDefault();
     event.returnValue = "";
+  });
+
+  document.querySelector("[data-copy-save]")?.addEventListener("click", async () => {
+    await withSave(document.querySelector("[data-copy-save]"), "Save page text", async () => {
+      const body = readCopy();
+      if (!body.about.paragraphs.length) throw new Error("About needs at least one paragraph.");
+      await call("/copy", { method: "POST", body: JSON.stringify(body) });
+      copySnapshot = JSON.stringify(body);
+      return {
+        label: "page text",
+        hint: "Refresh Home, About, and Work with me to see it.",
+      };
+    });
   });
 
   bindDrop("book");

@@ -70,7 +70,7 @@ const supplies = (await getCollection("supplies")).sort((a, b) => a.data.order -
           </h2>
           <p class="leading-relaxed text-muted-foreground">{site.art.suppliesLede}</p>
         </div>
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {
             supplies.map((item) => (
               <div id={item.id} class="scroll-mt-24">

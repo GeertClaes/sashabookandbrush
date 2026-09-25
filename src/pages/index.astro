@@ -87,14 +87,23 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
     />
     <div class="absolute inset-0 bg-hero-overlay/60 dark:bg-hero-overlay/40"></div>
     <div class="relative z-10 mx-auto max-w-5xl px-6 py-32 md:px-12">
-      <p class="mb-6 text-sm font-medium tracking-[0.25em] text-accent uppercase">
-        {site.hero.eyebrow}
-      </p>
+      {
+        site.hero.eyebrow && (
+          <p class="mb-6 text-sm font-medium tracking-[0.25em] text-accent uppercase">{site.hero.eyebrow}</p>
+        )
+      }
       <h1 class="font-display mb-6 max-w-2xl text-4xl leading-[1.05] font-semibold text-cream sm:text-5xl md:text-7xl">
-        {site.hero.headline}<br />
-        <em class="font-light italic">{site.hero.headlineItalic}</em>
+        {site.hero.headline}
+        {
+          site.hero.headlineItalic && (
+            <>
+              <br />
+              <em class="font-light italic">{site.hero.headlineItalic}</em>
+            </>
+          )
+        }
       </h1>
-      <p class="mb-10 max-w-lg text-lg leading-relaxed text-parchment">
+      <p class="mb-10 max-w-lg text-lg leading-relaxed whitespace-pre-line text-parchment">
         {site.hero.lede}
       </p>
       <div class="flex flex-wrap gap-4">
@@ -323,7 +332,7 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
             Full kit →
           </a>
         </div>
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {
             featuredSupplies.map((item) => (
               <SupplyCard {...item.data} slug={item.id} />

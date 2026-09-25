@@ -27,11 +27,26 @@
     "lede": "Romantasy, special editions, and the paintings I make between chapters — from an Aussie in Wales who always has a book or Kindle nearby and a cat stealing the good blanket."
   },
   "nav": [
-    { "href": "/", "label": "Home" },
-    { "href": "/recommendations", "label": "Books" },
-    { "href": "/art", "label": "Art" },
-    { "href": "/about", "label": "About" },
-    { "href": "/work", "label": "Work with me" }
+    {
+      "href": "/",
+      "label": "Home"
+    },
+    {
+      "href": "/recommendations",
+      "label": "Books"
+    },
+    {
+      "href": "/art",
+      "label": "Art"
+    },
+    {
+      "href": "/about",
+      "label": "About"
+    },
+    {
+      "href": "/work",
+      "label": "Work with me"
+    }
   ],
   "about": {
     "image": "/images/SashaHero.jpg",
@@ -53,10 +68,22 @@
     "goal": 52
   },
   "facts": [
-    { "label": "Based in", "value": "Wales" },
-    { "label": "Day job", "value": "Mental health nurse" },
-    { "label": "Paints", "value": "Acrylics" },
-    { "label": "Also", "value": "ARC reader" }
+    {
+      "label": "Based in",
+      "value": "Wales"
+    },
+    {
+      "label": "Day job",
+      "value": "Mental health nurse"
+    },
+    {
+      "label": "Paints",
+      "value": "Acrylics"
+    },
+    {
+      "label": "Also",
+      "value": "ARC reader"
+    }
   ],
   "art": {
     "eyebrow": "The studio",
@@ -75,10 +102,22 @@
     "lede": "Every book here is one I've actually read and rated. Browse by series or five-star loves, or search the full shelf."
   },
   "stats": [
-    { "label": "On Instagram", "value": "3,060" },
-    { "label": "Books on Goodreads", "value": "543" },
-    { "label": "Ratings given", "value": "276" },
-    { "label": "Notes written", "value": "24" }
+    {
+      "label": "On Instagram",
+      "value": "3,060"
+    },
+    {
+      "label": "Books on Goodreads",
+      "value": "543"
+    },
+    {
+      "label": "Ratings given",
+      "value": "276"
+    },
+    {
+      "label": "Notes written",
+      "value": "24"
+    }
   ],
   "workIntro": "If your book would actually live on my nightstand — romantasy, pretty editions, something I'd press into a friend's hands — I'd love to hear from you. DMs on Instagram; that's the inbox I actually see.",
   "work": {
@@ -86,7 +125,17 @@
     "headline": "If I'd lend it to a friend,",
     "headlineItalic": "I'll post it.",
     "lede": "I'm Sasha: romantasy, special editions, and the paintings I make between chapters. Publishers, authors, and bookish brands are welcome — as long as the title actually fits the shelves.",
-    "note": "I'm an Aussie reading in Wales, usually with Dobby stealing the good blanket and a sticker-covered Kindle nearby. I don't do fake enthusiasm. If it shows up on the grid or on this site, I liked it."
+    "note": "I'm an Aussie reading in Wales, usually with Dobby stealing the good blanket and a sticker-covered Kindle nearby. I don't do fake enthusiasm. If it shows up on the grid or on this site, I liked it.",
+    "photoCaption": "The nook, the lamps, the shelves. This is where your book would sit.",
+    "offersEyebrow": "What I like making",
+    "offersHeadline": "The same energy as the grid",
+    "offersLede": "Small, bookish, a bit painterly. If it wouldn't look at home next to a Maas stack or a wet canvas, it probably isn't for me — and that's alright.",
+    "packagesEyebrow": "If we work together",
+    "packagesHeadline": "A few ways it can look",
+    "packagesLede": "These are starting points, not a menu I recite. Tell me the book and we'll shape it around what actually suits.",
+    "pricesNote": "I don't put prices on the internet. Slide into @sashabookandbrush and we'll figure out what fits.",
+    "closeHeadline": "Come say hi",
+    "closeLede": "If a title belongs on these shelves, I'd rather hear about it in a DM than a cold pitch deck. Bring the book. I'll bring the nook, the Kindle, and probably a cat in the background."
   },
   "offers": [
     {
