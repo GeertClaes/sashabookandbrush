@@ -22,10 +22,3 @@ await png(icon, path.join(publicDir, "favicon-32.png"), 32);
 await png(icon, path.join(publicDir, "apple-touch-icon.png"), 180);
 await png(icon, path.join(publicDir, "icon-192.png"), 192);
 await png(icon, path.join(publicDir, "icon-512.png"), 512);
-
-const ogSvg = path.join(publicDir, "images", "og.svg");
-await sharp(await readFile(ogSvg), { density: 192 })
-  .resize(1200, 630)
-  .png()
-  .toFile(path.join(publicDir, "images", "og-default.png"));
-console.log("wrote images/og-default.png (1200×630)");
