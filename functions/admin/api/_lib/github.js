@@ -31,9 +31,45 @@ export async function github(env, apiPath, init = {}) {
     data = { message: text };
   }
   if (!response.ok) {
-    throw new Error(data.message || `GitHub ${response.status}`);
+    const error = new Error(data.message || `GitHub ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
   return data;
+}
+
+export async function dispatchWorkflow(env, workflowFile) {
+  const repo = env.GITHUB_REPO;
+  if (!repo) throw new Error("GITHUB_REPO is not set");
+  if (!token(env)) throw new Error("GITHUB_TOKEN is not set");
+
+  const response = await fetch(
+    `https://api.github.com/repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/dispatches`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token(env)}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "sashabookandbrush-admin",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ref: branch(env) }),
+    },
+  );
+  if (response.status === 204) return;
+
+  const text = await response.text();
+  let message = `GitHub ${response.status}`;
+  try {
+    const data = text ? JSON.parse(text) : {};
+    if (data.message) message = data.message;
+  } catch {
+    if (text) message = text.slice(0, 200);
+  }
+  const error = new Error(message);
+  error.status = response.status;
+  throw error;
 }
 
 export async function getTextFile(env, filePath) {

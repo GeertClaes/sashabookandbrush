@@ -140,6 +140,43 @@ async function readBody(req) {
   return Buffer.concat(chunks).toString("utf8");
 }
 
+function lastOutputLine(output) {
+  const line = String(output || "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .at(-1);
+  if (!line) return "";
+  return line.length > 240 ? `${line.slice(0, 240)}…` : line;
+}
+
+function syncSuccessMessage(output) {
+  if (/shelf unchanged/i.test(output)) return "Goodreads shelf is already up to date.";
+  if (/kept the previous shelf/i.test(output)) return "Goodreads returned an empty shelf. The previous one was kept.";
+  if (/^Wrote /m.test(output)) return "Goodreads shelf updated on this computer.";
+  return "Goodreads sync finished.";
+}
+
+function runGoodreadsSync() {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, ["scripts/sync-goodreads.mjs"], {
+      cwd: ROOT,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let out = "";
+    child.stdout.on("data", (data) => {
+      out += data;
+    });
+    child.stderr.on("data", (data) => {
+      out += data;
+    });
+    child.on("close", (code) => {
+      if (code === 0) resolve(out.trim());
+      else reject(new Error(lastOutputLine(out) || `Goodreads sync exited ${code}`));
+    });
+  });
+}
+
 function runImport() {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ["scripts/import-goodreads.mjs", "--skip-covers"], {
@@ -588,6 +625,12 @@ order: ${order}
         });
       }
       json(res, 200, { ok: true, unchanged: content === current });
+      return;
+    }
+
+    if (pathname === "/api/sync-goodreads" && req.method === "POST") {
+      const output = await runGoodreadsSync();
+      json(res, 200, { ok: true, message: syncSuccessMessage(output) });
       return;
     }
 

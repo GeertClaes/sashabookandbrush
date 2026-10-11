@@ -2,7 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import type { ImageMetadata } from "astro";
 import { editableCopy } from "../../functions/admin/api/_lib/site-copy.js";
-import live from "../data/goodreads-live.json";
 import site from "../data/site.json";
 import { affiliateLinks, realUrl } from "../lib/affiliates";
 import { coverModule } from "../lib/covers";
@@ -80,69 +79,43 @@ const supplies = (await getCollection("supplies"))
   }))
   .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
-const syncedAt = live.updated
-  ? new Date(live.updated).toLocaleString("en-GB", {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Europe/London",
-    })
-  : "never";
-const stats = [
-  { label: "Goodreads RSS", value: syncedAt },
-  { label: "Currently reading", value: String(live.currentlyReading?.length || 0) },
-  { label: "TBR teaser", value: String(live.upNext?.length || 0) },
-  { label: "Books on site", value: String(books.length) },
-  { label: "Featured books", value: String(books.filter((book) => book.featured).length) },
-  { label: "Paintings", value: String(art.length) },
-  { label: "Tools", value: String(supplies.length) },
-];
-const health = [
-  {
-    label: "Public notes",
-    value: `${books.filter((book) => book.note.trim()).length} / ${books.length}`,
-    tab: "book",
-    queue: "no-note",
-  },
-  {
-    label: "Featured",
-    value: `${books.filter((book) => book.featured).length} / target 6–8`,
-    tab: "book",
-    queue: "featured",
-  },
-  {
-    label: "Currently reading",
-    value: String(books.filter((book) => book.status === "currently-reading").length),
-    tab: "book",
-    queue: "currently-reading",
-  },
-  {
-    label: "Five-star, no note",
-    value: String(books.filter((book) => book.rating === 5 && !book.note.trim()).length),
-    tab: "book",
-    queue: "five-star-no-note",
-  },
-  {
-    label: "Missing ISBN",
-    value: String(books.filter((book) => !book.isbn && !book.isbn10).length),
-    tab: "book",
-    queue: "missing-isbn",
-  },
-  {
-    label: "Tools without Amazon",
-    value: `${supplies.filter((item) => !item.amazon).length} / ${supplies.length}`,
-    tab: "supply",
-  },
-  {
-    label: "Art missing image",
-    value: String(art.filter((piece) => !piece.image).length),
-    tab: "art",
-  },
-  {
-    label: "Art empty note",
-    value: String(art.filter((piece) => !piece.note.trim()).length),
-    tab: "art",
-  },
-];
+function todoItem(count: number, singular: string, plural: string, tab: string, queue = "") {
+  return { count, label: count === 1 ? singular : plural, tab, queue };
+}
+const todos = [
+  todoItem(
+    books.filter((book) => book.rating === 5 && !book.note.trim()).length,
+    "five-star book has no note",
+    "five-star books have no note",
+    "book",
+    "five-star-no-note",
+  ),
+  todoItem(
+    books.filter((book) => !book.isbn && !book.isbn10).length,
+    "book has no ISBN",
+    "books have no ISBN",
+    "book",
+    "missing-isbn",
+  ),
+  todoItem(
+    supplies.filter((item) => !item.amazon).length,
+    "tool has no Amazon link",
+    "tools have no Amazon link",
+    "supply",
+  ),
+  todoItem(
+    art.filter((piece) => !piece.image).length,
+    "painting has no photo",
+    "paintings have no photo",
+    "art",
+  ),
+  todoItem(
+    art.filter((piece) => !piece.note.trim()).length,
+    "painting has an empty note",
+    "paintings have an empty note",
+    "art",
+  ),
+].filter((item) => item.count > 0);
 const affiliateConfig = {
   amazonTag: site.affiliates?.amazonTag || "",
   bookshopUkId: site.affiliates?.bookshopUkId || "",
@@ -160,28 +133,16 @@ const pageCopy = editableCopy(site);
     <div class="mx-auto max-w-6xl px-6 py-12 md:px-12 md:py-16">
       <p class="mb-3 text-xs font-medium tracking-widest text-accent uppercase">Private</p>
       <h1 class="font-display mb-3 text-3xl font-semibold text-foreground">Studio editor</h1>
-      <p class="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        Ratings and progress stay on Goodreads. Notes, covers, featured cards, paintings, and tools live here.
-        Home, About, and Work with me wording is under Pages.
+      <p class="mb-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        Notes, covers, paintings, and tools. Ratings stay on Goodreads.
         {
-          isDev ? (
+          isDev && (
             <>
               {" "}
               Locally, also run <code class="text-foreground">npm run admin</code>.
             </>
-          ) : (
-            <> Sign in with Google if Cloudflare asks.</>
           )
         }
-      </p>
-
-      <p
-        data-status
-        role="status"
-        aria-live="polite"
-        class="sticky top-16 z-40 mb-6 rounded-lg border border-transparent bg-background/95 px-3 py-2 text-sm text-muted-foreground backdrop-blur-sm"
-      >
-        Checking the editor…
       </p>
 
       {
@@ -202,136 +163,114 @@ const pageCopy = editableCopy(site);
         )
       }
 
-      <div data-app class="hidden space-y-8">
-        <div class="sticky top-28 z-30 -mx-2 flex flex-wrap gap-2 bg-background/95 px-2 py-2 backdrop-blur-sm">
-          <button
-            type="button"
-            data-tab="overview"
-            class="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground"
-          >
-            Overview
-          </button>
-          <button
-            type="button"
-            data-tab="book"
-            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
-          >
-            Books
-          </button>
-          <button
-            type="button"
-            data-tab="art"
-            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
-          >
-            Art
-          </button>
-          <button
-            type="button"
-            data-tab="supply"
-            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
-          >
-            Tools
-          </button>
-          <button
-            type="button"
-            data-tab="copy"
-            class="rounded-full border border-border px-4 py-2 text-sm text-foreground"
-          >
-            Pages
-          </button>
+      <div
+        data-editor-bar
+        class="sticky top-16 z-30 -mx-6 mb-8 bg-background/95 px-6 backdrop-blur-sm md:-mx-12 md:px-12"
+      >
+        <p
+          data-status
+          role="status"
+          aria-live="polite"
+          class="py-2 text-sm text-muted-foreground"
+        >
+          Checking the editor…
+        </p>
+        <div
+          data-tabs
+          role="tablist"
+          aria-label="Editor"
+          class="hidden overflow-x-auto border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <button type="button" role="tab" id="tab-overview" data-tab="overview" aria-selected="true" aria-controls="panel-overview" class="shrink-0 border-b-2 border-accent px-4 py-3 text-sm text-foreground">Overview</button>
+          <button type="button" role="tab" id="tab-book" data-tab="book" aria-selected="false" aria-controls="panel-book" class="shrink-0 border-b-2 border-transparent px-4 py-3 text-sm text-muted-foreground">Books</button>
+          <button type="button" role="tab" id="tab-art" data-tab="art" aria-selected="false" aria-controls="panel-art" class="shrink-0 border-b-2 border-transparent px-4 py-3 text-sm text-muted-foreground">Art</button>
+          <button type="button" role="tab" id="tab-supply" data-tab="supply" aria-selected="false" aria-controls="panel-supply" class="shrink-0 border-b-2 border-transparent px-4 py-3 text-sm text-muted-foreground">Tools</button>
+          <button type="button" role="tab" id="tab-copy" data-tab="copy" aria-selected="false" aria-controls="panel-copy" class="shrink-0 border-b-2 border-transparent px-4 py-3 text-sm text-muted-foreground">Pages</button>
         </div>
+      </div>
 
-        <div data-panel="overview" class="space-y-6">
-          <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {
-              stats.map((item) => (
-                <div class="rounded-xl border border-border bg-card px-4 py-3">
-                  <dt class="text-xs tracking-widest text-muted-foreground uppercase">{item.label}</dt>
-                  <dd class="font-display mt-1 text-lg font-semibold text-foreground">{item.value}</dd>
-                </div>
-              ))
-            }
-          </dl>
-
-          <section class="rounded-xl border border-border bg-card p-5">
-            <h2 class="font-display mb-1 text-xl font-semibold text-foreground">Content health</h2>
-            <p class="mb-4 text-sm text-muted-foreground">
-              Queues for notes, featured cards, and missing links. Counts refresh after the next rebuild.
+      <div data-app class="hidden">
+        <div data-panel="overview" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="space-y-10">
+          <section>
+            <p data-activity-site class="text-sm text-foreground">Checking the live site…</p>
+            <p class="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span data-sync-line class="text-sm text-muted-foreground">Checking Goodreads…</span>
+              <button
+                type="button"
+                data-sync-details-toggle
+                aria-expanded="false"
+                aria-controls="sync-details"
+                class="text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+              >
+                Details
+              </button>
+              <button
+                type="button"
+                data-sync-now
+                class="text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground disabled:opacity-60"
+              >
+                Sync now
+              </button>
             </p>
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {
-                health.map((item) => (
-                  <button
-                    type="button"
-                    data-health-tab={item.tab}
-                    data-health-queue={item.queue || ""}
-                    class="rounded-lg border border-border bg-background px-3 py-3 text-left hover:border-primary"
-                  >
-                    <span class="block text-xs tracking-widest text-muted-foreground uppercase">{item.label}</span>
-                    <span class="font-display mt-1 block text-lg font-semibold text-foreground">{item.value}</span>
-                  </button>
-                ))
-              }
-            </div>
-          </section>
-
-          <section class="rounded-xl border border-border bg-card p-5">
-            <h2 class="font-display mb-1 text-xl font-semibold text-foreground">For Instagram</h2>
-            <p class="mb-4 text-sm text-muted-foreground">
-              Copy a page or shop link for a Story sticker or the bio. These always go to the live site.
-            </p>
-            <div class="mb-4 flex flex-wrap gap-2" data-ig-pages></div>
-            <div data-ig-reading class="space-y-2"></div>
-          </section>
-
-          <div class="grid gap-6 lg:grid-cols-2">
-            <section class="rounded-xl border border-border bg-card p-5">
-              <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 class="font-display text-xl font-semibold text-foreground">Goodreads &amp; live site</h2>
-                  <p class="mt-1 text-sm text-muted-foreground">
-                    Reload this status. It does not start a new Goodreads pull — that happens when the site rebuilds.
-                  </p>
-                </div>
+            <div id="sync-details" data-sync-details class="mt-4 hidden rounded-xl border border-border bg-card p-5">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p data-activity-checked class="text-xs text-muted-foreground"></p>
                 <button
                   type="button"
                   data-activity-refresh
-                  class="cursor-pointer rounded border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:border-primary hover:bg-muted hover:text-primary disabled:pointer-events-none disabled:opacity-60"
+                  class="text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground disabled:opacity-60"
                 >
                   Refresh
                 </button>
               </div>
-              <p data-activity-site class="text-sm text-muted-foreground">Checking…</p>
-              <p data-activity-checked class="mt-1 text-xs text-muted-foreground"></p>
-              <div data-activity-sync class="mt-4 rounded-lg border border-border bg-background p-4 text-sm"></div>
-            </section>
+              <div data-activity-sync class="text-sm"></div>
+            </div>
+          </section>
 
-            <section class="rounded-xl border border-border bg-card p-5">
-              <h2 class="font-display mb-1 text-xl font-semibold text-foreground">Recent activity</h2>
-              <p class="mb-4 text-sm text-muted-foreground">Saves from this editor and Goodreads syncs.</p>
-              <ol data-activity-log class="space-y-2 text-sm"></ol>
-            </section>
-          </div>
+          <section>
+            <h2 class="font-display mb-1 text-xl font-semibold text-foreground">To do</h2>
+            <p class="mb-3 text-sm text-muted-foreground">Counts update after the next rebuild.</p>
+            {
+              todos.length ? (
+                <ul class="divide-y divide-border border-y border-border">
+                  {todos.map((item) => (
+                    <li>
+                      <button
+                        type="button"
+                        data-health-tab={item.tab}
+                        data-health-queue={item.queue}
+                        class="flex w-full items-baseline justify-between gap-4 py-3 text-left text-sm text-foreground hover:text-accent"
+                      >
+                        <span>{item.label}</span>
+                        <span class="font-display text-lg font-semibold tabular-nums">{item.count}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="text-sm text-muted-foreground">Nothing waiting.</p>
+              )
+            }
+          </section>
 
-          <details class="rounded-xl border border-border bg-card px-5 py-4 text-sm">
-            <summary class="cursor-pointer font-medium text-muted-foreground">
-              Advanced: import a Goodreads CSV
-            </summary>
-            <p class="mt-3 text-muted-foreground">
-              Only needed when ratings or new finished books should land on the site. Notes, covers, and featured
-              flags are kept.
-            </p>
-            <input type="file" data-csv accept=".csv" class="mt-4 block text-sm" />
-            <button type="button" data-import class="mt-3 rounded border border-border px-4 py-2 text-sm">
-              Import CSV
-            </button>
-            <pre data-log class="mt-3 overflow-x-auto text-xs text-muted-foreground"></pre>
-          </details>
+          <section>
+            <h2 class="font-display mb-4 text-xl font-semibold text-foreground">Recent</h2>
+            <div class="grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3 text-sm">
+              <ol data-activity-log class="col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"></ol>
+              <button
+                type="button"
+                data-activity-more
+                class="col-start-3 mt-4 hidden justify-self-start text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+              >
+                Show all
+              </button>
+            </div>
+          </section>
         </div>
 
-        <div data-panel="book" class="hidden">
+        <div data-panel="book" id="panel-book" role="tabpanel" aria-labelledby="tab-book" class="hidden">
           <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
-          <div class="space-y-4 lg:sticky lg:top-40">
+          <div class="space-y-4 lg:sticky lg:top-32">
           <details class="rounded-xl border border-border bg-card p-4">
             <summary class="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-foreground">
               <span>Home featured</span>
@@ -357,12 +296,12 @@ const pageCopy = editableCopy(site);
               placeholder="Search any title or author…"
               class="mb-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             />
-            <div class="mb-3 flex flex-wrap gap-1.5" data-queues role="tablist" aria-label="Book queues">
-              <button type="button" data-queue="currently-reading" class="rounded-full border border-border px-2.5 py-1 text-xs">Reading <span data-queue-n="currently-reading" class="text-muted-foreground"></span></button>
-              <button type="button" data-queue="featured" class="rounded-full border border-border px-2.5 py-1 text-xs">Featured <span data-queue-n="featured" class="text-muted-foreground"></span></button>
-              <button type="button" data-queue="five-star-no-note" class="rounded-full border border-border px-2.5 py-1 text-xs">5★ no note <span data-queue-n="five-star-no-note" class="text-muted-foreground"></span></button>
-              <button type="button" data-queue="no-note" class="rounded-full border border-border px-2.5 py-1 text-xs">No note <span data-queue-n="no-note" class="text-muted-foreground"></span></button>
-              <button type="button" data-queue="missing-isbn" class="rounded-full border border-border px-2.5 py-1 text-xs">No ISBN <span data-queue-n="missing-isbn" class="text-muted-foreground"></span></button>
+            <div class="mb-3 flex gap-4 overflow-x-auto border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" data-queues role="tablist" aria-label="Book queues">
+              <button type="button" role="tab" data-queue="currently-reading" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">Reading <span data-queue-n="currently-reading"></span></button>
+              <button type="button" role="tab" data-queue="featured" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">Featured <span data-queue-n="featured"></span></button>
+              <button type="button" role="tab" data-queue="five-star-no-note" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">5★ no note <span data-queue-n="five-star-no-note"></span></button>
+              <button type="button" role="tab" data-queue="no-note" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">No note <span data-queue-n="no-note"></span></button>
+              <button type="button" role="tab" data-queue="missing-isbn" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">No ISBN <span data-queue-n="missing-isbn"></span></button>
             </div>
             <p data-queue-count class="mb-2 text-xs text-muted-foreground"></p>
             <ul data-results class="max-h-[min(70vh,40rem)] space-y-1.5 overflow-y-auto text-sm"></ul>
@@ -373,7 +312,7 @@ const pageCopy = editableCopy(site);
           <p data-book-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
             Pick a book to write a note, drop a cover, or feature it on Home.
           </p>
-          <section data-book-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-40">
+          <section data-book-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-32">
             <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 data-book-heading class="font-display text-xl font-semibold text-foreground"></h2>
@@ -490,11 +429,25 @@ const pageCopy = editableCopy(site);
           </section>
           </div>
           </div>
+          <details class="mt-10 rounded-xl border border-border bg-card px-5 py-4 text-sm">
+            <summary class="cursor-pointer font-medium text-muted-foreground">
+              Import a Goodreads CSV
+            </summary>
+            <p class="mt-3 text-muted-foreground">
+              Only needed when ratings or new finished books should land on the site. Notes, covers, and featured
+              flags are kept.
+            </p>
+            <input type="file" data-csv accept=".csv" class="mt-4 block text-sm" />
+            <button type="button" data-import class="mt-3 rounded border border-border px-4 py-2 text-sm">
+              Import CSV
+            </button>
+            <pre data-log class="mt-3 overflow-x-auto text-xs text-muted-foreground"></pre>
+          </details>
         </div>
 
-        <div data-panel="art" class="hidden">
+        <div data-panel="art" id="panel-art" role="tabpanel" aria-labelledby="tab-art" class="hidden">
           <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
-          <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-40">
+          <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-32">
             <div class="mb-4 flex items-center justify-between gap-3">
               <h2 class="font-display text-lg font-semibold text-foreground">Paintings</h2>
               <button
@@ -514,7 +467,7 @@ const pageCopy = editableCopy(site);
           <p data-art-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
             Pick a painting, or add a new one.
           </p>
-          <section data-art-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-40">
+          <section data-art-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-32">
             <label class="mb-4 block text-sm font-medium text-foreground">
               Title
               <input data-art-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
@@ -603,9 +556,9 @@ const pageCopy = editableCopy(site);
           </div>
         </div>
 
-        <div data-panel="supply" class="hidden">
+        <div data-panel="supply" id="panel-supply" role="tabpanel" aria-labelledby="tab-supply" class="hidden">
           <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
-          <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-40">
+          <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-32">
             <div class="mb-4 flex items-center justify-between gap-3">
               <h2 class="font-display text-lg font-semibold text-foreground">Tools</h2>
               <button
@@ -728,10 +681,9 @@ const pageCopy = editableCopy(site);
           </div>
         </div>
 
-        <div data-panel="copy" class="hidden space-y-6">
+        <div data-panel="copy" id="panel-copy" role="tabpanel" aria-labelledby="tab-copy" class="hidden space-y-6">
           <p class="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Rewrite the Home hero, the About page, and Work with me so it sounds like you. Navigation, photos,
-            stats, the reading challenge, and the shop page stay as they are.
+            Home, About, and Work with me. Open a section to edit it. Navigation, photos, and the reading challenge stay as they are.
           </p>
           <div data-copy-root class="space-y-6"></div>
           <button type="button" data-copy-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
@@ -767,6 +719,8 @@ const pageCopy = editableCopy(site);
   let previewUrls = { book: "", art: "", supply: "" };
   let activityTimer = 0;
   let activityLoading = false;
+  let showAllActivity = false;
+  let lastActivity = null;
   let currentTab = "overview";
   let currentQueue = "currently-reading";
   let bookSnapshot = "";
@@ -805,16 +759,36 @@ const pageCopy = editableCopy(site);
     return wrap;
   }
 
-  function copySection(title, hint) {
-    const section = document.createElement("section");
-    section.className = "rounded-xl border border-border bg-card p-5";
-    const heading = document.createElement("h2");
-    heading.className = "font-display mb-1 text-xl font-semibold text-foreground";
+  function copySection(title, hint, copyName) {
+    const section = document.createElement("details");
+    section.className = "rounded-xl border border-border bg-card px-5 pb-5";
+    const summary = document.createElement("summary");
+    summary.className = "flex cursor-pointer list-none items-center justify-between gap-3 py-4";
+    const heading = document.createElement("span");
+    heading.className = "font-display text-xl font-semibold text-foreground";
     heading.textContent = title;
+    summary.append(heading);
+    if (copyName) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.copy = copyName;
+      button.className =
+        "shrink-0 text-sm font-normal text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground";
+      button.textContent = "Copy link";
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const origin = siteOrigin();
+        if (copyName === "home") copyText("Home link", origin);
+        else if (copyName === "about") copyText("About link", `${origin}/about`);
+        else if (copyName === "work") copyText("Work with me link", `${origin}/work`);
+      });
+      summary.append(button);
+    }
     const note = document.createElement("p");
     note.className = "mb-4 text-sm text-muted-foreground";
     note.textContent = hint;
-    section.append(heading, note);
+    section.append(summary, note);
     return section;
   }
 
@@ -975,7 +949,7 @@ const pageCopy = editableCopy(site);
     const work = pageCopy.work || {};
     const credentials = pageCopy.credentials || {};
 
-    const home = copySection("Home", "The big words on the first screen. The buttons stay as they are.");
+    const home = copySection("Home", "The big words on the first screen. The buttons stay as they are.", "home");
     home.append(
       labelledField("Small line above the title", hero.eyebrow, { path: "hero.eyebrow" }),
       labelledField("Headline", hero.headline, { path: "hero.headline" }),
@@ -986,6 +960,7 @@ const pageCopy = editableCopy(site);
     const aboutSection = copySection(
       "About",
       "The bio on the About page. Each box is its own paragraph. Photos and the fact chips stay as they are.",
+      "about",
     );
     aboutSection.append(
       labelledField("Small line above the title", about.eyebrow, { path: "about.eyebrow" }),
@@ -994,7 +969,11 @@ const pageCopy = editableCopy(site);
       listBlock("paragraphs", "Add paragraph", about.paragraphs?.length ? about.paragraphs : [""], (value) => paragraphRow(value)),
     );
 
-    const workSection = copySection("Work with me", "The words on Work with me. The Instagram buttons stay as they are.");
+    const workSection = copySection(
+      "Work with me",
+      "The words on Work with me. The Instagram buttons stay as they are.",
+      "work",
+    );
     workSection.append(
       labelledField("Short summary", pageCopy.workIntro || "", {
         path: "workIntro",
@@ -1036,14 +1015,8 @@ const pageCopy = editableCopy(site);
   function setBanner(kind, message) {
     if (!status) return;
     status.className =
-      "sticky top-16 z-40 mb-6 rounded-lg bg-background/95 px-3 py-2 text-sm backdrop-blur-sm " +
-      (kind === "error"
-        ? "border border-accent text-accent"
-        : kind === "busy"
-          ? "border border-primary text-foreground"
-          : kind === "ok"
-            ? "border border-primary text-foreground"
-            : "border border-transparent text-muted-foreground");
+      "py-2 text-sm " +
+      (kind === "error" ? "text-accent" : kind === "busy" || kind === "ok" ? "text-foreground" : "text-muted-foreground");
     status.innerHTML = message;
   }
 
@@ -1205,20 +1178,90 @@ const pageCopy = editableCopy(site);
     });
   }
 
+  function formatTimeline(value) {
+    const date = new Date(value);
+    if (!value || Number.isNaN(date.getTime())) return { day: "Unknown date", time: "" };
+    return {
+      day: date.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "Europe/London",
+      }),
+      time: date.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/London",
+      }),
+    };
+  }
+
+  function activityItem(event, time, placement) {
+    const failed = event.ok === false;
+    const mark = failed ? "Failed" : event.type === "goodreads" ? "Goodreads" : "Editor";
+    const detailClass = showAllActivity ? "mt-1 text-muted-foreground" : "mt-1 line-clamp-2 text-muted-foreground";
+    const dot = failed ? "border-2 border-accent bg-background" : "bg-accent";
+    const rail = placement === "last" || placement === "only"
+      ? ""
+      : `<span class="absolute ${placement === "first" ? "top-3" : "top-0"} -bottom-2 left-1/2 w-0.5 -translate-x-1/2 bg-muted-foreground" aria-hidden="true"></span>`;
+    const by = event.by ? ` · ${escapeHtml(event.by)}` : "";
+    const detail = event.detail ? `<p class="${detailClass}">${escapeHtml(event.detail)}</p>` : "";
+    return `<li class="group col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"><p class="pt-0.5 text-right text-xs text-muted-foreground tabular-nums">${escapeHtml(time)}</p><div class="relative flex justify-center">${rail}<span class="relative z-10 mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${dot}" aria-hidden="true"></span></div><div class="min-w-0 pb-7 group-last:pb-0"><p class="text-xs text-muted-foreground">${escapeHtml(mark)}${by}</p><p class="font-medium text-foreground">${escapeHtml(event.title)}</p>${detail}</div></li>`;
+  }
+
+  function activityLog(events) {
+    const groups = [];
+    for (const event of events) {
+      const stamp = formatTimeline(event.at);
+      const last = groups.at(-1);
+      if (!last || last.day !== stamp.day) groups.push({ day: stamp.day, items: [] });
+      groups.at(-1).items.push({ event, time: stamp.time });
+    }
+    let index = 0;
+    return groups
+      .map((group, groupIndex) => {
+        const rail = groupIndex > 0
+          ? `<span class="absolute top-0 -bottom-2 left-1/2 w-0.5 -translate-x-1/2 bg-muted-foreground" aria-hidden="true"></span>`
+          : "";
+        const heading = `<li class="col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"><div></div><div class="relative">${rail}</div><p class="${groupIndex === 0 ? "" : "pt-2"} pb-3 text-xs font-medium text-foreground">${escapeHtml(group.day)}</p></li>`;
+        const rows = group.items
+          .map((item) => {
+            const placement = events.length === 1 ? "only" : index === 0 ? "first" : index === events.length - 1 ? "last" : "middle";
+            index += 1;
+            return activityItem(item.event, item.time, placement);
+          })
+          .join("");
+        return heading + rows;
+      })
+      .join("");
+  }
+
   function renderActivity(data) {
+    lastActivity = data;
     const siteEl = document.querySelector("[data-activity-site]");
+    const syncLine = document.querySelector("[data-sync-line]");
     const syncEl = document.querySelector("[data-activity-sync]");
     const logEl = document.querySelector("[data-activity-log]");
+    const more = document.querySelector("[data-activity-more]");
     const site = data.site || {};
     const sync = data.sync || {};
     if (siteEl) {
       if (site.deploymentsAvailable === false && !site.deploymentsError) {
-        siteEl.textContent =
-          "Saves are stored immediately. The public site usually updates within a minute after Cloudflare rebuilds. You do not need extra tokens for that.";
+        siteEl.textContent = "Saves are stored. The public site usually updates within a minute.";
       } else {
-        const when = site.at ? ` · ${formatWhen(site.at)}` : "";
-        const trigger = site.trigger ? ` · ${site.trigger}` : "";
-        siteEl.textContent = `${site.label || "Rebuild status unknown"}${when}${trigger}`;
+        siteEl.textContent = site.label || "Rebuild status unknown";
+      }
+    }
+    if (syncLine) {
+      if (!sync.at) {
+        syncLine.textContent = "No Goodreads sync recorded yet.";
+        syncLine.className = "text-sm text-muted-foreground";
+      } else if (sync.ok) {
+        syncLine.textContent = `Goodreads synced ${formatWhen(sync.at)} · ${sync.readingCount || 0} reading`;
+        syncLine.className = "text-sm text-muted-foreground";
+      } else {
+        syncLine.textContent = `Goodreads sync had a problem · ${formatWhen(sync.at)}`;
+        syncLine.className = "text-sm text-accent";
       }
     }
     if (syncEl) {
@@ -1229,12 +1272,9 @@ const pageCopy = editableCopy(site);
         })
         .join("<br>");
       const changes = (sync.changes || []).map((item) => escapeHtml(item)).join("<br>");
-      const tone = sync.ok ? "text-foreground" : "text-accent";
-      const headline = sync.ok ? "Goodreads sync succeeded" : "Goodreads sync had a problem";
       const extra = sync.warning || sync.error || "";
       syncEl.innerHTML = `
-        <p class="${tone} font-medium">${headline}</p>
-        <p class="mt-1 text-xs text-muted-foreground">${escapeHtml(formatWhen(sync.at))} · ${escapeHtml(String(sync.readingCount || 0))} currently reading · ${escapeHtml(String(sync.upNextCount || 0))} up next</p>
+        <p class="text-xs text-muted-foreground">${escapeHtml(String(sync.readingCount || 0))} currently reading · ${escapeHtml(String(sync.upNextCount || 0))} up next</p>
         ${extra ? `<p class="mt-2 text-muted-foreground">${escapeHtml(extra)}</p>` : ""}
         ${reading ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Now reading</span><br>${reading}</p>` : ""}
         ${changes ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Changes</span><br>${changes}</p>` : `<p class="mt-3 text-muted-foreground">No currently-reading changes in that sync.</p>`}
@@ -1243,16 +1283,16 @@ const pageCopy = editableCopy(site);
     }
     if (logEl) {
       const events = data.events || [];
+      const limit = showAllActivity ? 20 : 3;
       if (!events.length) {
-        logEl.innerHTML = `<li class="text-muted-foreground">No admin or sync events recorded yet.</li>`;
+        logEl.innerHTML = `<li class="col-span-3 text-muted-foreground">No admin or sync events recorded yet.</li>`;
       } else {
-        logEl.innerHTML = events
-          .slice(0, 20)
-          .map((event) => {
-            const mark = event.ok === false ? "Failed" : event.type === "goodreads" ? "Goodreads" : "Editor";
-            return `<li class="rounded-lg border border-border px-3 py-2"><p class="font-medium text-foreground">${escapeHtml(event.title)}</p><p class="mt-0.5 text-xs text-muted-foreground">${escapeHtml(mark)} · ${escapeHtml(formatWhen(event.at))}${event.by ? ` · ${escapeHtml(event.by)}` : ""}</p>${event.detail ? `<p class="mt-1 text-muted-foreground">${escapeHtml(event.detail)}</p>` : ""}</li>`;
-          })
-          .join("");
+        logEl.innerHTML = activityLog(events.slice(0, limit));
+      }
+      if (more) {
+        const hiddenCount = Math.min(events.length, 20) - 3;
+        more.classList.toggle("hidden", hiddenCount <= 0 || showAllActivity);
+        more.textContent = hiddenCount > 0 ? `Show all (${Math.min(events.length, 20)})` : "Show all";
       }
     }
   }
@@ -1429,8 +1469,10 @@ const pageCopy = editableCopy(site);
     renderArtList();
     renderSupplyList();
     renderFeaturedBoard();
-    renderInstagram();
     renderCopyEditor();
+    const tabs = document.querySelector("[data-tabs]");
+    tabs?.classList.remove("hidden");
+    tabs?.classList.add("flex");
     if (status) {
       if (email && email !== "local") {
         status.textContent = `Signed in as ${email}. Saves go live after the site rebuilds (usually a minute).`;
@@ -1496,11 +1538,11 @@ const pageCopy = editableCopy(site);
     currentTab = kind;
     document.querySelectorAll("[data-tab]").forEach((button) => {
       const on = button.dataset.tab === kind;
-      button.classList.toggle("bg-primary", on);
-      button.classList.toggle("text-primary-foreground", on);
-      button.classList.toggle("border", !on);
-      button.classList.toggle("border-border", !on);
-      button.classList.toggle("rounded-full", true);
+      button.setAttribute("aria-selected", on ? "true" : "false");
+      button.classList.toggle("border-accent", on);
+      button.classList.toggle("text-foreground", on);
+      button.classList.toggle("border-transparent", !on);
+      button.classList.toggle("text-muted-foreground", !on);
     });
     document.querySelectorAll("[data-panel]").forEach((panel) => {
       panel.classList.toggle("hidden", panel.dataset.panel !== kind);
@@ -1628,36 +1670,6 @@ const pageCopy = editableCopy(site);
     return `<button type="button" class="rounded border border-border px-2.5 py-1 text-xs text-foreground hover:border-primary" data-copy-value="${escapeHtml(value)}" data-copy-label="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
   }
 
-  function renderInstagram() {
-    const origin = siteOrigin();
-    const pages = document.querySelector("[data-ig-pages]");
-    const reading = document.querySelector("[data-ig-reading]");
-    if (pages) {
-      const links = [
-        ["Home", origin],
-        ["Currently reading", `${origin}/#currently-reading`],
-        ["Books", `${origin}/recommendations`],
-        ["Art", `${origin}/art`],
-        ["Tools", `${origin}/art#supplies`],
-        ["Work with me", `${origin}/work`],
-      ];
-      pages.innerHTML = links.map(([label, href]) => copyChip(label, href)).join("");
-    }
-    if (!reading) return;
-    const current = books.filter((book) => book.status === "currently-reading");
-    if (!current.length) {
-      reading.innerHTML = `<p class="text-sm text-muted-foreground">No currently-reading titles on the site.</p>`;
-      return;
-    }
-    reading.innerHTML = `<p class="mb-2 text-xs font-medium tracking-widest text-accent uppercase">Reading now</p>${current
-      .map((book) => {
-        const buy = previewBuy(book);
-        const page = `${origin}/books/${book.slug}`;
-        return `<div class="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2"><span class="min-w-0 flex-1 text-sm font-medium text-foreground">${escapeHtml(book.title)}</span>${copyChip("Page", page)}${copyChip("Bookshop", buy.bookshop)}${copyChip("Amazon", buy.amazon)}</div>`;
-      })
-      .join("")}`;
-  }
-
   function nextFeaturedOrder() {
     const max = books.reduce((high, book) => {
       if (!book.featured) return high;
@@ -1719,9 +1731,11 @@ const pageCopy = editableCopy(site);
   function paintQueue() {
     document.querySelectorAll("[data-queue]").forEach((button) => {
       const on = button.dataset.queue === currentQueue && searchQuery().length < 2;
-      button.classList.toggle("bg-primary", on);
-      button.classList.toggle("text-primary-foreground", on);
-      button.classList.toggle("border-border", !on);
+      button.setAttribute("aria-selected", on ? "true" : "false");
+      button.classList.toggle("border-accent", on);
+      button.classList.toggle("text-foreground", on);
+      button.classList.toggle("border-transparent", !on);
+      button.classList.toggle("text-muted-foreground", !on);
     });
     document.querySelectorAll("[data-queue-n]").forEach((el) => {
       el.textContent = String(queueCount(el.getAttribute("data-queue-n") || ""));
@@ -2166,8 +2180,51 @@ const pageCopy = editableCopy(site);
     };
   }
 
+  document.querySelector("[data-tabs]")?.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    const tabs = [...document.querySelectorAll("[data-tabs] [data-tab]")];
+    const index = tabs.findIndex((button) => button.getAttribute("aria-selected") === "true");
+    if (index < 0) return;
+    const next = event.key === "ArrowRight" ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
+    event.preventDefault();
+    tabs[next].focus();
+    setTab(tabs[next].dataset.tab);
+  });
+
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => setTab(button.dataset.tab));
+  });
+
+  document.querySelector("[data-sync-details-toggle]")?.addEventListener("click", () => {
+    const panel = document.querySelector("[data-sync-details]");
+    const toggle = document.querySelector("[data-sync-details-toggle]");
+    if (!panel || !toggle) return;
+    const open = panel.classList.toggle("hidden") === false;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.textContent = open ? "Hide details" : "Details";
+  });
+
+  document.querySelector("[data-sync-now]")?.addEventListener("click", async () => {
+    const button = document.querySelector("[data-sync-now]");
+    if (!button || button.disabled) return;
+    button.disabled = true;
+    const idle = button.textContent;
+    button.textContent = "Syncing…";
+    try {
+      const result = await call("/sync-goodreads", { method: "POST", body: "{}" });
+      setBanner("ok", escapeHtml(result.message || "Sync started."));
+      await loadActivity({ manual: true });
+    } catch (error) {
+      setBanner("error", escapeHtml(error instanceof Error ? error.message : "Sync failed."));
+    } finally {
+      button.disabled = false;
+      button.textContent = idle;
+    }
+  });
+
+  document.querySelector("[data-activity-more]")?.addEventListener("click", () => {
+    showAllActivity = true;
+    if (lastActivity) renderActivity(lastActivity);
   });
 
   document.querySelectorAll("[data-queue]").forEach((button) => {

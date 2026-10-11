@@ -59,7 +59,7 @@ Mark tokens as **Secret**.
 
 1. On GitHub, open **Settings → Developer settings → Personal access tokens → Fine-grained tokens** (your user settings, not the repo).
 2. Resource owner: the user who owns `GeertClaes/sashabookandbrush`. Repository access: **Only select repositories** → this repo.
-3. Permissions: **Contents → Read and write**.
+3. Permissions: **Contents → Read and write**. Optional: **Actions → Read and write**, so Overview → **Sync now** can start the workflow directly. Without that, Sync now commits a small request file and the workflow starts from that push.
 4. Also in the repo: **Settings → Actions → General → Workflow permissions → Read and write** (CSV import Action commits back).
 
 | Variable | Example | Purpose |
@@ -211,13 +211,13 @@ Then refresh the Books page. Shelf, rating, genre, year read, and sort are indep
 
 ### Library editor (`/admin`)
 
-Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. Tabs are **Overview**, **Books**, **Art**, and **Tools**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
+Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. Tabs are **Overview**, **Books**, **Art**, **Tools**, and **Pages**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
 
 On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` opens. Saves commit to GitHub; Pages rebuilds (usually about a minute). A CSV upload writes `data/export.csv`, then [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) runs `import-goodreads.mjs --skip-covers` and commits library files.
 
 Set Access, GitHub, and optional rebuild-status variables as described in [Environment configuration](#environment-configuration). API writes fail closed until Access and the GitHub token are set.
 
-**Overview** shows the last Goodreads RSS sync (success/fail, currently reading, what changed) and a log of editor saves. Saves hit GitHub immediately; the public site updates when Pages finishes rebuilding (usually about a minute).
+**Overview** is a status line (live site and the last Goodreads sync), a short to-do list, and the last few saves. **Sync now** fetches the shelf: on this computer it runs immediately; on the live site it starts the Sync Goodreads Action. Shelf titles and the full log sit behind Details and Show all. CSV import is at the bottom of Books. Saves hit GitHub immediately; the public site updates when Pages finishes rebuilding (usually about a minute).
 
 Locally:
 
@@ -296,7 +296,7 @@ The home shelf and progress % come from public Goodreads RSS (`npm run sync:good
 
 The production site is static. A new shelf is published only when Pages rebuilds.
 
-The **Sync Goodreads** Action (`.github/workflows/sync-goodreads.yml`) fetches the RSS at 23:15 UTC from GitHub's runners, which Goodreads allows. It commits `src/data/goodreads-live.json` when currently reading or up next changes. A commit made with the Actions token does not start a new Actions run.
+The **Sync Goodreads** Action (`.github/workflows/sync-goodreads.yml`) fetches the RSS at 23:15 UTC from GitHub's runners, which Goodreads allows. **Sync now** on `/admin` starts that same Action. It commits `src/data/goodreads-live.json` when currently reading or up next changes. A commit made with the Actions token does not start a new Actions run.
 
 Build command: `npm run build`. Create the deploy hook and Worker secret as in [Environment configuration](#environment-configuration) → **Cron Worker**.
 

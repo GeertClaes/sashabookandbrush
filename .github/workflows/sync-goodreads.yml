@@ -5,6 +5,11 @@ on:
     # 23:15 UTC. The Pages cron worker at 00:00 UTC then builds main and publishes this file.
     - cron: "15 23 * * *"
   workflow_dispatch:
+  push:
+    # Admin "Sync now" writes this file when the GitHub token cannot dispatch workflows.
+    branches: [main]
+    paths:
+      - .github/goodreads-sync-request
 
 permissions:
   contents: write
