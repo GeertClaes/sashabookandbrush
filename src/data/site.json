@@ -56,10 +56,10 @@
     "headline": "Hi, I'm Sasha.",
     "headlineItalic": "I paint too.",
     "paragraphs": [
-      "I'm a Bookstagrammer, painter, and mental health nurse — an Aussie living in Wales, documenting books and art in one place as @sashabookandbrush. This site is the quieter home for recommendations that don't have to fight the algorithm.",
-      "My shelves lean romantasy: Sarah J. Maas, Rebecca Yarros, Rebecca Ross, dragons, fae, and morally complicated people I would not survive standing next to. I also wander into contemporary and the odd literary title when I need air — Evelyn Hugo on a garden bench, DeLillo on the art desk between brushes.",
-      "When I'm not reading, I'm usually painting, rearranging the nook, or being supervised by Dobby, who has opinions about which blanket is his. The checkered Kindle case covered in stickers is a personality trait at this point.",
-      "I'm an ARC reader and a Rattle the Stars PR influencer, which means you'll see early copies and gifted titles flagged honestly. If I post it here, it's because I actually liked it — not because someone asked me to."
+      "Hi, I’m Sasha, an Australian living in Wales, a mental health nurse, lifelong reader, artist, and bookstragrammer @sashabookandbrush. My interests have always been rooted in creativity, storytelling and the things that inspire me, and this website is a place to bring those passions together.",
+      "Reading has always been an important part of my life, with a particular love for fantasy, romantasy, romance and historical fiction. I enjoy immersive worlds, complex characters and stories that stay with me long after the final page. Alongside reading for pleasure, I also read advance reader copies (ARCs), sharing reviews, recommendations and honest thoughts on upcoming releases. I love discovering new authors, exploring different genres and connecting with other readers through a shared appreciation for books.",
+      "Art has been part of my life since childhood and remains an important part of who I am. I draw inspiration from nature, mythology, fantasy and literature, exploring how colour, atmosphere and storytelling can come together through painting. My work is an ongoing exploration of ideas, techniques and creative expression, with a particular interest in bringing the worlds and feelings that inspire me into my own art.",
+      "This website is a space for me to delve a little deeper into the things I love, beyond what social media allows. I want to share more detailed book reviews and recommendations, explore my artistic process, and talk about the tools, materials and techniques I use in my work. Whether it’s sharing my thoughts on a recent read, documenting the journey behind a painting or discussing the products and tools that help bring my ideas to life, this is a place to explore my interests in more detail, share what I learn along the way and connect with others who share the same passions."
     ]
   },
   "readingChallenge": {
@@ -124,12 +124,12 @@
     "eyebrow": "Say hello",
     "headline": "If I'd lend it to a friend,",
     "headlineItalic": "I'll post it.",
-    "lede": "I'm Sasha: romantasy, special editions, and the paintings I make between chapters. Publishers, authors, and bookish brands are welcome — as long as the title actually fits the shelves.",
-    "note": "I'm an Aussie reading in Wales, usually with Dobby stealing the good blanket and a sticker-covered Kindle nearby. I don't do fake enthusiasm. If it shows up on the grid or on this site, I liked it.",
-    "photoCaption": "The nook, the lamps, the shelves. This is where your book would sit.",
+    "lede": "I’m Sasha, an Australian book lover and artist based in Wales, sharing my passion for reading, creativity and all things bookish. Through my website and social media, I create content featuring book reviews, ARCs, reading recommendations and art inspired by the stories I love. I’m always interested in connecting with authors, publishers and brands who share my interests and would love to explore opportunities to work together.",
+    "note": "",
+    "photoCaption": "My special place",
     "offersEyebrow": "What I like making",
-    "offersHeadline": "The same energy as the grid",
-    "offersLede": "Small, bookish, a bit painterly. If it wouldn't look at home next to a Maas stack or a wet canvas, it probably isn't for me — and that's alright.",
+    "offersHeadline": "",
+    "offersLede": "",
     "packagesEyebrow": "If we work together",
     "packagesHeadline": "A few ways it can look",
     "packagesLede": "These are starting points, not a menu I recite. Tell me the book and we'll shape it around what actually suits.",
@@ -140,19 +140,15 @@
   "offers": [
     {
       "title": "Early copies",
-      "desc": "I'll read it like a reader, not a billboard. Honest thoughts on Instagram and here, clearly flagged as an ARC."
+      "desc": "I’m always excited to discover new books and work with authors and publishers to share upcoming releases with my audience. I welcome ARC opportunities across fantasy, romantasy, romance and historical fiction, as well as other genres that catch my interest. I aim to provide honest, thoughtful reviews and engaging bookish content to help introduce readers to new stories and authors. If you’re interested in working together, I’d love to hear from you!"
     },
     {
-      "title": "Pretty posts",
-      "desc": "Reels, Stories, and feed photos from the nook. Your book, my lighting, my voice — no scripted gushing."
+      "title": "Content Collaborations",
+      "desc": "I’m open to collaborating with authors, publishers and brands to create engaging Instagram content that showcases books, products and creative projects. From dedicated posts and reels to stories and bookish features, I love finding ways to share the things I’m passionate about with my audience. If you’re looking to promote an upcoming release, showcase a product or explore a creative partnership, I’d love to hear your ideas and discuss how we could work together."
     },
     {
-      "title": "Gifted, if it fits",
-      "desc": "Send it if it belongs next to the TBR. I'll share it because I want to, not because I have to."
-    },
-    {
-      "title": "Books and a little paint",
-      "desc": "The brush in the name is real. Painted stills, wet acrylics in the frame, the studio between chapters."
+      "title": "Gifted Collaborations",
+      "desc": "I love discovering new bookish products, creative tools and unique finds that inspire my reading and art. I’m always happy to hear from brands and small businesses interested in gifting opportunities, particularly those aligned with my interests in books, fantasy, art and creativity. If you think your products would be a good fit for my content, I’d love to connect and learn more about what you do."
     }
   ],
   "packages": [

@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-11T20:00:44.286Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated page text",
+      "detail": "Home, About, and Work with me update after the site rebuilds (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-11T13:35:34.687Z",
       "type": "goodreads",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Photo for mirror",
       "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:45:59.644Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated Mirror",
-      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]
