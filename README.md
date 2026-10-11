@@ -68,7 +68,7 @@ Mark tokens as **Secret**.
 | `GITHUB_REPO` | `GeertClaes/sashabookandbrush` | Repo the admin API commits to |
 | `GITHUB_BRANCH` | `main` | Branch to commit to |
 
-Goodreads RSS is pulled during the Pages **build**. It updates the live site only. It does **not** commit back to GitHub, so those `[skip ci]` log commits should no longer appear on `main`.
+Goodreads RSS is pulled by the **Sync Goodreads** GitHub Action (23:15 UTC). That commits `src/data/goodreads-live.json` only when the shelf changes. The Pages build does not call Goodreads: Cloudflare's build network is rejected with HTTP 403. The 00:00 UTC cron Worker then rebuilds `main` and publishes the committed file.
 
 #### Cloudflare Access (lock `/admin` to Google)
 
@@ -125,7 +125,7 @@ npx wrangler secret put CLOUDFLARE_PAGES_DEPLOY_HOOK --config workers/rebuild-pa
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
-| `CLOUDFLARE_PAGES_DEPLOY_HOOK` | Worker secret (`wrangler secret put`) | POSTed daily so Pages rebuilds and refreshes currently reading |
+| `CLOUDFLARE_PAGES_DEPLOY_HOOK` | Worker secret (`wrangler secret put`) | POSTed daily so Pages rebuilds `main` |
 
 Do not add the deploy-hook URL to the Pages env vars list.
 
@@ -136,9 +136,9 @@ Do not add the deploy-hook URL to the Pages env vars list.
 | Local site | none |
 | Local `/admin` | `npm run admin`; optional `ADMIN_PASSWORD` |
 | Live `/admin` saves | Access app + `ADMIN_GITHUB_TOKEN`, `GITHUB_REPO`, `CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD` |
-| Goodreads log on Overview | None extra — it is written during the Pages build |
+| Goodreads log on Overview | The Sync Goodreads Action commits it. Optional GitHub secret `CLOUDFLARE_PAGES_DEPLOY_HOOK` (the same deploy-hook URL) publishes that commit immediately |
 | Live rebuild spinner on Overview | `CF_ACCOUNT_ID` + `CF_API_TOKEN` |
-| Cron currently-reading refresh | Worker secret `CLOUDFLARE_PAGES_DEPLOY_HOOK` |
+| Nightly currently-reading publish | Worker secret `CLOUDFLARE_PAGES_DEPLOY_HOOK`, and the Sync Goodreads Action on `main` |
 | Shop email waitlist | `PUBLIC_FORMSPREE_ID` on Pages (and locally if you test it) |
 
 ## How to update content
@@ -205,7 +205,7 @@ node scripts/import-goodreads.mjs "C:\path\to\export.csv"
 npm run sync:goodreads
 ```
 
-`npm run sync:goodreads` pulls public RSS (currently reading, progress, a short TBR) into `src/data/goodreads-live.json` without a CSV. Production uses the Cloudflare Worker cron below.
+`npm run sync:goodreads` pulls public RSS (currently reading, progress, a short TBR) into `src/data/goodreads-live.json` without a CSV. Production runs that script from GitHub Actions, not from the Cloudflare build.
 
 Then refresh the Books page. Shelf, rating, genre, year read, and sort are independent. Covers are downloaded into `src/assets/covers/` so Astro can optimize them. Review HTML such as `<br/>` is turned into real line breaks.
 
@@ -290,17 +290,19 @@ The footer already includes an affiliate disclosure.
 
 The home shelf and progress % come from public Goodreads RSS (`npm run sync:goodreads`). That also writes a short “Up next” TBR teaser. The full library (ratings, reviews, covers) still needs a CSV import.
 
-`npm run build` runs the RSS sync first, then Astro. If Goodreads is down, the last `src/data/goodreads-live.json` is kept so the deploy still works. The result is baked into the site (and `/data/goodreads-live.json` for Overview). It is not committed to git. On production, a Cloudflare Worker cron triggers that rebuild.
+`npm run build` runs the RSS sync first, then Astro. On Cloudflare Pages (`CF_PAGES=1`) the sync does not call Goodreads. It copies the committed `src/data/goodreads-live.json` into the site. Locally, and in GitHub Actions, it fetches the feeds. If Goodreads is down, the last shelf is kept.
 
 ### Cloudflare Pages
 
-The production site is static. RSS cannot update the live HTML unless Pages rebuilds. Use a **Cloudflare Worker cron**, not GitHub Actions.
+The production site is static. A new shelf is published only when Pages rebuilds.
 
-Build command: `npm run build` (includes the Goodreads RSS sync). Create the deploy hook and Worker secret as in [Environment configuration](#environment-configuration) → **Cron Worker**.
+The **Sync Goodreads** Action (`.github/workflows/sync-goodreads.yml`) fetches the RSS at 23:15 UTC from GitHub's runners, which Goodreads allows. It commits `src/data/goodreads-live.json` when currently reading or up next changes. A commit made with the Actions token does not start a new Actions run.
 
-The Worker runs daily at 00:00 UTC (`0 0 * * *`). Each run POSTs the hook; Pages rebuilds currently reading / progress / up next. Free Pages is 500 builds/month; daily cron is about 30. Do not `wrangler deploy` with a different Worker `name` — that would create a duplicate.
+Build command: `npm run build`. Create the deploy hook and Worker secret as in [Environment configuration](#environment-configuration) → **Cron Worker**.
 
-Do not also schedule a GitHub Action against the same hook.
+The Worker runs daily at 00:00 UTC (`0 0 * * *`) and POSTs that hook, so the committed shelf goes live about 45 minutes after the fetch. Free Pages is 500 builds/month; the daily cron is about 30. Do not `wrangler deploy` with a different Worker `name` — that would create a duplicate.
+
+To publish a manual run immediately, add the same deploy-hook URL as a GitHub Actions secret named `CLOUDFLARE_PAGES_DEPLOY_HOOK`. Without that secret, wait for the 00:00 UTC cron. Do not add a second scheduled Action that calls the hook.
 
 CSV can also be uploaded on `/admin`. That commits `data/export.csv`; GitHub Actions imports it with `--skip-covers` and Pages rebuilds again. New covers can be added in the editor afterwards, or run `node scripts/import-goodreads.mjs --missing-covers` locally.
 

@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-11T13:35:34.687Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "4 currently reading, 8 up next. Started Rebel Witch (The Crimson Moth, #2); Started Slashed Beauties; Left currently reading: Free Falling (Sweetwater Peak, #2); Left currently reading: The Secret Paris Ingredient",
+      "by": "local"
+    },
+    {
       "at": "2026-09-19T16:23:37.677Z",
       "type": "admin",
       "ok": true,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Updated Mirror",
-      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:44:12.988Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated The Mountains of Velaris",
       "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }

@@ -137,7 +137,30 @@ async function writeLive(payload) {
 }
 
 const previous = await readJson(OUT, { currentlyReading: [], upNext: [] });
-const source = process.env.CF_PAGES === "1" ? "pages-build" : "local";
+const source =
+  process.env.GITHUB_ACTIONS === "true" ? "github-actions" : process.env.CF_PAGES === "1" ? "pages-build" : "local";
+
+function shelfSnapshot(data) {
+  return JSON.stringify({
+    currentlyReading: data?.currentlyReading || [],
+    upNext: data?.upNext || [],
+  });
+}
+
+// Cloudflare's build network is rejected by Goodreads' CloudFront (HTTP 403).
+// The scheduled GitHub Action fetches the feeds and commits this file.
+// The Pages build only publishes that committed copy.
+if (process.env.CF_PAGES === "1") {
+  try {
+    const text = await readFile(OUT, "utf8");
+    await mkdir(path.dirname(PUBLIC_OUT), { recursive: true });
+    await writeFile(PUBLIC_OUT, text.endsWith("\n") ? text : `${text}\n`, "utf8");
+    console.log("Using the committed Goodreads shelf.");
+  } catch {
+    console.warn("No committed Goodreads shelf to publish.");
+  }
+  process.exit(0);
+}
 
 function lastSyncFields({ ok, changes = [], warning = "", error = "", currentlyReading, upNext }) {
   return {
@@ -171,6 +194,7 @@ try {
   if (currentlyReading.length === 0 && previous.currentlyReading?.length) {
     const warning = "Goodreads RSS returned no currently-reading books; kept the previous shelf.";
     console.warn(warning);
+    if (previous.lastSync?.ok === false && previous.lastSync?.warning === warning) process.exit(0);
     const lastSync = lastSyncFields({
       ok: false,
       warning,
@@ -207,6 +231,11 @@ try {
     upNext,
   };
 
+  if (shelfSnapshot(previous) === shelfSnapshot(payload) && previous.lastSync?.ok !== false) {
+    console.log("Goodreads shelf unchanged.");
+    process.exit(0);
+  }
+
   await writeLive(payload);
   const changeText = changes.length ? changes.join("; ") : "No changes to currently reading.";
   await writeActivity({
@@ -221,6 +250,11 @@ try {
   );
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
+  if (previous.lastSync?.ok === false && previous.lastSync?.error === message) {
+    console.warn(`Goodreads sync failed again (${message}).`);
+    if (ALLOW_FAIL) process.exit(0);
+    process.exit(1);
+  }
   const lastSync = lastSyncFields({
     ok: false,
     error: message,

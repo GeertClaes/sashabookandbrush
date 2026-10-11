@@ -3,6 +3,7 @@ main = "index.js"
 compatibility_date = "2026-09-08"
 workers_dev = false
 
-# Daily at 00:00 UTC. Matches the live Worker. Do not go back to 6-hourly.
+# Daily at 00:00 UTC, after the Goodreads Action (23:15 UTC) has committed the shelf.
+# Matches the live Worker. Do not go back to 6-hourly.
 [triggers]
 crons = ["0 0 * * *"]

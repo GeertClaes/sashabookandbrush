@@ -1,26 +1,27 @@
 {
-  "updated": "2026-09-25T10:53:52.371Z",
+  "updated": "2026-10-11T13:35:34.650Z",
   "lastSync": {
-    "at": "2026-09-25T10:53:52.371Z",
+    "at": "2026-10-11T13:35:34.650Z",
     "ok": true,
-    "source": "pages-build",
+    "source": "local",
     "readingCount": 4,
     "upNextCount": 8,
     "changes": [
-      "Started Free Falling (Sweetwater Peak, #2)",
-      "A Court of Wings and Ruin (A Court of Thorns and Roses, #3): — → 40%",
-      "Left currently reading: Heartless Hunter (The Crimson Moth, #1)"
+      "Started Rebel Witch (The Crimson Moth, #2)",
+      "Started Slashed Beauties",
+      "Left currently reading: Free Falling (Sweetwater Peak, #2)",
+      "Left currently reading: The Secret Paris Ingredient"
     ],
     "warning": null,
     "error": null,
     "reading": [
       {
-        "title": "Free Falling (Sweetwater Peak, #2)",
+        "title": "Rebel Witch (The Crimson Moth, #2)",
         "progress": null
       },
       {
-        "title": "The Secret Paris Ingredient",
-        "progress": null
+        "title": "Slashed Beauties",
+        "progress": 30
       },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
@@ -34,20 +35,20 @@
   },
   "currentlyReading": [
     {
-      "title": "Free Falling (Sweetwater Peak, #2)",
-      "author": "Lyla Sage",
-      "goodreadsId": "249550125",
-      "isbn": "0593977793",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1773803052l/249550125._SY475_.jpg",
+      "title": "Rebel Witch (The Crimson Moth, #2)",
+      "author": "Kristen Ciccarelli",
+      "goodreadsId": "60217777",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1713462814l/60217777._SY475_.jpg",
       "progress": null
     },
     {
-      "title": "The Secret Paris Ingredient",
-      "author": "M.H. Cali",
-      "goodreadsId": "257267566",
-      "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1787341557l/257267566._SY475_.jpg",
-      "progress": null
+      "title": "Slashed Beauties",
+      "author": "A. Rushby",
+      "goodreadsId": "222925674",
+      "isbn": "0593954645",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1742609954l/222925674._SY475_.jpg",
+      "progress": 30
     },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
@@ -67,6 +68,13 @@
     }
   ],
   "upNext": [
+    {
+      "title": "The Secret Paris Ingredient",
+      "author": "M.H. Cali",
+      "goodreadsId": "257267566",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1787341557l/257267566._SY475_.jpg"
+    },
     {
       "title": "The Knave and the Moon (The Stonewater Kingdom, #2)",
       "author": "Rachel Gillig",
@@ -115,13 +123,6 @@
       "goodreadsId": "238286481",
       "isbn": "031659492X",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761344174l/238286481._SY475_.jpg"
-    },
-    {
-      "title": "The Lost Book of Elizabeth Barton",
-      "author": "Jennifer N. Brown",
-      "goodreadsId": "231126959",
-      "isbn": "1250383595",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1750428558l/231126959._SY475_.jpg"
     }
   ]
 }
