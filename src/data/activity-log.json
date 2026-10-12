@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T02:24:04.954Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "3 currently reading, 8 up next. Left currently reading: Rebel Witch (The Crimson Moth, #2)",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-10-11T20:02:51.927Z",
       "type": "admin",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Photo for studio-still",
       "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:51:50.806Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated Frodo Baggins",
-      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]

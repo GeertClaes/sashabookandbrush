@@ -1,24 +1,17 @@
 {
-  "updated": "2026-10-11T13:35:34.650Z",
+  "updated": "2026-10-12T02:24:04.952Z",
   "lastSync": {
-    "at": "2026-10-11T13:35:34.650Z",
+    "at": "2026-10-12T02:24:04.952Z",
     "ok": true,
-    "source": "local",
-    "readingCount": 4,
+    "source": "github-actions",
+    "readingCount": 3,
     "upNextCount": 8,
     "changes": [
-      "Started Rebel Witch (The Crimson Moth, #2)",
-      "Started Slashed Beauties",
-      "Left currently reading: Free Falling (Sweetwater Peak, #2)",
-      "Left currently reading: The Secret Paris Ingredient"
+      "Left currently reading: Rebel Witch (The Crimson Moth, #2)"
     ],
     "warning": null,
     "error": null,
     "reading": [
-      {
-        "title": "Rebel Witch (The Crimson Moth, #2)",
-        "progress": null
-      },
       {
         "title": "Slashed Beauties",
         "progress": 30
@@ -34,14 +27,6 @@
     ]
   },
   "currentlyReading": [
-    {
-      "title": "Rebel Witch (The Crimson Moth, #2)",
-      "author": "Kristen Ciccarelli",
-      "goodreadsId": "60217777",
-      "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1713462814l/60217777._SY475_.jpg",
-      "progress": null
-    },
     {
       "title": "Slashed Beauties",
       "author": "A. Rushby",
