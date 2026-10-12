@@ -5,7 +5,7 @@ cover: "wild-reverence.jpg"
 note: "Lush, a little devastating, and very much my kind of mythic romance. If you liked Divine Rivals, start here next."
 rating: 5
 genre: "Fantasy"
-featured: true
+featured: false
 order: 1
 status: "read"
 isbn: "9781250373359"
