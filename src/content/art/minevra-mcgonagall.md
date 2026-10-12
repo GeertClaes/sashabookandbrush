@@ -1,8 +1,8 @@
 ---
 title: "Minevra McGonagall"
-medium: "Acrylic"
-note: ""
+medium: "Procreate"
 featured: false
 order: 5
 image: "minevra-mcgonagall.jpeg"
+available: false
 ---
