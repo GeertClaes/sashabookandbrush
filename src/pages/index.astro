@@ -1,5 +1,6 @@
 ---
 import AffiliateButtons from "../components/AffiliateButtons.astro";
+import InlineText from "../components/InlineText.astro";
 import ArtCard from "../components/ArtCard.astro";
 import BookCard from "../components/BookCard.astro";
 import CoverImage from "../components/CoverImage.astro";
@@ -108,7 +109,7 @@ const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Bro
         }
       </h1>
       <p class="mb-10 max-w-lg text-lg leading-relaxed whitespace-pre-line text-parchment">
-        {site.hero.lede}
+        <InlineText text={site.hero.lede} />
       </p>
       <div class="flex flex-wrap gap-4">
         <a

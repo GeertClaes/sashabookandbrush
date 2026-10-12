@@ -1,0 +1,26 @@
+---
+import { linkParts } from "../lib/inline-links";
+
+interface Props {
+  text?: string;
+}
+
+const parts = linkParts(Astro.props.text || "");
+---
+
+{
+  parts.map((part) =>
+    "href" in part ? (
+      <a
+        href={part.href}
+        class="underline decoration-current/70 underline-offset-2 hover:decoration-current"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {part.label}
+      </a>
+    ) : (
+      part.text
+    ),
+  )
+}

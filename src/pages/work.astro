@@ -1,11 +1,13 @@
 ---
+import InlineText from "../components/InlineText.astro";
 import site from "../data/site.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { plainInline } from "../lib/inline-links";
 
 const { work, workIntro, stats, offers, packages, credentials, instagram, handle, about } = site;
 ---
 
-<BaseLayout title="Work with me" description={workIntro}>
+<BaseLayout title="Work with me" description={plainInline(workIntro)}>
   <div class="min-h-screen bg-background">
     <div class="mx-auto max-w-5xl px-6 py-16 md:px-12">
       <div class="grid items-start gap-12 md:grid-cols-5">
@@ -29,7 +31,7 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
             </div>
             {
               work.photoCaption && (
-                <p class="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{work.photoCaption}</p>
+                <p class="text-sm leading-relaxed whitespace-pre-line text-muted-foreground"><InlineText text={work.photoCaption} /></p>
               )
             }
           </div>
@@ -53,8 +55,8 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
             }
           </h1>
           <div class="max-w-none space-y-4 leading-relaxed text-foreground">
-            <p class="whitespace-pre-line">{work.lede}</p>
-            {work.note && <p class="whitespace-pre-line">{work.note}</p>}
+            <p class="whitespace-pre-line"><InlineText text={work.lede} /></p>
+            {work.note && <p class="whitespace-pre-line"><InlineText text={work.note} /></p>}
           </div>
           <a
             href={instagram}
@@ -93,7 +95,7 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
               <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">{work.offersHeadline}</h2>
             )}
             {work.offersLede && (
-              <p class="mb-8 max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground">{work.offersLede}</p>
+              <p class="mb-8 max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground"><InlineText text={work.offersLede} /></p>
             )}
             {
               offers.length > 0 && (
@@ -101,7 +103,7 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
                   {offers.map((offer) => (
                     <div class="rounded-lg border border-border bg-card p-5">
                       <h3 class="font-display text-lg font-semibold text-foreground">{offer.title}</h3>
-                      {offer.desc && <p class="mt-2 text-sm leading-relaxed whitespace-pre-line text-foreground/80">{offer.desc}</p>}
+                      {offer.desc && <p class="mt-2 text-sm leading-relaxed whitespace-pre-line text-foreground/80"><InlineText text={offer.desc} /></p>}
                     </div>
                   ))}
                 </div>
@@ -121,7 +123,7 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
               <h2 class="font-display mb-3 text-2xl font-semibold text-foreground">{work.packagesHeadline}</h2>
             )}
             {work.packagesLede && (
-              <p class="mb-8 max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground">{work.packagesLede}</p>
+              <p class="mb-8 max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground"><InlineText text={work.packagesLede} /></p>
             )}
             {
               packages.length > 0 && (
@@ -129,14 +131,14 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
                   {packages.map((item) => (
                     <div class="rounded-lg border border-border bg-card p-5">
                       <h3 class="font-display text-lg font-semibold text-foreground">{item.title}</h3>
-                      {item.desc && <p class="mt-2 text-sm leading-relaxed whitespace-pre-line text-foreground/80">{item.desc}</p>}
+                      {item.desc && <p class="mt-2 text-sm leading-relaxed whitespace-pre-line text-foreground/80"><InlineText text={item.desc} /></p>}
                     </div>
                   ))}
                 </div>
               )
             }
             {work.pricesNote && (
-              <p class="mt-5 text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{work.pricesNote}</p>
+              <p class="mt-5 text-sm leading-relaxed whitespace-pre-line text-muted-foreground"><InlineText text={work.pricesNote} /></p>
             )}
           </section>
         )
@@ -148,7 +150,7 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
             {credentials.title && (
               <p class="text-xs font-medium tracking-widest text-accent uppercase">{credentials.title}</p>
             )}
-            {credentials.org && <p class="mt-2 leading-relaxed whitespace-pre-line text-foreground">{credentials.org}</p>}
+            {credentials.org && <p class="mt-2 leading-relaxed whitespace-pre-line text-foreground"><InlineText text={credentials.org} /></p>}
           </section>
         )
       }
@@ -161,7 +163,7 @@ const { work, workIntro, stats, offers, packages, credentials, instagram, handle
         }
         {
           work.closeLede && (
-            <p class="mb-6 leading-relaxed whitespace-pre-line text-foreground">{work.closeLede}</p>
+            <p class="mb-6 leading-relaxed whitespace-pre-line text-foreground"><InlineText text={work.closeLede} /></p>
           )
         }
         <a

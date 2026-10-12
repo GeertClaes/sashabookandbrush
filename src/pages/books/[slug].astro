@@ -6,7 +6,9 @@ import live from "../../data/goodreads-live.json";
 import site from "../../data/site.json";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { affiliateLinks } from "../../lib/affiliates";
+import InlineText from "../../components/InlineText.astro";
 import { bookHref, formatFullDate, pageLength, rereadLabel } from "../../lib/books";
+import { plainInline } from "../../lib/inline-links";
 import { coverModule } from "../../lib/covers";
 import { liveProgress, liveReadingStatus } from "../../lib/live";
 import { getImage } from "astro:assets";
@@ -26,7 +28,7 @@ const reading = liveReadingStatus(live, data.title, data.goodreadsId, data.statu
 const genericGenre = data.genre === "Read" || data.genre === "Currently reading" || !data.genre;
 const label = reading ? "Currently reading" : genericGenre ? "" : data.genre;
 const description = data.note
-  ? data.note.replace(/\s+/g, " ").trim().slice(0, 160)
+  ? plainInline(data.note).replace(/\s+/g, " ").trim().slice(0, 160)
   : `${data.title} by ${data.author}`;
 
 const published = data.originalYear || data.yearPublished;
@@ -212,7 +214,7 @@ const og = cover ? await getImage({ src: cover, width: 800, height: 1200, format
         data.note ? (
           <section class="mt-12 max-w-3xl border-t border-border pt-10">
             <h2 class="font-display mb-5 text-2xl font-semibold text-foreground">Sasha's notes</h2>
-            <div class="whitespace-pre-wrap text-base leading-relaxed text-foreground">{data.note}</div>
+            <div class="whitespace-pre-wrap text-base leading-relaxed text-foreground"><InlineText text={data.note} /></div>
           </section>
         ) : (
           <section class="mt-12 max-w-3xl border-t border-border pt-10">

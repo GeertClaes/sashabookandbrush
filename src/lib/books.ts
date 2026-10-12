@@ -1,3 +1,5 @@
+import { plainInline } from "./inline-links";
+
 export function bookHref(id: string) {
   return `/books/${id}`;
 }
@@ -19,7 +21,7 @@ export function formatFullDate(value?: string) {
 }
 
 export function reviewExcerpt(note: string, length = 160) {
-  const compact = note.replace(/\s+/g, " ").trim();
+  const compact = plainInline(note).replace(/\s+/g, " ").trim();
   if (compact.length <= length) return compact;
   return `${compact.slice(0, length).trim()}…`;
 }

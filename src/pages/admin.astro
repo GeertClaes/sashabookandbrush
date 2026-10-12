@@ -359,6 +359,7 @@ const pageCopy = editableCopy(site);
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               ></textarea>
             </label>
+            <p class="mb-1 text-xs text-muted-foreground">To make a link, write [the words](https://the-site.com).</p>
             <p data-book-note-count class="mb-4 text-xs text-muted-foreground"></p>
             <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
               <input type="checkbox" data-book-featured />
@@ -480,7 +481,7 @@ const pageCopy = editableCopy(site);
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               />
             </label>
-            <label class="mb-4 block text-sm font-medium text-foreground">
+            <label class="mb-1 block text-sm font-medium text-foreground">
               Note
               <textarea
                 data-art-note
@@ -488,6 +489,7 @@ const pageCopy = editableCopy(site);
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               ></textarea>
             </label>
+            <p class="mb-4 text-xs text-muted-foreground">To make a link, write [the words](https://the-site.com).</p>
             <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
               <input type="checkbox" data-art-featured />
               Feature on the home page
@@ -623,7 +625,7 @@ const pageCopy = editableCopy(site);
             <p class="mb-4 text-xs text-muted-foreground">
               Copy Amazon is the shop link. Copy tool link is this item on the site. Copy tools page is the whole kit section.
             </p>
-            <label class="mb-4 block text-sm font-medium text-foreground">
+            <label class="mb-1 block text-sm font-medium text-foreground">
               Note
               <textarea
                 data-supply-note
@@ -631,6 +633,7 @@ const pageCopy = editableCopy(site);
                 class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               ></textarea>
             </label>
+            <p class="mb-4 text-xs text-muted-foreground">To make a link, write [the words](https://the-site.com).</p>
             <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
               <input type="checkbox" data-supply-featured />
               Feature on the home page
@@ -786,9 +789,12 @@ const pageCopy = editableCopy(site);
       summary.append(button);
     }
     const note = document.createElement("p");
-    note.className = "mb-4 text-sm text-muted-foreground";
+    note.className = "text-sm text-muted-foreground";
     note.textContent = hint;
-    section.append(summary, note);
+    const linkNote = document.createElement("p");
+    linkNote.className = "mt-1 mb-4 text-xs text-muted-foreground";
+    linkNote.textContent = "To make a link, write [the words](https://the-site.com).";
+    section.append(summary, note, linkNote);
     return section;
   }
 
