@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:17:20.128Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Battle Mage",
+      "detail": "Book saved. The public page updates after the site rebuilds (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T15:16:52.199Z",
       "type": "admin",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Photo for girl-in-turmoil",
       "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-12T00:01:54.881Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Added Girl in turmoil",
-      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]

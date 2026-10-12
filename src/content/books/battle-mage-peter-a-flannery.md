@@ -2,13 +2,12 @@
 title: "Battle Mage"
 author: "Peter A. Flannery"
 cover: "battle-mage-peter-a-flannery.jpg"
-note: ""
 rating: 5
 genre: "Read"
 isbn: "9781739934132"
 isbn10: "173993413X"
-featured: false
-order: 1242
+featured: true
+order: 1243
 status: "read"
 goodreadsId: "34532979"
 dateAdded: "2021-10-09"
