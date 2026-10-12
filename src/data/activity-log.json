@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:14:51.106Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated the about photo",
+      "detail": "About and Work with me show it after the site rebuilds (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T15:12:10.065Z",
       "type": "admin",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Photo for frodo-baggins",
       "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-12T00:01:00.557Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Added Frodo Baggins",
-      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]
