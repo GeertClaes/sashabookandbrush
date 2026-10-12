@@ -1,8 +1,8 @@
 ---
 title: "Bilbo Baggins"
-medium: "Acrylic"
-note: ""
+medium: "Procreate"
 featured: false
 order: 6
 image: "bilbo-baggins.jpeg"
+available: false
 ---

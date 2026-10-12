@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:11:35.004Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Bilbo Baggins",
+      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T15:11:20.814Z",
       "type": "admin",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Added The Mountains of Velaris",
       "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:59:51.892Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Deleted painting mountain-study",
-      "detail": "It leaves the Art page after the site rebuilds (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]
