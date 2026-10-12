@@ -683,11 +683,11 @@ const pageCopy = editableCopy(site);
 
         <div data-panel="copy" id="panel-copy" role="tabpanel" aria-labelledby="tab-copy" class="hidden space-y-6">
           <p class="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Home, About, and Work with me. Open a section to edit it. Navigation, photos, and the reading challenge stay as they are.
+            Home, About, and Work with me. Open a section to edit it. Navigation, the home photo, and the reading challenge stay as they are.
           </p>
           <div data-copy-root class="space-y-6"></div>
           <button type="button" data-copy-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
-            Save page text
+            Save pages
           </button>
         </div>
       </div>
@@ -716,7 +716,7 @@ const pageCopy = editableCopy(site);
   let currentBook = null;
   let currentArt = null;
   let currentSupply = null;
-  let previewUrls = { book: "", art: "", supply: "" };
+  let previewUrls = { book: "", art: "", supply: "", about: "" };
   let activityTimer = 0;
   let activityLoading = false;
   let showAllActivity = false;
@@ -913,6 +913,7 @@ const pageCopy = editableCopy(site);
         eyebrow: copyValue("about.eyebrow").trim(),
         headline: copyValue("about.headline").trim(),
         headlineItalic: copyValue("about.headlineItalic").trim(),
+        imageAlt: copyValue("about.imageAlt").trim(),
         paragraphs: [...document.querySelectorAll('[data-copy-item="paragraphs"] [data-copy-key="body"]')]
           .map((el) => el.value.trim())
           .filter(Boolean),
@@ -934,8 +935,12 @@ const pageCopy = editableCopy(site);
     return JSON.stringify(readCopy());
   }
 
+  function aboutPhotoPending() {
+    return Boolean(document.querySelector("[data-about-image]")?.files?.[0]);
+  }
+
   function isCopyDirty() {
-    return Boolean(copySnapshot) && copyState() !== copySnapshot;
+    return Boolean(copySnapshot) && (copyState() !== copySnapshot || aboutPhotoPending());
   }
 
   function renderCopyEditor() {
@@ -959,10 +964,11 @@ const pageCopy = editableCopy(site);
 
     const aboutSection = copySection(
       "About",
-      "The bio on the About page. Each box is its own paragraph. Photos and the fact chips stay as they are.",
+      "The portrait and the bio. Each box is its own paragraph. Fact chips stay as they are.",
       "about",
     );
     aboutSection.append(
+      aboutPhotoControl(about),
       labelledField("Small line above the title", about.eyebrow, { path: "about.eyebrow" }),
       labelledField("Headline", about.headline, { path: "about.headline" }),
       labelledField("Italic line", about.headlineItalic, { path: "about.headlineItalic" }),
@@ -1009,7 +1015,53 @@ const pageCopy = editableCopy(site);
 
     root.append(home, aboutSection, workSection);
     root.addEventListener("click", onCopyClick);
+    bindDrop("about");
+    const samePhoto = about.image && about.image === about.imageDark;
+    resetDrop(
+      "about",
+      about.image || "",
+      samePhoto
+        ? "Drop a new photo to replace it."
+        : "Drop a new photo to replace the light and dark portraits.",
+    );
     copySnapshot = copyState();
+  }
+
+  function aboutPhotoControl(about) {
+    const wrap = document.createElement("div");
+    wrap.className = "mb-4";
+    const heading = document.createElement("p");
+    heading.className = "mb-2 text-sm font-medium text-foreground";
+    heading.textContent = "Photo";
+    const drop = document.createElement("button");
+    drop.type = "button";
+    drop.dataset.aboutDrop = "";
+    drop.className =
+      "mb-2 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary";
+    const preview = document.createElement("img");
+    preview.dataset.aboutPreview = "";
+    preview.alt = "";
+    preview.className = "hidden max-h-72 rounded object-cover shadow";
+    const label = document.createElement("span");
+    label.dataset.aboutDropLabel = "";
+    label.textContent = "Drop a photo here, or click to choose. Large phone photos are resized.";
+    drop.append(preview, label);
+    const input = document.createElement("input");
+    input.type = "file";
+    input.dataset.aboutImage = "";
+    input.accept = "image/jpeg,image/png,image/webp,image/heic,image/heif";
+    input.className = "hidden";
+    const hint = document.createElement("p");
+    hint.className = "mt-2 text-xs font-normal text-muted-foreground";
+    hint.textContent =
+      "This portrait is on About and on Work with me. A new photo is used in light and dark. The home photo stays as it is.";
+    const alt = labelledField("Photo description", about.imageAlt, {
+      path: "about.imageAlt",
+      hint: "A short line for someone who cannot see the photo.",
+    });
+    alt.classList.remove("mb-4");
+    wrap.append(heading, drop, input, hint, alt);
+    return wrap;
   }
 
   function setBanner(kind, message) {
@@ -1829,14 +1881,20 @@ const pageCopy = editableCopy(site);
       .join("");
   }
 
+  function dropInputSelector(kind) {
+    if (kind === "book") return "[data-book-cover]";
+    if (kind === "supply") return "[data-supply-image]";
+    if (kind === "about") return "[data-about-image]";
+    return "[data-art-image]";
+  }
+
   function bindDrop(kind) {
     const drop = document.querySelector(`[data-${kind}-drop]`);
-    const input = document.querySelector(
-      kind === "book" ? "[data-book-cover]" : kind === "supply" ? "[data-supply-image]" : "[data-art-image]",
-    );
+    const input = document.querySelector(dropInputSelector(kind));
     const preview = document.querySelector(`[data-${kind}-preview]`);
     const label = document.querySelector(`[data-${kind}-drop-label]`);
-    if (!drop || !input) return;
+    if (!drop || !input || drop.dataset.bound) return;
+    drop.dataset.bound = "1";
 
     function showFile(file) {
       if (!file) return;
@@ -1871,9 +1929,7 @@ const pageCopy = editableCopy(site);
   }
 
   function resetDrop(kind, existingSrc, existingLabel) {
-    const input = document.querySelector(
-      kind === "book" ? "[data-book-cover]" : kind === "supply" ? "[data-supply-image]" : "[data-art-image]",
-    );
+    const input = document.querySelector(dropInputSelector(kind));
     const preview = document.querySelector(`[data-${kind}-preview]`);
     const label = document.querySelector(`[data-${kind}-drop-label]`);
     if (input) input.value = "";
@@ -1889,7 +1945,11 @@ const pageCopy = editableCopy(site);
       }
     }
     if (label) {
-      label.textContent = existingLabel || (kind === "book" ? "Drop a cover here, or click to choose a photo" : "Drop a photo here, or click to choose");
+      const fallback =
+        kind === "book"
+          ? "Drop a cover here, or click to choose a photo"
+          : "Drop a photo here, or click to choose";
+      label.textContent = existingLabel || fallback;
     }
   }
 
@@ -2247,14 +2307,30 @@ const pageCopy = editableCopy(site);
   });
 
   document.querySelector("[data-copy-save]")?.addEventListener("click", async () => {
-    await withSave(document.querySelector("[data-copy-save]"), "Save page text", async () => {
+    await withSave(document.querySelector("[data-copy-save]"), "Save pages", async () => {
+      const textChanged = copyState() !== copySnapshot;
       const body = readCopy();
       if (!body.about.paragraphs.length) throw new Error("About needs at least one paragraph.");
-      await call("/copy", { method: "POST", body: JSON.stringify(body) });
-      copySnapshot = JSON.stringify(body);
+      const file = document.querySelector("[data-about-image]")?.files?.[0];
+      if (file) body.aboutPhoto = await preparePhoto(file);
+      const result = await call("/copy", { method: "POST", body: JSON.stringify(body) });
+      if (file) {
+        const input = document.querySelector("[data-about-image]");
+        if (input) input.value = "";
+        const label = document.querySelector("[data-about-drop-label]");
+        if (label) label.textContent = "Saved. Drop a new photo to replace it.";
+        if (result.image) {
+          pageCopy.about = pageCopy.about || {};
+          pageCopy.about.image = result.image;
+          pageCopy.about.imageDark = result.image;
+        }
+      }
+      copySnapshot = copyState();
       return {
-        label: "page text",
-        hint: "Refresh Home, About, and Work with me to see it.",
+        label: file && textChanged ? "page text and the about photo" : file ? "the about photo" : "page text",
+        hint: file
+          ? "Refresh About and Work with me to see it. The home photo stays as it is."
+          : "Refresh Home, About, and Work with me to see it.",
       };
     });
   });

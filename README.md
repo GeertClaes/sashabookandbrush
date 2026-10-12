@@ -211,7 +211,7 @@ Then refresh the Books page. Shelf, rating, genre, year read, and sort are indep
 
 ### Library editor (`/admin`)
 
-Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, or a CSV drop. Tabs are **Overview**, **Books**, **Art**, **Tools**, and **Pages**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
+Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, the About portrait, or a CSV drop. Tabs are **Overview**, **Books**, **Art**, **Tools**, and **Pages**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
 
 On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` opens. Saves commit to GitHub; Pages rebuilds (usually about a minute). A CSV upload writes `data/export.csv`, then [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) runs `import-goodreads.mjs --skip-covers` and commits library files.
 

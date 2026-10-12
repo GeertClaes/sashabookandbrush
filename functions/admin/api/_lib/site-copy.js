@@ -1,3 +1,5 @@
+import { aboutImageFile, managedAboutImagePaths, parseImageUpload } from "./photo.js";
+
 const SHORT = 160;
 const MEDIUM = 800;
 const LONG = 2000;
@@ -43,6 +45,7 @@ const ABOUT_FIELDS = [
   { key: "eyebrow", label: "About small line", max: SHORT },
   { key: "headline", label: "About headline", max: SHORT, required: true },
   { key: "headlineItalic", label: "About italic line", max: SHORT },
+  { key: "imageAlt", label: "Photo description", max: SHORT },
 ];
 
 const WORK_FIELDS = [
@@ -105,6 +108,9 @@ export function editableCopy(site) {
       lede: hero.lede || "",
     },
     about: {
+      image: about.image || "",
+      imageDark: about.imageDark || "",
+      imageAlt: about.imageAlt || "",
       eyebrow: about.eyebrow || "",
       headline: about.headline || "",
       headlineItalic: about.headlineItalic || "",
@@ -174,4 +180,37 @@ export function applySiteCopy(site, body) {
 
 export function stringifySite(site) {
   return `${JSON.stringify(site, null, 2)}\n`;
+}
+
+export function prepareCopySave(site, body) {
+  const source = body && typeof body === "object" ? { ...body } : {};
+  const upload = source.aboutPhoto;
+  delete source.aboutPhoto;
+  const next = applySiteCopy(site, source);
+  if (upload == null || upload === false) {
+    return { next, photo: false, uploads: [], removals: [] };
+  }
+  if (typeof upload !== "object") throw new Error("About photo could not be read.");
+  const parsed = parseImageUpload(upload, "about");
+  if (!parsed.ok) throw new Error(parsed.error || "Use a JPG, PNG, or WebP photo");
+  if (!parsed.photo) throw new Error("Missing image");
+
+  const stored = aboutImageFile(parsed.photo);
+  const previousImage = site?.about?.image || "";
+  const previousDark = site?.about?.imageDark || "";
+  next.about = { ...(next.about || {}) };
+  next.about.image = stored.publicPath;
+  next.about.imageDark = stored.publicPath;
+  const photo = previousImage !== stored.publicPath || previousDark !== stored.publicPath;
+  return {
+    next,
+    photo,
+    image: stored.publicPath,
+    uploads: photo
+      ? [{ path: stored.repoPath, content: parsed.photo.contentBase64, encoding: "base64" }]
+      : [],
+    removals: photo
+      ? managedAboutImagePaths(previousImage, previousDark).filter((item) => item !== stored.repoPath)
+      : [],
+  };
 }

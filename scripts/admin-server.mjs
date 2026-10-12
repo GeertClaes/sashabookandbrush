@@ -13,7 +13,7 @@ import {
 } from "./lib/activity.mjs";
 import { applyYamlFields, emptyAffiliateUrl, taggedAmazonUrl, yamlString } from "../functions/admin/api/_lib/frontmatter.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
-import { applySiteCopy, stringifySite } from "../functions/admin/api/_lib/site-copy.js";
+import { applySiteCopy, prepareCopySave, stringifySite } from "../functions/admin/api/_lib/site-copy.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -607,24 +607,43 @@ order: ${order}
       const body = JSON.parse((await readBody(req)) || "{}");
       const file = path.join(ROOT, "src", "data", "site.json");
       const raw = await readFile(file, "utf8");
-      let next;
+      const site = JSON.parse(raw);
+      let prepared;
       try {
-        next = applySiteCopy(JSON.parse(raw), body);
+        prepared = prepareCopySave(site, body);
       } catch (error) {
         json(res, 400, { error: error instanceof Error ? error.message : "Check the page text" });
         return;
       }
-      const content = stringifySite(next);
+      const content = stringifySite(prepared.next);
       const current = raw.endsWith("\n") ? raw : `${raw}\n`;
       if (content !== current) {
+        for (const upload of prepared.uploads) {
+          const dest = path.join(ROOT, upload.path);
+          await mkdir(path.dirname(dest), { recursive: true });
+          await writeFile(dest, Buffer.from(upload.content, "base64"));
+        }
         await writeFile(file, content, "utf8");
+        for (const oldPath of prepared.removals) {
+          await removeFile(path.join(ROOT, oldPath));
+        }
+        const source = { ...body };
+        delete source.aboutPhoto;
+        const textChanged = stringifySite(applySiteCopy(site, source)) !== current;
         await recordLocalActivity({
           type: "admin",
-          title: "Updated page text",
-          detail: "Saved on this computer. Refresh Home, About, and Work with me to see it.",
+          title:
+            textChanged && prepared.photo
+              ? "Updated page text and the about photo"
+              : prepared.photo
+                ? "Updated the about photo"
+                : "Updated page text",
+          detail: prepared.photo
+            ? "Saved on this computer. Refresh About and Work with me to see the photo."
+            : "Saved on this computer. Refresh Home, About, and Work with me to see it.",
         });
       }
-      json(res, 200, { ok: true, unchanged: content === current });
+      json(res, 200, { ok: true, unchanged: content === current, image: prepared.next.about?.image || "" });
       return;
     }
 
