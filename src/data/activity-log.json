@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:08:33.918Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Archway",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T15:06:49.876Z",
       "type": "admin",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Deleted tool stay-wet-palette",
       "detail": "It leaves the Art page after the site rebuilds (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:54:09.283Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated Liquitex Basics acrylics",
-      "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]
