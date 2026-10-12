@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:10:29.038Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Velaris",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T15:10:09.089Z",
       "type": "admin",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Updated Mountain study",
       "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:55:51.727Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Added Windsor & Newton Galeria acrylic",
-      "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]
