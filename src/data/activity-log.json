@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:10:09.089Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Added Garden bridge",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T15:08:33.918Z",
       "type": "admin",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Added Windsor & Newton Galeria acrylic",
       "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:54:20.452Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Deleted tool stay-wet-palette",
-      "detail": "It leaves the Art page after the site rebuilds (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]
