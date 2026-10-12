@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:12:10.065Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Welsh meets Polish table",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T15:11:41.017Z",
       "type": "admin",
       "ok": true,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Added Frodo Baggins",
-      "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-12T00:00:22.683Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated The Mountains of Velaris",
       "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
