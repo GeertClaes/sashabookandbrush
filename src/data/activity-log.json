@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-12T15:06:49.876Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Updated Velaris",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-12T02:24:04.954Z",
       "type": "goodreads",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Updated Liquitex Basics acrylics",
       "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-11T23:51:53.781Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Photo for studio-still",
-      "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]
