@@ -1,17 +1,21 @@
 {
-  "updated": "2026-10-12T02:24:04.952Z",
+  "updated": "2026-10-13T03:33:42.252Z",
   "lastSync": {
-    "at": "2026-10-12T02:24:04.952Z",
+    "at": "2026-10-13T03:33:42.252Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 3,
+    "readingCount": 4,
     "upNextCount": 8,
     "changes": [
-      "Left currently reading: Rebel Witch (The Crimson Moth, #2)"
+      "Started The Lamb"
     ],
     "warning": null,
     "error": null,
     "reading": [
+      {
+        "title": "The Lamb",
+        "progress": null
+      },
       {
         "title": "Slashed Beauties",
         "progress": 30
@@ -27,6 +31,14 @@
     ]
   },
   "currentlyReading": [
+    {
+      "title": "The Lamb",
+      "author": "Lucy   Rose",
+      "goodreadsId": "216867498",
+      "isbn": "1399619713",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1722268713l/216867498._SY475_.jpg",
+      "progress": null
+    },
     {
       "title": "Slashed Beauties",
       "author": "A. Rushby",
@@ -53,6 +65,13 @@
     }
   ],
   "upNext": [
+    {
+      "title": "The Washwoman at the River's End (The Curse of the Fates, #1)",
+      "author": "Megan Shade",
+      "goodreadsId": "255803383",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1784989603l/255803383._SY475_.jpg"
+    },
     {
       "title": "The Secret Paris Ingredient",
       "author": "M.H. Cali",
@@ -101,13 +120,6 @@
       "goodreadsId": "60538347",
       "isbn": "1984882171",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1646257003l/60538347.jpg"
-    },
-    {
-      "title": "You With the Sad Eyes",
-      "author": "Christina Applegate",
-      "goodreadsId": "238286481",
-      "isbn": "031659492X",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761344174l/238286481._SY475_.jpg"
     }
   ]
 }

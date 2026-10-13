@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-13T03:33:42.254Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "4 currently reading, 8 up next. Started The Lamb",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-10-12T15:17:20.128Z",
       "type": "admin",
       "ok": true,
@@ -311,14 +319,6 @@
       "title": "Updated Studio still",
       "detail": "Painting saved. It shows on the site after the rebuild (about a minute).",
       "by": "geert.wl.claes@gmail.com"
-    },
-    {
-      "at": "2026-09-12T00:01:57.896Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Photo for girl-in-turmoil",
-      "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
     }
   ]
 }
