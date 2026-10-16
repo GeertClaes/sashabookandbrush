@@ -1,24 +1,25 @@
 {
-  "updated": "2026-10-13T03:33:42.252Z",
+  "updated": "2026-10-16T01:20:05.276Z",
   "lastSync": {
-    "at": "2026-10-13T03:33:42.252Z",
+    "at": "2026-10-16T01:20:05.276Z",
     "ok": true,
     "source": "github-actions",
     "readingCount": 4,
     "upNextCount": 8,
     "changes": [
-      "Started The Lamb"
+      "The Lamb: — → 30%",
+      "Slashed Beauties: 30% → 90%"
     ],
     "warning": null,
     "error": null,
     "reading": [
       {
         "title": "The Lamb",
-        "progress": null
+        "progress": 30
       },
       {
         "title": "Slashed Beauties",
-        "progress": 30
+        "progress": 90
       },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
@@ -37,7 +38,7 @@
       "goodreadsId": "216867498",
       "isbn": "1399619713",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1722268713l/216867498._SY475_.jpg",
-      "progress": null
+      "progress": 30
     },
     {
       "title": "Slashed Beauties",
@@ -45,7 +46,7 @@
       "goodreadsId": "222925674",
       "isbn": "0593954645",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1742609954l/222925674._SY475_.jpg",
-      "progress": 30
+      "progress": 90
     },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
