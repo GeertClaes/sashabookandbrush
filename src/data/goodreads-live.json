@@ -1,14 +1,13 @@
 {
-  "updated": "2026-10-16T01:20:05.276Z",
+  "updated": "2026-10-17T01:19:12.093Z",
   "lastSync": {
-    "at": "2026-10-16T01:20:05.276Z",
+    "at": "2026-10-17T01:19:12.093Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 4,
+    "readingCount": 3,
     "upNextCount": 8,
     "changes": [
-      "The Lamb: — → 30%",
-      "Slashed Beauties: 30% → 90%"
+      "Left currently reading: Slashed Beauties"
     ],
     "warning": null,
     "error": null,
@@ -16,10 +15,6 @@
       {
         "title": "The Lamb",
         "progress": 30
-      },
-      {
-        "title": "Slashed Beauties",
-        "progress": 90
       },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
@@ -39,14 +34,6 @@
       "isbn": "1399619713",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1722268713l/216867498._SY475_.jpg",
       "progress": 30
-    },
-    {
-      "title": "Slashed Beauties",
-      "author": "A. Rushby",
-      "goodreadsId": "222925674",
-      "isbn": "0593954645",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1742609954l/222925674._SY475_.jpg",
-      "progress": 90
     },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",

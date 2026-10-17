@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-17T01:19:12.094Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "3 currently reading, 8 up next. Left currently reading: Slashed Beauties",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-10-16T01:20:05.278Z",
       "type": "goodreads",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Deleted painting studio-still",
       "detail": "It leaves the Art page after the site rebuilds (about a minute).",
-      "by": "geert.wl.claes@gmail.com"
-    },
-    {
-      "at": "2026-09-12T08:11:33.867Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Photo for studio-still",
-      "detail": "Image saved. It shows on the site after the rebuild (about a minute).",
       "by": "geert.wl.claes@gmail.com"
     }
   ]
