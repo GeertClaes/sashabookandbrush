@@ -40,9 +40,16 @@ const books = (await getCollection("books"))
     amazon: book.data.amazon === "#" ? "" : book.data.amazon || "",
     isbn: book.data.isbn || "",
     isbn10: book.data.isbn10 || "",
+    goodreadsId: book.data.goodreadsId || "",
     rating: book.data.rating || 0,
     status: book.data.status || "read",
     dateRead: book.data.dateRead || "",
+    dateAdded: book.data.dateAdded || "",
+    pages: book.data.pages || 0,
+    yearPublished: book.data.yearPublished || 0,
+    originalYear: book.data.originalYear || 0,
+    publisher: book.data.publisher || "",
+    readCount: book.data.readCount || 0,
     order: book.data.order || 0,
     buy: affiliateLinks(book.data),
   }))
@@ -430,7 +437,21 @@ const pageCopy = editableCopy(site);
           </section>
           </div>
           </div>
-          <details class="mt-10 rounded-xl border border-border bg-card px-5 py-4 text-sm">
+          <div class="mt-10 rounded-xl border border-border bg-card px-5 py-4 text-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="max-w-xl">
+                <p class="font-medium text-foreground">Download the site library</p>
+                <p class="mt-1 text-muted-foreground">
+                  Same columns as a Goodreads export, so My Rating can be compared with the file from Goodreads.
+                  The review column is the public note on the site. Average Rating is not stored here.
+                </p>
+              </div>
+              <button type="button" data-export-csv class="rounded border border-border px-4 py-2 text-sm text-foreground hover:border-primary">
+                Download CSV
+              </button>
+            </div>
+          </div>
+          <details class="mt-4 rounded-xl border border-border bg-card px-5 py-4 text-sm">
             <summary class="cursor-pointer font-medium text-muted-foreground">
               Import a Goodreads CSV
             </summary>
@@ -2803,5 +2824,27 @@ const pageCopy = editableCopy(site);
   bindSortable(artList, "art");
   bindSortable(supplyList, "supply");
   boot();
+</script>
+<script>
+  import { libraryCsv, libraryCsvFilename } from "../lib/library-csv.js";
+
+  document.querySelector("[data-export-csv]")?.addEventListener("click", () => {
+    const books = JSON.parse(document.getElementById("book-catalog")?.textContent || "[]");
+    const csv = libraryCsv(books);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = libraryCsvFilename();
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    const status = document.querySelector("[data-status]");
+    if (status) {
+      const count = books.length;
+      status.textContent = `Downloaded ${count} ${count === 1 ? "book" : "books"}. Compare My Rating with a Goodreads export.`;
+    }
+  });
 </script>
 </BaseLayout>

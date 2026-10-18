@@ -211,13 +211,13 @@ Then refresh the Books page. Shelf, rating, genre, year read, and sort are indep
 
 ### Library editor (`/admin`)
 
-Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, the About portrait, or a CSV drop. Tabs are **Overview**, **Books**, **Art**, **Tools**, and **Pages**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
+Rate books on Goodreads. The studio editor at `/admin` is for a public note, a featured home card, a cover, a painting, a recommended tool, the About portrait, a CSV drop, or a CSV download of the books on the site. Tabs are **Overview**, **Books**, **Art**, **Tools**, and **Pages**. You can delete a painting or a tool (with a confirm). Books stay until a CSV import removes them. The page is not in the public nav — bookmark [sashabookandbrush.com/admin](https://sashabookandbrush.com/admin).
 
 On the live site, Cloudflare Access asks for **Google sign-in** before `/admin` opens. Saves commit to GitHub; Pages rebuilds (usually about a minute). A CSV upload writes `data/export.csv`, then [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) runs `import-goodreads.mjs --skip-covers` and commits library files.
 
 Set Access, GitHub, and optional rebuild-status variables as described in [Environment configuration](#environment-configuration). API writes fail closed until Access and the GitHub token are set.
 
-**Overview** is a status line (live site and the last Goodreads sync), a short to-do list, and the last few saves. **Sync now** fetches the shelf: on this computer it runs immediately; on the live site it starts the Sync Goodreads Action. Shelf titles and the full log sit behind Details and Show all. CSV import is at the bottom of Books. Saves hit GitHub immediately; the public site updates when Pages finishes rebuilding (usually about a minute).
+**Overview** is a status line (live site and the last Goodreads sync), a short to-do list, and the last few saves. **Sync now** fetches the shelf: on this computer it runs immediately; on the live site it starts the Sync Goodreads Action. Shelf titles and the full log sit behind Details and Show all. CSV import and a Download CSV of the site library are at the bottom of Books. The download uses the same columns as a Goodreads export, including My Rating. Saves hit GitHub immediately; the public site updates when Pages finishes rebuilding (usually about a minute).
 
 Locally:
 
