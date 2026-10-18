@@ -6,14 +6,14 @@ note: ""
 rating: 2
 genre: "Read"
 featured: false
-order: 1173
+order: 1185
 status: "read"
 isbn: "9781668001226"
 isbn10: "1668001225"
 goodreadsId: "60393672"
 dateRead: "2022-10-23"
 dateAdded: "2022-04-10"
-pages: 324
+pages: 320
 yearPublished: 2022
 originalYear: 2022
 publisher: "Atria Books"

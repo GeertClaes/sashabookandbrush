@@ -1,12 +1,12 @@
 ---
 title: "Driving in the Dark"
-author: "Jack  Harding"
+author: "Jack Harding"
 cover: "driving-in-the-dark-jack-harding.jpg"
 note: ""
 rating: 4
 genre: "Read"
 featured: false
-order: 1156
+order: 1168
 status: "read"
 goodreadsId: "59724780"
 dateRead: "2023-05-29"

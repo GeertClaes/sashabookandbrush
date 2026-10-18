@@ -1,12 +1,12 @@
 ---
 title: "Fearless (The Powerless Trilogy, #3)"
-author: "Lauren  Roberts"
+author: "Lauren Roberts"
 cover: "fearless-the-powerless-trilogy-3-lauren-roberts.jpg"
 note: ""
 rating: 4
 genre: "Read"
 featured: false
-order: 1059
+order: 1068
 status: "read"
 isbn: "9781665955461"
 isbn10: "1665955465"

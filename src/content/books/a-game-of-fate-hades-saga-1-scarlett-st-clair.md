@@ -1,6 +1,6 @@
 ---
 title: "A Game of Fate (Hades Saga, #1)"
-author: "Scarlett St.  Clair"
+author: "Scarlett St. Clair"
 cover: "a-game-of-fate-hades-saga-1-scarlett-st-clair.jpg"
 note: ""
 rating: 3
@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9781735771915"
 isbn10: "1735771910"
 featured: false
-order: 1112
+order: 1122
 status: "read"
 goodreadsId: "54626426"
 dateRead: "2024-03-28"

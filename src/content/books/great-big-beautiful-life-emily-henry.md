@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9780241739860"
 isbn10: "0241739861"
 featured: false
-order: 1047
+order: 1056
 status: "read"
 goodreadsId: "218559595"
 dateRead: "2025-07-16"

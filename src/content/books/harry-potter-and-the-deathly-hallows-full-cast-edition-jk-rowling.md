@@ -6,7 +6,7 @@ note: ""
 rating: 5
 genre: "Read"
 featured: false
-order: 1008
+order: 1013
 status: "read"
 goodreadsId: "252122862"
 dateRead: "2026-08-23"
@@ -14,4 +14,5 @@ dateAdded: "2026-08-23"
 yearPublished: 2026
 publisher: "Audible"
 readCount: 1
+originalYear: 2007
 ---

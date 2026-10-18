@@ -1,12 +1,12 @@
 ---
 title: "Ruthless Vows (Letters of Enchantment, #2)"
-author: "Rebecca   Ross"
+author: "Rebecca Ross"
 cover: "ruthless-vows-letters-of-enchantment-2-rebecca-ross.jpg"
 note: ""
 rating: 3
 genre: "Read"
 featured: false
-order: 1126
+order: 1136
 status: "read"
 isbn: "9781250857453"
 isbn10: "1250857457"

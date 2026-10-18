@@ -1,12 +1,12 @@
 ---
 title: "Wisteria (Belladonna, #3)"
-author: "Adalyn  Grace"
+author: "Adalyn Grace"
 cover: "wisteria-belladonna-3-adalyn-grace.jpg"
 note: ""
 rating: 4
 genre: "Read"
 featured: false
-order: 1071
+order: 1080
 status: "read"
 isbn: "9780316569385"
 isbn10: "0316569380"

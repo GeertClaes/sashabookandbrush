@@ -1,12 +1,12 @@
 ---
 title: "Foxglove (Belladonna, #2)"
-author: "Adalyn  Grace"
+author: "Adalyn Grace"
 cover: "foxglove-belladonna-2-adalyn-grace.jpg"
 note: ""
 rating: 4
 genre: "Read"
 featured: false
-order: 1132
+order: 1143
 status: "read"
 isbn: "9780316565257"
 isbn10: "0316565253"

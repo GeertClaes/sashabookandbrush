@@ -1,12 +1,12 @@
 ---
 title: "Sleeping with a Psychopath"
-author: "Carolyn  Woods"
+author: "Carolyn Woods"
 cover: "sleeping-with-a-psychopath-carolyn-woods.jpg"
 note: "The story itself was kinda interesting in some part, however it went on for way longer than it needed too, and I did not like the narrator for the audiobook. 2.5 at a push 🤷🏼‍♀️"
 rating: 2
 genre: "Read"
 featured: false
-order: 1099
+order: 1109
 status: "read"
 isbn: "9780008398668"
 isbn10: "0008398666"

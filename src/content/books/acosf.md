@@ -1,8 +1,8 @@
 ---
-title: "A Court of Silver Flames"
+title: "A Court of Silver Flames (A Court of Thorns and Roses, #5)"
 author: "Sarah J. Maas"
 cover: "acosf.jpg"
-note: "Nesta's book. Angry, messy, and I loved her for it."
+note: "I would die for this book and Cassian. Nothing else to say."
 rating: 5
 genre: "Romantasy"
 featured: false

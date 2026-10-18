@@ -6,7 +6,7 @@ note: ""
 rating: 5
 genre: "Currently reading"
 featured: false
-order: 3
+order: 2
 status: "currently-reading"
 isbn: "9781619630628"
 isbn10: "1619630621"

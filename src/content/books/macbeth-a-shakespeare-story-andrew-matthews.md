@@ -1,12 +1,12 @@
 ---
 title: "Macbeth: A Shakespeare Story"
-author: "Andrew  Matthews"
+author: "Andrew Matthews"
 cover: "macbeth-a-shakespeare-story-andrew-matthews.jpg"
 note: ""
 rating: 3
 genre: "Read"
 featured: false
-order: 1236
+order: 1250
 status: "read"
 isbn: "9781841213446"
 isbn10: "1841213446"

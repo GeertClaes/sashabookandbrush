@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9781668021927"
 isbn10: "1668021927"
 featured: false
-order: 1198
+order: 1210
 status: "read"
 goodreadsId: "51007311"
 dateRead: "2022-06-02"

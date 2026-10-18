@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9780241624128"
 isbn10: "0241624126"
 featured: false
-order: 1073
+order: 1083
 status: "read"
 goodreadsId: "194802722"
 dateRead: "2024-12-19"

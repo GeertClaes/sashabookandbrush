@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9780999602195"
 isbn10: "0999602195"
 featured: false
-order: 1051
+order: 1060
 status: "read"
 goodreadsId: "53928000"
 dateRead: "2025-07-02"

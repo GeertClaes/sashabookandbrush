@@ -6,7 +6,7 @@ note: "(FairyLoot book)\nI really enjoyed this book. It felt like a unique story
 rating: 4
 genre: "Read"
 featured: false
-order: 1219
+order: 1232
 status: "read"
 isbn: "9780063056367"
 isbn10: "0063056364"

@@ -6,7 +6,7 @@ note: "Thanks to NetGalley for the ARC.\n\nSet in Edinburgh in the 1820’s, an 
 rating: 5
 genre: "Read"
 featured: false
-order: 1104
+order: 1114
 status: "read"
 isbn: "9781496750341"
 isbn10: "1496750349"

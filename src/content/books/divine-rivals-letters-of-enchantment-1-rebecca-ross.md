@@ -1,12 +1,12 @@
 ---
 title: "Divine Rivals (Letters of Enchantment, #1)"
-author: "Rebecca   Ross"
+author: "Rebecca Ross"
 cover: "divine-rivals-letters-of-enchantment-1-rebecca-ross.jpg"
 note: ""
 rating: 5
 genre: "Read"
 featured: false
-order: 1145
+order: 1156
 status: "read"
 isbn: "9781250857439"
 isbn10: "1250857430"

@@ -1,9 +1,9 @@
 ---
-title: "Iron Flame"
+title: "Iron Flame (The Empyrean, #2)"
 author: "Rebecca Yarros"
 cover: "iron-flame.jpg"
 note: "Book two did not let me breathe. Violet and Tairn still have my whole heart."
-rating: 4
+rating: 5
 genre: "Romantasy"
 featured: false
 order: 8

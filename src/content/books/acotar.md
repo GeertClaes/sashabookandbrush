@@ -1,5 +1,5 @@
 ---
-title: "A Court of Thorns and Roses"
+title: "A Court of Thorns and Roses (A Court of Thorns and Roses, #1)"
 author: "Sarah J. Maas"
 cover: "acotar.jpg"
 note: "The series that lives on my shelves in more than one edition. Fae, feelings, and I will not be taking questions."

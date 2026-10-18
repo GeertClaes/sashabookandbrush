@@ -1,9 +1,9 @@
 ---
-title: "A Court of Wings and Ruin"
+title: "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)"
 author: "Sarah J. Maas"
 cover: "acowar.jpg"
 note: "War, wings, and the payoff of everything that came before. I needed the whole set on the shelf."
-rating: 5
+rating: 0
 genre: "Romantasy"
 featured: false
 order: 6

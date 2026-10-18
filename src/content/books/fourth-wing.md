@@ -1,8 +1,8 @@
 ---
-title: "Fourth Wing"
+title: "Fourth Wing (The Empyrean, #1)"
 author: "Rebecca Yarros"
 cover: "fourth-wing.jpg"
-note: "Dragons, a war college, and the kind of slow-burn that makes you miss your stop. The Empyrean stack on my feed is not a coincidence."
+note: "Sometimes you read a book that alters your brain chemistry…."
 rating: 5
 genre: "Romantasy"
 featured: true

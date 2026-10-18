@@ -1,5 +1,5 @@
 ---
-title: "Onyx Storm"
+title: "Onyx Storm (The Empyrean, #3)"
 author: "Rebecca Yarros"
 cover: "onyx-storm.jpg"
 note: "Had to sit next to the others on the shelf immediately. Empyrean completionist behaviour."

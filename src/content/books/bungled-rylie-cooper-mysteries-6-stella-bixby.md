@@ -6,7 +6,7 @@ note: ""
 rating: 3
 genre: "Read"
 featured: false
-order: 1049
+order: 1058
 status: "read"
 goodreadsId: "57330870"
 dateAdded: "2025-07-05"

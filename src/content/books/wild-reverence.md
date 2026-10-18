@@ -2,8 +2,8 @@
 title: "Wild Reverence"
 author: "Rebecca Ross"
 cover: "wild-reverence.jpg"
-note: "Lush, a little devastating, and very much my kind of mythic romance. If you liked Divine Rivals, start here next."
-rating: 5
+note: "I really wanted to love this, but unfortunately it just fell a little short of a great read for me.\nI felt like it dragged sometimes and I found myself skim reading some pages because I felt they just went on too long.\nI loved the world building and the Gods though!"
+rating: 3
 genre: "Fantasy"
 featured: false
 order: 1

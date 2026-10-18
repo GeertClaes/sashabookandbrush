@@ -6,7 +6,7 @@ note: "Cute witchy vibes straight off the bat which gave me high hopes for this 
 rating: 3
 genre: "Read"
 featured: false
-order: 1100
+order: 1110
 status: "read"
 isbn: "9780593871799"
 isbn10: "0593871790"

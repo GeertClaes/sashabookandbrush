@@ -1,12 +1,12 @@
 ---
 title: "Our Infinite Fates"
-author: "Laura   Steven"
+author: "Laura Steven"
 cover: "our-infinite-fates-laura-steven.jpg"
 note: ""
 rating: 2
 genre: "Read"
 featured: false
-order: 1012
+order: 1021
 status: "read"
 isbn: "9781250333889"
 isbn10: "1250333881"

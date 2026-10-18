@@ -1,6 +1,6 @@
 ---
 title: "A Touch of Chaos (Hades x Persephone Saga, #4)"
-author: "Scarlett St.  Clair"
+author: "Scarlett St. Clair"
 cover: "a-touch-of-chaos-hades-x-persephone-saga-4-scarlett-st-clair.jpg"
 note: ""
 rating: 3
@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9781464238871"
 isbn10: "1464238871"
 featured: false
-order: 1110
+order: 1120
 status: "read"
 goodreadsId: "56670031"
 dateRead: "2024-04-13"

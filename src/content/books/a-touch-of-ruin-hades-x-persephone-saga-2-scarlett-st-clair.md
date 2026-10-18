@@ -1,12 +1,12 @@
 ---
 title: "A Touch of Ruin (Hades x Persephone Saga, #2)"
-author: "Scarlett St.  Clair"
+author: "Scarlett St. Clair"
 cover: "a-touch-of-ruin-hades-x-persephone-saga-2-scarlett-st-clair.jpg"
 note: ""
 rating: 5
 genre: "Read"
 featured: false
-order: 1186
+order: 1198
 status: "read"
 isbn: "9798637299126"
 goodreadsId: "53143734"

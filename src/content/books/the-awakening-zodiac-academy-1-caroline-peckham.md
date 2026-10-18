@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9781914425028"
 isbn10: "1914425022"
 featured: false
-order: 1048
+order: 1057
 status: "read"
 goodreadsId: "46261182"
 dateRead: "2025-07-15"

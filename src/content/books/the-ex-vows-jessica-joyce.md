@@ -1,12 +1,12 @@
 ---
 title: "The Ex Vows"
-author: "Jessica  Joyce"
+author: "Jessica Joyce"
 cover: "the-ex-vows-jessica-joyce.jpg"
 note: ""
 rating: 4
 genre: "Read"
 featured: false
-order: 1092
+order: 1102
 status: "read"
 isbn: "9780593548431"
 isbn10: "0593548434"

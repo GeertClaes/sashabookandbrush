@@ -1,6 +1,6 @@
 ---
 title: "The Fault in Our Stars"
-author: "John  Green"
+author: "John Green"
 cover: "the-fault-in-our-stars-john-green.jpg"
 note: ""
 rating: 2
@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9780142424179"
 isbn10: "014242417X"
 featured: false
-order: 1248
+order: 1262
 status: "read"
 goodreadsId: "11870085"
 dateAdded: "2021-10-09"

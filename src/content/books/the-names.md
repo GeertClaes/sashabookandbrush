@@ -1,9 +1,9 @@
 ---
 title: "The Names"
-author: "Don DeLillo"
+author: "Florence Knapp"
 cover: "the-names.jpg"
-note: "On the art desk between brushes and the checkered Kindle. Proof I don't only live in romantasy."
-rating: 4
+note: "This book will stay with me for a long time. I absolutely loved it. So unique and heart wrenching ."
+rating: 5
 genre: "Literary"
 featured: false
 order: 10

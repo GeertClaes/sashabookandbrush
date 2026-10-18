@@ -1,12 +1,12 @@
 ---
 title: "The Echo of Old Books"
-author: "Barbara  Davis"
+author: "Barbara Davis"
 cover: "the-echo-of-old-books-barbara-davis.webp"
 note: ""
 rating: 4
 genre: "Read"
 featured: false
-order: 1128
+order: 1138
 status: "read"
 isbn: "9781542038157"
 isbn10: "1542038154"

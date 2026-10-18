@@ -1,6 +1,6 @@
 ---
 title: "A Touch of Malice (Hades x Persephone Saga, #3)"
-author: "Scarlett St.  Clair"
+author: "Scarlett St. Clair"
 cover: "a-touch-of-malice-hades-x-persephone-saga-3-scarlett-st-clair.jpg"
 note: ""
 rating: 5
@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9781728261676"
 isbn10: "1728261678"
 featured: false
-order: 1185
+order: 1197
 status: "read"
 goodreadsId: "55604481"
 dateRead: "2022-08-09"

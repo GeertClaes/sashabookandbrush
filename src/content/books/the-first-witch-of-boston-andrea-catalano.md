@@ -1,12 +1,12 @@
 ---
 title: "The First Witch of Boston"
-author: "Andrea  Catalano"
+author: "Andrea Catalano"
 cover: "the-first-witch-of-boston-andrea-catalano.jpg"
 note: ""
 rating: 5
 genre: "Read"
 featured: false
-order: 1027
+order: 1036
 status: "read"
 isbn: "9781662525995"
 isbn10: "1662525990"

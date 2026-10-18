@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9781959285748"
 isbn10: "1959285742"
 featured: false
-order: 1093
+order: 1103
 status: "read"
 goodreadsId: "63031640"
 dateRead: "2024-07-26"

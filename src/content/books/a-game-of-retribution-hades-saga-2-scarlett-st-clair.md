@@ -1,6 +1,6 @@
 ---
 title: "A Game of Retribution (Hades Saga, #2)"
-author: "Scarlett St.  Clair"
+author: "Scarlett St. Clair"
 cover: "a-game-of-retribution-hades-saga-2-scarlett-st-clair.jpg"
 note: ""
 rating: 3
@@ -8,7 +8,7 @@ genre: "Read"
 isbn: "9781728264448"
 isbn10: "1728264448"
 featured: false
-order: 1111
+order: 1121
 status: "read"
 goodreadsId: "55454619"
 dateRead: "2024-03-31"

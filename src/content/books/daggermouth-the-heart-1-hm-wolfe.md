@@ -1,12 +1,12 @@
 ---
 title: "Daggermouth (The Heart, #1)"
-author: "H.M.  Wolfe"
+author: "H.M. Wolfe"
 cover: "daggermouth-the-heart-1-hm-wolfe.jpg"
 note: ""
 rating: 4
 genre: "Read"
 featured: false
-order: 1015
+order: 1024
 status: "read"
 isbn: "9798347122387"
 goodreadsId: "247928235"
