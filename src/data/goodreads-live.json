@@ -1,21 +1,17 @@
 {
-  "updated": "2026-10-17T01:19:12.093Z",
+  "updated": "2026-10-18T01:01:50.339Z",
   "lastSync": {
-    "at": "2026-10-17T01:19:12.093Z",
+    "at": "2026-10-18T01:01:50.339Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 3,
+    "readingCount": 2,
     "upNextCount": 8,
     "changes": [
-      "Left currently reading: Slashed Beauties"
+      "Left currently reading: The Lamb"
     ],
     "warning": null,
     "error": null,
     "reading": [
-      {
-        "title": "The Lamb",
-        "progress": 30
-      },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
         "progress": 40
@@ -27,14 +23,6 @@
     ]
   },
   "currentlyReading": [
-    {
-      "title": "The Lamb",
-      "author": "Lucy   Rose",
-      "goodreadsId": "216867498",
-      "isbn": "1399619713",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1722268713l/216867498._SY475_.jpg",
-      "progress": 30
-    },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
       "author": "Sarah J. Maas",

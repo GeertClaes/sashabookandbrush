@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-18T01:01:50.341Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "2 currently reading, 8 up next. Left currently reading: The Lamb",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-10-17T01:19:12.094Z",
       "type": "goodreads",
       "ok": true,
@@ -311,14 +319,6 @@
       "title": "Deleted painting the-mountains-of-velaris",
       "detail": "It leaves the Art page after the site rebuilds (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-13T17:36:16.154Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Deleted painting studio-still",
-      "detail": "It leaves the Art page after the site rebuilds (about a minute).",
-      "by": "geert.wl.claes@gmail.com"
     }
   ]
 }
