@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-24T01:34:41.051Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads RSS sync",
+      "detail": "2 currently reading, 8 up next. No changes to currently reading.",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-10-18T01:01:50.341Z",
       "type": "goodreads",
       "ok": true,
@@ -310,14 +318,6 @@
       "ok": true,
       "title": "Added Velaris",
       "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-13T19:35:44.119Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Deleted painting the-mountains-of-velaris",
-      "detail": "It leaves the Art page after the site rebuilds (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
   ]

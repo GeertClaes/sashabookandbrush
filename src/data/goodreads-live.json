@@ -1,14 +1,12 @@
 {
-  "updated": "2026-10-18T01:01:50.339Z",
+  "updated": "2026-10-24T01:34:41.049Z",
   "lastSync": {
-    "at": "2026-10-18T01:01:50.339Z",
+    "at": "2026-10-24T01:34:41.049Z",
     "ok": true,
     "source": "github-actions",
     "readingCount": 2,
     "upNextCount": 8,
-    "changes": [
-      "Left currently reading: The Lamb"
-    ],
+    "changes": [],
     "warning": null,
     "error": null,
     "reading": [
@@ -63,7 +61,7 @@
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1768433474l/241564688._SY475_.jpg"
     },
     {
-      "title": "Of Her Blood: A Novel",
+      "title": "Of Her Blood",
       "author": "Rozina Hyland",
       "goodreadsId": "253006772",
       "isbn": "1066693420",
