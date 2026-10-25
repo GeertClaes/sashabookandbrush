@@ -1,9 +1,8 @@
 ---
 title: "Garden bridge"
 medium: "Acrylic on canvas"
-note: ""
 featured: true
 order: 7
-available: false
+available: true
 image: "garden-bridge.jpg"
 ---
