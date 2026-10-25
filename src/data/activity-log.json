@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-25T17:07:37.269Z",
+      "type": "admin",
+      "ok": true,
+      "title": "Added Dragon",
+      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
+      "by": "sasha.l.barnes@gmail.com"
+    },
+    {
       "at": "2026-10-24T01:34:41.051Z",
       "type": "goodreads",
       "ok": true,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Updated Velaris",
-      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-13T19:38:24.144Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Added Velaris",
       "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
