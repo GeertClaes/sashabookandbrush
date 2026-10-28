@@ -1,14 +1,14 @@
 {
   "updated": "2026-10-24T01:34:41.049Z",
   "lastSync": {
-    "at": "2026-10-24T01:34:41.049Z",
-    "ok": true,
+    "at": "2026-10-28T02:14:18.920Z",
+    "ok": false,
     "source": "github-actions",
     "readingCount": 2,
     "upNextCount": 8,
     "changes": [],
     "warning": null,
-    "error": null,
+    "error": "Command failed: curl -L --fail -sS -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 https://www.goodreads.com/review/list_rss/141471789?shelf=currently-reading\ncurl: (22) The requested URL returned error: 404\n",
     "reading": [
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",

@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-28T02:14:18.923Z",
+      "type": "goodreads",
+      "ok": false,
+      "title": "Goodreads RSS sync failed",
+      "detail": "Command failed: curl -L --fail -sS -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 https://www.goodreads.com/review/list_rss/141471789?shelf=currently-reading\ncurl: (22) The requested URL returned error: 404\n",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-10-25T17:09:33.272Z",
       "type": "admin",
       "ok": true,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Updated Bilbo Baggins",
-      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-13T19:47:44.356Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Added Bilbo Baggins",
       "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
