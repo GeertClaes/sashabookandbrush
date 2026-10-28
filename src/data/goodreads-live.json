@@ -1,14 +1,17 @@
 {
-  "updated": "2026-10-24T01:34:41.049Z",
+  "updated": "2026-10-28T17:29:53.404Z",
   "lastSync": {
-    "at": "2026-10-28T02:14:18.920Z",
-    "ok": false,
-    "source": "github-actions",
+    "at": "2026-10-28T17:29:53.404Z",
+    "ok": true,
+    "source": "local",
     "readingCount": 2,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Crown of Midnight (Throne of Glass, #2): — → 30%",
+      "Up next order changed."
+    ],
     "warning": null,
-    "error": "Command failed: curl -L --fail -sS -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 https://www.goodreads.com/review/list_rss/141471789?shelf=currently-reading\ncurl: (22) The requested URL returned error: 404\n",
+    "error": null,
     "reading": [
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
@@ -16,7 +19,7 @@
       },
       {
         "title": "Crown of Midnight (Throne of Glass, #2)",
-        "progress": null
+        "progress": 30
       }
     ]
   },
@@ -35,7 +38,7 @@
       "goodreadsId": "17167166",
       "isbn": "1619630621",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1391580481l/17167166.jpg",
-      "progress": null
+      "progress": 30
     }
   ],
   "upNext": [
@@ -45,13 +48,6 @@
       "goodreadsId": "255803383",
       "isbn": "",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1784989603l/255803383._SY475_.jpg"
-    },
-    {
-      "title": "The Secret Paris Ingredient",
-      "author": "M.H. Cali",
-      "goodreadsId": "257267566",
-      "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1787341557l/257267566._SY475_.jpg"
     },
     {
       "title": "The Knave and the Moon (The Stonewater Kingdom, #2)",
@@ -66,6 +62,13 @@
       "goodreadsId": "253006772",
       "isbn": "1066693420",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1780447142l/253006772._SX318_.jpg"
+    },
+    {
+      "title": "The Secret Paris Ingredient",
+      "author": "M.H. Cali",
+      "goodreadsId": "257267566",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1787341557l/257267566._SY475_.jpg"
     },
     {
       "title": "The Memory Chamber",

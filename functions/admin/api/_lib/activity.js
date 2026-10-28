@@ -12,9 +12,9 @@ export function parseActivityLog(text) {
   }
 }
 
-export function activityEntry({ type, ok = true, title, detail = "", by = "" }) {
+export function activityEntry({ at, type, ok = true, title, detail = "", by = "" }) {
   return {
-    at: new Date().toISOString(),
+    at: at || new Date().toISOString(),
     type,
     ok: Boolean(ok),
     title: String(title || "Update"),

@@ -11,41 +11,66 @@ function parseLive(text) {
   }
 }
 
+function shelfTitles(books, withProgress) {
+  return (books || []).map((book) => {
+    if (!withProgress) return book.title;
+    const percent = typeof book.progress === "number" ? ` (${book.progress}%)` : "";
+    return `${book.title}${percent}`;
+  });
+}
+
 function syncFromLive(live) {
-  return (
-    live.lastSync || {
-      at: live.updated || "",
-      ok: Boolean(live.updated),
-      source: "file",
-      readingCount: live.currentlyReading?.length || 0,
-      upNextCount: live.upNext?.length || 0,
-      changes: [],
-      warning: live.updated ? null : "No Goodreads sync has been recorded yet.",
-      error: null,
-      reading: (live.currentlyReading || []).map((book) => ({
+  const recorded = live.lastSync || {};
+  const reading = recorded.reading?.length
+    ? recorded.reading
+    : (live.currentlyReading || []).map((book) => ({
         title: book.title,
         progress: book.progress ?? null,
-      })),
-    }
-  );
+      }));
+  const upNext = (live.upNext || []).map((book) => ({ title: book.title }));
+  return {
+    at: recorded.at || live.updated || "",
+    ok: recorded.at ? Boolean(recorded.ok) : Boolean(live.updated),
+    source: recorded.source || "file",
+    readingCount: recorded.readingCount ?? reading.length,
+    upNextCount: recorded.upNextCount ?? upNext.length,
+    changes: recorded.changes || [],
+    warning: recorded.warning ?? (live.updated ? null : "No Goodreads sync has been recorded yet."),
+    error: recorded.error ?? null,
+    reading,
+    upNext,
+  };
+}
+
+function syncDetail(sync) {
+  const reading = shelfTitles(sync.reading, true);
+  const next = shelfTitles(sync.upNext, false).filter(Boolean);
+  const lines = ["Now reading", ...(reading.length ? reading : ["None"]), "Up next", ...(next.length ? next : ["None"])];
+  if (!sync.ok) {
+    lines.push(sync.warning || sync.error || "Goodreads shelf sync had a problem.");
+    return lines.join("\n");
+  }
+  const changes = sync.changes || [];
+  lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
+  return lines.join("\n");
 }
 
 function eventFromSync(sync) {
   if (!sync?.at) return null;
-  const changes = (sync.changes || []).join("; ");
-  const extra = sync.warning || sync.error || "";
-  const counts = `${sync.readingCount || 0} currently reading, ${sync.upNextCount || 0} up next.`;
-  const detail = sync.ok
-    ? `${counts} ${changes || "No changes to currently reading."}`.trim()
-    : extra || "Goodreads RSS sync had a problem.";
   return {
     at: sync.at,
     type: "goodreads",
     ok: Boolean(sync.ok),
-    title: sync.ok ? "Goodreads RSS sync" : "Goodreads RSS sync failed",
-    detail,
+    title: sync.ok ? "Goodreads shelf sync" : "Goodreads shelf sync failed",
+    detail: syncDetail(sync),
     by: sync.source || "pages-build",
   };
+}
+
+function sameSync(left, right) {
+  const a = Date.parse(left || "");
+  const b = Date.parse(right || "");
+  return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) < 5000;
 }
 
 async function fetchDeployedLive(request) {
@@ -78,7 +103,7 @@ export async function onRequestGet(context) {
     const log = parseActivityLog(logText);
     const fromSync = eventFromSync(sync);
     const events = fromSync
-      ? [fromSync, ...log.events.filter((event) => event.type !== "goodreads" || event.at !== fromSync.at)]
+      ? [fromSync, ...log.events.filter((event) => event.type !== "goodreads" || !sameSync(event.at, fromSync.at))]
       : log.events;
     const site = summarizeDeployments(pages.deployments);
 

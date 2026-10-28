@@ -1275,20 +1275,73 @@ const pageCopy = editableCopy(site);
     };
   }
 
-  function activityItem(event, time, placement) {
+  function sameSync(left, right) {
+    const a = Date.parse(left || "");
+    const b = Date.parse(right || "");
+    return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) < 5000;
+  }
+
+  function shortSyncProblem(text) {
+    const value = String(text || "");
+    const status = value.match(/returned error:\s*(\d+)/) || value.match(/HTTP (\d+)/);
+    if (status) return `Goodreads returned HTTP ${status[1]}. The previous shelf was kept.`;
+    return value;
+  }
+
+  function syncLines(sync) {
+    const reading = (sync.reading || []).map((book) => {
+      const percent = typeof book.progress === "number" ? ` (${book.progress}%)` : "";
+      return `${book.title}${percent}`;
+    });
+    const next = (sync.upNext || []).map((book) => book.title).filter(Boolean);
+    const lines = ["Now reading", ...(reading.length ? reading : ["None"]), "Up next", ...(next.length ? next : ["None"])];
+    if (!sync.ok) {
+      lines.push(shortSyncProblem(sync.warning || sync.error || "Goodreads shelf sync had a problem."));
+      return lines;
+    }
+    const changes = sync.changes || [];
+    lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
+    return lines;
+  }
+
+  function presentLines(lines) {
+    const blob = lines.join("\n");
+    if (/Command failed: curl|curl: \(22\)/.test(blob)) return [shortSyncProblem(blob)];
+    return lines.map((line) => (/returned error:\s*\d+|HTTP \d+/.test(line) ? shortSyncProblem(line) : line));
+  }
+
+  function activityDetail(lines) {
+    if (!lines.length) return "";
+    const labels = new Set(["Now reading", "Up next", "Changes"]);
+    if (lines.length === 1 && !labels.has(lines[0])) {
+      const detailClass = showAllActivity ? "mt-1 text-muted-foreground" : "mt-1 line-clamp-2 text-muted-foreground";
+      return `<p class="${detailClass}">${escapeHtml(lines[0])}</p>`;
+    }
+    return `<ul class="mt-1 space-y-0.5 text-muted-foreground">${lines
+      .map((line) => {
+        const label = labels.has(line);
+        return `<li class="${label ? "mt-2 text-foreground first:mt-0" : ""}">${escapeHtml(line)}</li>`;
+      })
+      .join("")}</ul>`;
+  }
+
+  function activityItem(event, time, placement, sync) {
     const failed = event.ok === false;
     const mark = failed ? "Failed" : event.type === "goodreads" ? "Goodreads" : "Editor";
-    const detailClass = showAllActivity ? "mt-1 text-muted-foreground" : "mt-1 line-clamp-2 text-muted-foreground";
     const dot = failed ? "border-2 border-accent bg-background" : "bg-accent";
     const rail = placement === "last" || placement === "only"
       ? ""
       : `<span class="absolute ${placement === "first" ? "top-3" : "top-0"} -bottom-2 left-1/2 w-0.5 -translate-x-1/2 bg-muted-foreground" aria-hidden="true"></span>`;
     const by = event.by ? ` · ${escapeHtml(event.by)}` : "";
-    const detail = event.detail ? `<p class="${detailClass}">${escapeHtml(event.detail)}</p>` : "";
-    return `<li class="group col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"><p class="pt-0.5 text-right text-xs text-muted-foreground tabular-nums">${escapeHtml(time)}</p><div class="relative flex justify-center">${rail}<span class="relative z-10 mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${dot}" aria-hidden="true"></span></div><div class="min-w-0 pb-7 group-last:pb-0"><p class="text-xs text-muted-foreground">${escapeHtml(mark)}${by}</p><p class="font-medium text-foreground">${escapeHtml(event.title)}</p>${detail}</div></li>`;
+    const lines = presentLines(
+      sync?.at && event.type === "goodreads" && sameSync(event.at, sync.at)
+        ? syncLines(sync)
+        : String(event.detail || "").split("\n").map((line) => line.trim()).filter(Boolean),
+    );
+    return `<li class="group col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"><p class="pt-0.5 text-right text-xs text-muted-foreground tabular-nums">${escapeHtml(time)}</p><div class="relative flex justify-center">${rail}<span class="relative z-10 mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${dot}" aria-hidden="true"></span></div><div class="min-w-0 pb-7 group-last:pb-0"><p class="text-xs text-muted-foreground">${escapeHtml(mark)}${by}</p><p class="font-medium text-foreground">${escapeHtml(event.title)}</p>${activityDetail(lines)}</div></li>`;
   }
 
-  function activityLog(events) {
+  function activityLog(events, sync) {
     const groups = [];
     for (const event of events) {
       const stamp = formatTimeline(event.at);
@@ -1307,12 +1360,22 @@ const pageCopy = editableCopy(site);
           .map((item) => {
             const placement = events.length === 1 ? "only" : index === 0 ? "first" : index === events.length - 1 ? "last" : "middle";
             index += 1;
-            return activityItem(item.event, item.time, placement);
+            return activityItem(item.event, item.time, placement, sync);
           })
           .join("");
         return heading + rows;
       })
       .join("");
+  }
+
+  function syncList(sync) {
+    const labels = new Set(["Now reading", "Up next", "Changes"]);
+    return `<ul class="space-y-0.5">${syncLines(sync)
+      .map((line) => {
+        const label = labels.has(line);
+        return `<li class="${label ? "mt-3 text-foreground first:mt-0" : "text-muted-foreground"}">${escapeHtml(line)}</li>`;
+      })
+      .join("")}</ul>`;
   }
 
   function renderActivity(data) {
@@ -1344,21 +1407,10 @@ const pageCopy = editableCopy(site);
       }
     }
     if (syncEl) {
-      const reading = (sync.reading || [])
-        .map((book) => {
-          const pct = typeof book.progress === "number" ? ` (${book.progress}%)` : "";
-          return escapeHtml(`${book.title}${pct}`);
-        })
-        .join("<br>");
-      const changes = (sync.changes || []).map((item) => escapeHtml(item)).join("<br>");
-      const extra = sync.warning || sync.error || "";
-      syncEl.innerHTML = `
-        <p class="text-xs text-muted-foreground">${escapeHtml(String(sync.readingCount || 0))} currently reading · ${escapeHtml(String(sync.upNextCount || 0))} up next</p>
-        ${extra ? `<p class="mt-2 text-muted-foreground">${escapeHtml(extra)}</p>` : ""}
-        ${reading ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Now reading</span><br>${reading}</p>` : ""}
-        ${changes ? `<p class="mt-3 text-muted-foreground"><span class="text-foreground">Changes</span><br>${changes}</p>` : `<p class="mt-3 text-muted-foreground">No currently-reading changes in that sync.</p>`}
-        ${site.deploymentsError ? `<p class="mt-3 text-xs text-muted-foreground">${escapeHtml(site.deploymentsError)}</p>` : ""}
-      `;
+      const problem = site.deploymentsError
+        ? `<p class="mt-3 text-xs text-muted-foreground">${escapeHtml(site.deploymentsError)}</p>`
+        : "";
+      syncEl.innerHTML = `${sync.at ? syncList(sync) : `<p class="text-muted-foreground">No Goodreads sync recorded yet.</p>`}${problem}`;
     }
     if (logEl) {
       const events = data.events || [];
@@ -1366,7 +1418,7 @@ const pageCopy = editableCopy(site);
       if (!events.length) {
         logEl.innerHTML = `<li class="col-span-3 text-muted-foreground">No admin or sync events recorded yet.</li>`;
       } else {
-        logEl.innerHTML = activityLog(events.slice(0, limit));
+        logEl.innerHTML = activityLog(events.slice(0, limit), sync);
       }
       if (more) {
         const hiddenCount = Math.min(events.length, 20) - 3;

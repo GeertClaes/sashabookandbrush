@@ -68,7 +68,7 @@ Mark tokens as **Secret**.
 | `GITHUB_REPO` | `GeertClaes/sashabookandbrush` | Repo the admin API commits to |
 | `GITHUB_BRANCH` | `main` | Branch to commit to |
 
-Goodreads RSS is pulled by the **Sync Goodreads** GitHub Action (23:15 UTC). That commits `src/data/goodreads-live.json` only when the shelf changes. The Pages build does not call Goodreads: Cloudflare's build network is rejected with HTTP 403. The 00:00 UTC cron Worker then rebuilds `main` and publishes the committed file.
+The Goodreads shelf is pulled by the **Sync Goodreads** GitHub Action (23:15 UTC). That commits `src/data/goodreads-live.json` only when the shelf changes. The Pages build does not call Goodreads: Cloudflare's build network is rejected with HTTP 403. The 00:00 UTC cron Worker then rebuilds `main` and publishes the committed file.
 
 #### Cloudflare Access (lock `/admin` to Google)
 
@@ -205,7 +205,7 @@ node scripts/import-goodreads.mjs "C:\path\to\export.csv"
 npm run sync:goodreads
 ```
 
-`npm run sync:goodreads` pulls public RSS (currently reading, progress, a short TBR) into `src/data/goodreads-live.json` without a CSV. Production runs that script from GitHub Actions, not from the Cloudflare build.
+`npm run sync:goodreads` reads the public Goodreads profile (currently reading and progress) and the public to-read widget (a short TBR) into `src/data/goodreads-live.json` without a CSV. Production runs that script from GitHub Actions, not from the Cloudflare build. Shelf RSS feeds now return HTTP 404.
 
 Then refresh the Books page. Shelf, rating, genre, year read, and sort are independent. Covers are downloaded into `src/assets/covers/` so Astro can optimize them. Review HTML such as `<br/>` is turned into real line breaks.
 
@@ -288,15 +288,15 @@ The footer already includes an affiliate disclosure.
 
 ### Currently reading
 
-The home shelf and progress % come from public Goodreads RSS (`npm run sync:goodreads`). That also writes a short “Up next” TBR teaser. The full library (ratings, reviews, covers) still needs a CSV import.
+The home shelf and progress % come from the public Goodreads profile (`npm run sync:goodreads`). That also writes a short “Up next” TBR teaser from the public shelf widget. The full library (ratings, reviews, covers) still needs a CSV import.
 
-`npm run build` runs the RSS sync first, then Astro. On Cloudflare Pages (`CF_PAGES=1`) the sync does not call Goodreads. It copies the committed `src/data/goodreads-live.json` into the site. Locally, and in GitHub Actions, it fetches the feeds. If Goodreads is down, the last shelf is kept.
+`npm run build` runs the shelf sync first, then Astro. On Cloudflare Pages (`CF_PAGES=1`) the sync does not call Goodreads. It copies the committed `src/data/goodreads-live.json` into the site. Locally, and in GitHub Actions, it fetches the profile and widget. If Goodreads is down, the last shelf is kept.
 
 ### Cloudflare Pages
 
 The production site is static. A new shelf is published only when Pages rebuilds.
 
-The **Sync Goodreads** Action (`.github/workflows/sync-goodreads.yml`) fetches the RSS at 23:15 UTC from GitHub's runners, which Goodreads allows. **Sync now** on `/admin` starts that same Action. It commits `src/data/goodreads-live.json` when currently reading or up next changes. A commit made with the Actions token does not start a new Actions run.
+The **Sync Goodreads** Action (`.github/workflows/sync-goodreads.yml`) fetches the profile and widget at 23:15 UTC from GitHub's runners, which Goodreads allows. **Sync now** on `/admin` starts that same Action. It commits `src/data/goodreads-live.json` when currently reading or up next changes. A commit made with the Actions token does not start a new Actions run.
 
 Build command: `npm run build`. Create the deploy hook and Worker secret as in [Environment configuration](#environment-configuration) → **Cron Worker**.
 

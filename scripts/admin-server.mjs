@@ -251,19 +251,22 @@ const server = createServer(async (req, res) => {
       const log = parseActivityLog(await readFile(path.join(ROOT, ACTIVITY_FILE), "utf8").catch(() => ""));
       json(res, 200, {
         ok: true,
-        sync: live.lastSync || {
-          at: live.updated || "",
-          ok: Boolean(live.updated),
-          source: "local",
-          readingCount: live.currentlyReading?.length || 0,
-          upNextCount: live.upNext?.length || 0,
-          changes: [],
-          warning: null,
-          error: null,
-          reading: (live.currentlyReading || []).map((book) => ({
-            title: book.title,
-            progress: book.progress ?? null,
-          })),
+        sync: {
+          at: live.lastSync?.at || live.updated || "",
+          ok: live.lastSync ? Boolean(live.lastSync.ok) : Boolean(live.updated),
+          source: live.lastSync?.source || "local",
+          readingCount: live.lastSync?.readingCount ?? live.currentlyReading?.length ?? 0,
+          upNextCount: live.lastSync?.upNextCount ?? live.upNext?.length ?? 0,
+          changes: live.lastSync?.changes || [],
+          warning: live.lastSync?.warning ?? null,
+          error: live.lastSync?.error ?? null,
+          reading: live.lastSync?.reading?.length
+            ? live.lastSync.reading
+            : (live.currentlyReading || []).map((book) => ({
+                title: book.title,
+                progress: book.progress ?? null,
+              })),
+          upNext: (live.upNext || []).map((book) => ({ title: book.title })),
         },
         events: log.events,
         site: {
