@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-10-31T14:13:08.210Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads shelf sync",
+      "detail": "Now reading\nA Court of Wings and Ruin (A Court of Thorns and Roses, #3) (40%)\nCrown of Midnight (Throne of Glass, #2) (30%)\nUp next\nThe Washwoman at the River's End (The Curse of the Fates, #1)\nThe Knave and the Moon (The Stonewater Kingdom, #2)\nOf Her Blood\nThe Secret Paris Ingredient\nThe Memory Chamber\nA Time of Witches\nMad Mabel\nThe Lamplighters\nChanges\nNo changes since the previous shelf.",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-10-28T17:29:53.418Z",
       "type": "goodreads",
       "ok": true,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Updated Liquitex professional heavy body acrylics",
-      "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-13T19:49:23.512Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated Nicpro paintbrushes",
       "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }

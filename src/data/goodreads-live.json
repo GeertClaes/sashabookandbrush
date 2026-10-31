@@ -1,15 +1,12 @@
 {
   "updated": "2026-10-28T17:29:53.404Z",
   "lastSync": {
-    "at": "2026-10-28T17:29:53.404Z",
+    "at": "2026-10-31T14:13:08.210Z",
     "ok": true,
-    "source": "local",
+    "source": "github-actions",
     "readingCount": 2,
     "upNextCount": 8,
-    "changes": [
-      "Crown of Midnight (Throne of Glass, #2): — → 30%",
-      "Up next order changed."
-    ],
+    "changes": [],
     "warning": null,
     "error": null,
     "reading": [
@@ -20,6 +17,32 @@
       {
         "title": "Crown of Midnight (Throne of Glass, #2)",
         "progress": 30
+      }
+    ],
+    "upNext": [
+      {
+        "title": "The Washwoman at the River's End (The Curse of the Fates, #1)"
+      },
+      {
+        "title": "The Knave and the Moon (The Stonewater Kingdom, #2)"
+      },
+      {
+        "title": "Of Her Blood"
+      },
+      {
+        "title": "The Secret Paris Ingredient"
+      },
+      {
+        "title": "The Memory Chamber"
+      },
+      {
+        "title": "A Time of Witches"
+      },
+      {
+        "title": "Mad Mabel"
+      },
+      {
+        "title": "The Lamplighters"
       }
     ]
   },
