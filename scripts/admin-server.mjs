@@ -161,6 +161,7 @@ function runGoodreadsSync() {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ["scripts/sync-goodreads.mjs"], {
       cwd: ROOT,
+      env: { ...process.env, GOODREADS_SYNC_MANUAL: "1" },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let out = "";

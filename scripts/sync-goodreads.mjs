@@ -308,6 +308,36 @@ function lastSyncFields({ ok, changes = [], warning = "", error = "", currentlyR
   };
 }
 
+// Scheduled runs stay quiet when nothing changed. A Sync now click should still
+// leave a Recent row, including "already up to date".
+function isManualSync() {
+  return (
+    process.env.GOODREADS_SYNC_MANUAL === "1" ||
+    process.env.GITHUB_EVENT_NAME === "workflow_dispatch" ||
+    process.env.GITHUB_EVENT_NAME === "push"
+  );
+}
+
+async function noteShelfCheck({ ok, changes = [], warning = "", error = "", currentlyReading, upNext, title }) {
+  const lastSync = lastSyncFields({ ok, changes, warning, error, currentlyReading, upNext });
+  await writeLive({
+    ...previous,
+    currentlyReading,
+    upNext,
+    updated: previous.updated || lastSync.at,
+    lastSync,
+  });
+  await writeActivity({
+    at: lastSync.at,
+    type: "goodreads",
+    ok,
+    title,
+    detail: formatSyncDetail({ currentlyReading, upNext, changes, ok, warning, error }),
+    by: source,
+  });
+  console.log("Recorded the Goodreads check.");
+}
+
 try {
   const profileUrl = site.goodreads?.profile || `https://www.goodreads.com/user/show/${USER_ID}`;
   const widgetUrl =
@@ -368,7 +398,7 @@ try {
   if (currentlyReading.length === 0 && previous.currentlyReading?.length) {
     const warning = "Goodreads returned no currently-reading books; kept the previous shelf.";
     console.warn(warning);
-    if (previous.lastSync?.ok === false && previous.lastSync?.warning === warning) process.exit(0);
+    if (previous.lastSync?.ok === false && previous.lastSync?.warning === warning && !isManualSync()) process.exit(0);
     const lastSync = lastSyncFields({
       ok: false,
       warning,
@@ -416,6 +446,15 @@ try {
 
   if (shelfSnapshot(previous) === shelfSnapshot(payload) && previous.lastSync?.ok !== false) {
     console.log("Goodreads shelf unchanged.");
+    if (isManualSync()) {
+      await noteShelfCheck({
+        ok: true,
+        changes: [],
+        currentlyReading,
+        upNext,
+        title: "Goodreads shelf sync",
+      });
+    }
     process.exit(0);
   }
 
@@ -435,8 +474,10 @@ try {
   const message = error instanceof Error ? error.message : String(error);
   if (previous.lastSync?.ok === false && previous.lastSync?.error === message) {
     console.warn(`Goodreads sync failed again (${message}).`);
-    if (ALLOW_FAIL) process.exit(0);
-    process.exit(1);
+    if (!isManualSync()) {
+      if (ALLOW_FAIL) process.exit(0);
+      process.exit(1);
+    }
   }
   const lastSync = lastSyncFields({
     ok: false,

@@ -742,7 +742,10 @@ const pageCopy = editableCopy(site);
   let currentSupply = null;
   let previewUrls = { book: "", art: "", supply: "", about: "" };
   let activityTimer = 0;
-  let activityLoading = false;
+  let activityChain = Promise.resolve(null);
+  let syncPending = false;
+  let syncPendingAt = "";
+  let syncWatchMark = 0;
   let showAllActivity = false;
   let lastActivity = null;
   let currentTab = "overview";
@@ -1413,7 +1416,22 @@ const pageCopy = editableCopy(site);
       syncEl.innerHTML = `${sync.at ? syncList(sync) : `<p class="text-muted-foreground">No Goodreads sync recorded yet.</p>`}${problem}`;
     }
     if (logEl) {
-      const events = data.events || [];
+      let events = [...(data.events || [])];
+      if (syncPending && latestMark(data) <= syncWatchMark) {
+        events.push({
+          at: syncPendingAt,
+          type: "goodreads",
+          ok: true,
+          title: "Checking Goodreads…",
+          detail: "",
+          by: "",
+        });
+      }
+      events.sort((left, right) => {
+        const a = Date.parse(left.at || "");
+        const b = Date.parse(right.at || "");
+        return (Number.isFinite(b) ? b : 0) - (Number.isFinite(a) ? a : 0);
+      });
       const limit = showAllActivity ? 20 : 3;
       if (!events.length) {
         logEl.innerHTML = `<li class="col-span-3 text-muted-foreground">No admin or sync events recorded yet.</li>`;
@@ -1428,9 +1446,37 @@ const pageCopy = editableCopy(site);
     }
   }
 
-  async function loadActivity(options = {}) {
-    if (activityLoading) return;
-    activityLoading = true;
+  function latestMark(data) {
+    if (!data) return 0;
+    const times = [data.sync?.at];
+    for (const event of data.events || []) {
+      if (event?.type === "goodreads") times.push(event.at);
+    }
+    let best = 0;
+    for (const value of times) {
+      const time = Date.parse(value || "");
+      if (Number.isFinite(time) && time > best) best = time;
+    }
+    return best;
+  }
+
+  function syncOutcome(data) {
+    const sync = data?.sync || {};
+    if (!sync.ok) return "Goodreads sync had a problem. The previous shelf was kept.";
+    if ((sync.changes || []).length) return "Goodreads shelf updated. A changed shelf goes live on the next publish.";
+    return "Goodreads shelf is already up to date.";
+  }
+
+  function loadActivity(options = {}) {
+    const run = activityChain.then(() => fetchActivity(options));
+    activityChain = run.then(
+      (data) => data,
+      () => null,
+    );
+    return run;
+  }
+
+  async function fetchActivity(options = {}) {
     const manual = Boolean(options.manual);
     const button = document.querySelector("[data-activity-refresh]");
     const checkedEl = document.querySelector("[data-activity-checked]");
@@ -1444,17 +1490,28 @@ const pageCopy = editableCopy(site);
       if (checkedEl) checkedEl.textContent = `Checked ${formatWhen(new Date().toISOString())}`;
       if (activityTimer) window.clearInterval(activityTimer);
       activityTimer = window.setInterval(() => loadActivity(), data.site?.building ? 15000 : 60000);
+      return data;
     } catch (error) {
       const siteEl = document.querySelector("[data-activity-site]");
       if (siteEl) siteEl.textContent = error instanceof Error ? error.message : "Could not load activity.";
       if (checkedEl) checkedEl.textContent = "";
+      return lastActivity;
     } finally {
-      activityLoading = false;
       if (button) {
         button.disabled = false;
         button.textContent = "Refresh";
       }
     }
+  }
+
+  async function watchSyncActivity(previousMark) {
+    const deadline = Date.now() + (isDev ? 0 : 120000);
+    let data = await loadActivity({ manual: true });
+    while (!isDev && Date.now() < deadline && latestMark(data) <= previousMark) {
+      await wait(4000);
+      data = await loadActivity({ manual: true });
+    }
+    return data;
   }
 
   function escapeHtml(value) {
@@ -2349,13 +2406,27 @@ const pageCopy = editableCopy(site);
     button.disabled = true;
     const idle = button.textContent;
     button.textContent = "Syncing…";
+    syncWatchMark = latestMark(lastActivity);
+    syncPendingAt = new Date().toISOString();
+    syncPending = true;
+    if (lastActivity) renderActivity(lastActivity);
     try {
       const result = await call("/sync-goodreads", { method: "POST", body: "{}" });
       setBanner("ok", escapeHtml(result.message || "Sync started."));
-      await loadActivity({ manual: true });
+      const data = await watchSyncActivity(syncWatchMark);
+      syncPending = false;
+      if (data) renderActivity(data);
+      if (!isDev && latestMark(data) > syncWatchMark) setBanner("ok", escapeHtml(syncOutcome(data)));
+      if (!isDev && latestMark(data) <= syncWatchMark) {
+        setBanner("ok", "Sync is still running. Recent will show it when GitHub finishes.");
+      }
     } catch (error) {
+      syncPending = false;
       setBanner("error", escapeHtml(error instanceof Error ? error.message : "Sync failed."));
+      const data = await loadActivity({ manual: true });
+      if (data) renderActivity(data);
     } finally {
+      syncPending = false;
       button.disabled = false;
       button.textContent = idle;
     }

@@ -14,3 +14,6 @@ public/data/goodreads-live.json
 # Installed by the Mermaid VS Code extension. The site does not use these.
 .github/copilot-instructions.md
 .github/instructions/mermaid.instructions.md
+
+# Local drafts. Not part of the site.
+drafts/

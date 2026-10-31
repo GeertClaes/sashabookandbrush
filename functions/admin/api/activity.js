@@ -73,6 +73,29 @@ function sameSync(left, right) {
   return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) < 5000;
 }
 
+function timeValue(value) {
+  const time = Date.parse(value || "");
+  return Number.isFinite(time) ? time : 0;
+}
+
+export function chooseLive(deployed, git) {
+  const deployedTime = timeValue(deployed?.lastSync?.at || deployed?.updated);
+  const gitTime = timeValue(git?.lastSync?.at || git?.updated);
+  if (git && gitTime >= deployedTime) return git;
+  if (deployed && (deployed.lastSync || deployed.updated || deployed.currentlyReading)) return deployed;
+  return git || deployed || {};
+}
+
+export function mergeActivityEvents(logEvents, sync) {
+  const fromSync = eventFromSync(sync);
+  const events = Array.isArray(logEvents) ? [...logEvents] : [];
+  if (fromSync && !events.some((event) => event.type === "goodreads" && sameSync(event.at, fromSync.at))) {
+    events.push(fromSync);
+  }
+  events.sort((left, right) => timeValue(right.at) - timeValue(left.at));
+  return events;
+}
+
 async function fetchDeployedLive(request) {
   const url = new URL("/data/goodreads-live.json", request.url);
   const response = await fetch(url.toString(), {
@@ -95,16 +118,10 @@ export async function onRequestGet(context) {
       })),
     ]);
 
-    const live =
-      deployedLive && (deployedLive.lastSync || deployedLive.updated || deployedLive.currentlyReading)
-        ? deployedLive
-        : parseLive(gitLiveText);
+    const live = chooseLive(deployedLive, parseLive(gitLiveText));
     const sync = syncFromLive(live);
     const log = parseActivityLog(logText);
-    const fromSync = eventFromSync(sync);
-    const events = fromSync
-      ? [fromSync, ...log.events.filter((event) => event.type !== "goodreads" || !sameSync(event.at, fromSync.at))]
-      : log.events;
+    const events = mergeActivityEvents(log.events, sync);
     const site = summarizeDeployments(pages.deployments);
 
     return json({

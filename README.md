@@ -296,7 +296,7 @@ The home shelf and progress % come from the public Goodreads profile (`npm run s
 
 The production site is static. A new shelf is published only when Pages rebuilds.
 
-The **Sync Goodreads** Action (`.github/workflows/sync-goodreads.yml`) fetches the profile and widget at 23:15 UTC from GitHub's runners, which Goodreads allows. **Sync now** on `/admin` starts that same Action. It commits `src/data/goodreads-live.json` when currently reading or up next changes. A commit made with the Actions token does not start a new Actions run.
+The **Sync Goodreads** Action (`.github/workflows/sync-goodreads.yml`) fetches the profile and widget at 23:15 UTC from GitHub's runners, which Goodreads allows. **Sync now** on `/admin` starts that same Action. It commits `src/data/goodreads-live.json` when currently reading or up next changes. A Sync now click also records the check in Recent when the shelf is already up to date. The nightly run stays quiet in that case. A commit made with the Actions token does not start a new Actions run.
 
 Build command: `npm run build`. Create the deploy hook and Worker secret as in [Environment configuration](#environment-configuration) → **Cron Worker**.
 
