@@ -1,15 +1,23 @@
 {
-  "updated": "2026-10-28T17:29:53.404Z",
+  "updated": "2026-11-03T14:37:31.553Z",
   "lastSync": {
-    "at": "2026-11-03T03:55:32.140Z",
-    "ok": false,
+    "at": "2026-11-03T14:37:31.553Z",
+    "ok": true,
     "source": "github-actions",
-    "readingCount": 2,
+    "readingCount": 3,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Started The Washwoman at the River's End (The Curse of the Fates, #1)",
+      "Up next: You With the Sad Eyes",
+      "Left up next: The Washwoman at the River's End (The Curse of the Fates, #1)"
+    ],
     "warning": null,
-    "error": "Goodreads returned HTTP 503 for /book/show/238286481",
+    "error": null,
     "reading": [
+      {
+        "title": "The Washwoman at the River's End (The Curse of the Fates, #1)",
+        "progress": null
+      },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
         "progress": 40
@@ -20,9 +28,6 @@
       }
     ],
     "upNext": [
-      {
-        "title": "The Washwoman at the River's End (The Curse of the Fates, #1)"
-      },
       {
         "title": "The Knave and the Moon (The Stonewater Kingdom, #2)"
       },
@@ -43,10 +48,21 @@
       },
       {
         "title": "The Lamplighters"
+      },
+      {
+        "title": "You With the Sad Eyes"
       }
     ]
   },
   "currentlyReading": [
+    {
+      "title": "The Washwoman at the River's End (The Curse of the Fates, #1)",
+      "author": "Megan Shade",
+      "goodreadsId": "255803383",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1784989603l/255803383._SY475_.jpg",
+      "progress": null
+    },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
       "author": "Sarah J. Maas",
@@ -65,13 +81,6 @@
     }
   ],
   "upNext": [
-    {
-      "title": "The Washwoman at the River's End (The Curse of the Fates, #1)",
-      "author": "Megan Shade",
-      "goodreadsId": "255803383",
-      "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1784989603l/255803383._SY475_.jpg"
-    },
     {
       "title": "The Knave and the Moon (The Stonewater Kingdom, #2)",
       "author": "Rachel Gillig",
@@ -120,6 +129,13 @@
       "goodreadsId": "60538347",
       "isbn": "1984882171",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1646257003l/60538347.jpg"
+    },
+    {
+      "title": "You With the Sad Eyes",
+      "author": "Christina Applegate",
+      "goodreadsId": "238286481",
+      "isbn": "9780316594929",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761344174l/238286481._SX98_.jpg"
     }
   ]
 }

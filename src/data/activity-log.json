@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-11-03T14:37:31.553Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads shelf sync",
+      "detail": "Now reading\nThe Washwoman at the River's End (The Curse of the Fates, #1)\nA Court of Wings and Ruin (A Court of Thorns and Roses, #3) (40%)\nCrown of Midnight (Throne of Glass, #2) (30%)\nUp next\nThe Knave and the Moon (The Stonewater Kingdom, #2)\nOf Her Blood\nThe Secret Paris Ingredient\nThe Memory Chamber\nA Time of Witches\nMad Mabel\nThe Lamplighters\nYou With the Sad Eyes\nChanges\nStarted The Washwoman at the River's End (The Curse of the Fates, #1)\nUp next: You With the Sad Eyes\nLeft up next: The Washwoman at the River's End (The Curse of the Fates, #1)",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-11-03T03:55:32.140Z",
       "type": "goodreads",
       "ok": false,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Added Shore & Marsh acrylic paint",
-      "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-09-13T19:50:41.188Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Added Windsor & Newton Gesso primer",
       "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }
