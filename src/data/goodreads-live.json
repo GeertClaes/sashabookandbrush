@@ -1,14 +1,14 @@
 {
   "updated": "2026-10-28T17:29:53.404Z",
   "lastSync": {
-    "at": "2026-10-31T14:13:08.210Z",
-    "ok": true,
+    "at": "2026-11-03T03:55:32.140Z",
+    "ok": false,
     "source": "github-actions",
     "readingCount": 2,
     "upNextCount": 8,
     "changes": [],
     "warning": null,
-    "error": null,
+    "error": "Goodreads returned HTTP 503 for /book/show/238286481",
     "reading": [
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
