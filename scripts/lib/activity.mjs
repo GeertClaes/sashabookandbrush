@@ -77,16 +77,17 @@ export function describeUpNextChanges(previous = [], next = []) {
 }
 
 export function formatSyncDetail({ currentlyReading = [], upNext = [], changes = [], ok = true, warning = "", error = "" }) {
+  if (!ok) {
+    const lines = [warning || error || "Goodreads shelf sync had a problem."];
+    if (currentlyReading.length || upNext.length) lines.push("The previous shelf was kept.");
+    return lines.join("\n");
+  }
   const reading = currentlyReading.map((book) => {
     const percent = typeof book.progress === "number" ? ` (${book.progress}%)` : "";
     return `${book.title}${percent}`;
   });
   const next = upNext.map((book) => book.title).filter(Boolean);
   const lines = ["Now reading", ...(reading.length ? reading : ["None"]), "Up next", ...(next.length ? next : ["None"])];
-  if (!ok) {
-    lines.push(warning || error || "Goodreads shelf sync had a problem.");
-    return lines.join("\n");
-  }
   lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
   return lines.join("\n");
 }

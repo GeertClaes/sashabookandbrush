@@ -1331,7 +1331,7 @@ const pageCopy = editableCopy(site);
   function activityItem(event, time, placement, sync) {
     const failed = event.ok === false;
     const mark = failed ? "Failed" : event.type === "goodreads" ? "Goodreads" : "Editor";
-    const dot = failed ? "border-2 border-accent bg-background" : "bg-accent";
+    const dot = failed ? "border-2 border-accent bg-background" : "bg-sage";
     const rail = placement === "last" || placement === "only"
       ? ""
       : `<span class="absolute ${placement === "first" ? "top-3" : "top-0"} -bottom-2 left-1/2 w-0.5 -translate-x-1/2 bg-muted-foreground" aria-hidden="true"></span>`;

@@ -43,13 +43,14 @@ function syncFromLive(live) {
 }
 
 function syncDetail(sync) {
+  if (!sync.ok) {
+    const lines = [sync.warning || sync.error || "Goodreads shelf sync had a problem."];
+    if (sync.reading?.length || sync.upNext?.length) lines.push("The previous shelf was kept.");
+    return lines.join("\n");
+  }
   const reading = shelfTitles(sync.reading, true);
   const next = shelfTitles(sync.upNext, false).filter(Boolean);
   const lines = ["Now reading", ...(reading.length ? reading : ["None"]), "Up next", ...(next.length ? next : ["None"])];
-  if (!sync.ok) {
-    lines.push(sync.warning || sync.error || "Goodreads shelf sync had a problem.");
-    return lines.join("\n");
-  }
   const changes = sync.changes || [];
   lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
   return lines.join("\n");

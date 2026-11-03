@@ -24,7 +24,13 @@ const BROWSER_UA =
 const CURL = process.platform === "win32" ? "curl.exe" : "curl";
 const execFileP = promisify(execFile);
 
-async function curlText(url) {
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Goodreads occasionally throws transient 503/429s or drops the connection.
+// Retry those a few times with backoff before giving up.
+async function curlText(url, attempt = 1) {
   try {
     const { stdout } = await execFileP(
       CURL,
@@ -36,6 +42,11 @@ async function curlText(url) {
     const stderr = typeof error?.stderr === "string" ? error.stderr : "";
     const status = stderr.match(/returned error:\s*(\d+)/)?.[1];
     const where = url.replace(/^https:\/\/www\.goodreads\.com/, "");
+    const retryable = !status || status === "429" || Number(status) >= 500;
+    if (retryable && attempt < 3) {
+      await sleep(attempt * 3000);
+      return curlText(url, attempt + 1);
+    }
     if (status) throw new Error(`Goodreads returned HTTP ${status} for ${where}`);
     throw new Error(`Could not reach Goodreads (${where}).`);
   }
