@@ -200,6 +200,7 @@ const pageCopy = editableCopy(site);
         <div data-panel="overview" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="space-y-10">
           <section>
             <p data-activity-site class="text-sm text-foreground">Checking the live site…</p>
+            <p data-activity-build class="mt-1 text-xs text-muted-foreground"></p>
             <p class="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span data-sync-line class="text-sm text-muted-foreground">Checking Goodreads…</span>
               <button
@@ -1384,6 +1385,7 @@ const pageCopy = editableCopy(site);
   function renderActivity(data) {
     lastActivity = data;
     const siteEl = document.querySelector("[data-activity-site]");
+    const buildEl = document.querySelector("[data-activity-build]");
     const syncLine = document.querySelector("[data-sync-line]");
     const syncEl = document.querySelector("[data-activity-sync]");
     const logEl = document.querySelector("[data-activity-log]");
@@ -1396,6 +1398,10 @@ const pageCopy = editableCopy(site);
       } else {
         siteEl.textContent = site.label || "Rebuild status unknown";
       }
+    }
+    if (buildEl) {
+      const hash = site.commitHash ? site.commitHash.slice(0, 7) : "";
+      buildEl.textContent = hash && site.at ? `Build ${hash} · ${formatWhen(site.at)}` : "";
     }
     if (syncLine) {
       if (!sync.at) {

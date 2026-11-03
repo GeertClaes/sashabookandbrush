@@ -18,6 +18,10 @@ function commitMessage(deployment) {
   return String(deployment?.deployment_trigger?.metadata?.commit_message || "");
 }
 
+function commitHash(deployment) {
+  return String(deployment?.deployment_trigger?.metadata?.commit_hash || "");
+}
+
 function triggerLabel(deployment) {
   const triggerType = String(deployment?.deployment_trigger?.type || "");
   if (triggerType === "ad_hoc") return "Goodreads cron / deploy hook";
@@ -79,6 +83,8 @@ export function summarizeDeployments(deployments = []) {
       live: false,
       building: false,
       commit: commitMessage(latest),
+      commitHash: commitHash(latest),
+      deployId: String(latest?.id || ""),
     };
   }
 
@@ -103,5 +109,7 @@ export function summarizeDeployments(deployments = []) {
     live,
     building,
     commit: commitMessage(relevant),
+    commitHash: commitHash(relevant),
+    deployId: String(relevant.id || ""),
   };
 }
