@@ -1,12 +1,15 @@
 {
-  "updated": "2026-11-03T14:37:31.553Z",
+  "updated": "2026-11-06T03:26:18.596Z",
   "lastSync": {
-    "at": "2026-11-05T09:01:51.589Z",
+    "at": "2026-11-06T03:26:18.596Z",
     "ok": true,
     "source": "github-actions",
     "readingCount": 3,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Up next: Hollow Bones",
+      "Left up next: You With the Sad Eyes"
+    ],
     "warning": null,
     "error": null,
     "reading": [
@@ -24,6 +27,9 @@
       }
     ],
     "upNext": [
+      {
+        "title": "Hollow Bones"
+      },
       {
         "title": "The Knave and the Moon (The Stonewater Kingdom, #2)"
       },
@@ -44,9 +50,6 @@
       },
       {
         "title": "The Lamplighters"
-      },
-      {
-        "title": "You With the Sad Eyes"
       }
     ]
   },
@@ -77,6 +80,13 @@
     }
   ],
   "upNext": [
+    {
+      "title": "Hollow Bones",
+      "author": "Jodi Picoult",
+      "goodreadsId": "245670591",
+      "isbn": "9780593726259",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1771387435l/245670591._SX98_.jpg"
+    },
     {
       "title": "The Knave and the Moon (The Stonewater Kingdom, #2)",
       "author": "Rachel Gillig",
@@ -125,13 +135,6 @@
       "goodreadsId": "60538347",
       "isbn": "1984882171",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1646257003l/60538347.jpg"
-    },
-    {
-      "title": "You With the Sad Eyes",
-      "author": "Christina Applegate",
-      "goodreadsId": "238286481",
-      "isbn": "9780316594929",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761344174l/238286481._SX98_.jpg"
     }
   ]
 }
