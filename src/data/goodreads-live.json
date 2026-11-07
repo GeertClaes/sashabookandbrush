@@ -1,22 +1,17 @@
 {
-  "updated": "2026-11-06T03:26:18.596Z",
+  "updated": "2026-11-07T02:46:54.624Z",
   "lastSync": {
-    "at": "2026-11-06T03:26:18.596Z",
+    "at": "2026-11-07T02:46:54.624Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 3,
+    "readingCount": 2,
     "upNextCount": 8,
     "changes": [
-      "Up next: Hollow Bones",
-      "Left up next: You With the Sad Eyes"
+      "Left currently reading: The Washwoman at the River's End (The Curse of the Fates, #1)"
     ],
     "warning": null,
     "error": null,
     "reading": [
-      {
-        "title": "The Washwoman at the River's End (The Curse of the Fates, #1)",
-        "progress": null
-      },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
         "progress": 40
@@ -54,14 +49,6 @@
     ]
   },
   "currentlyReading": [
-    {
-      "title": "The Washwoman at the River's End (The Curse of the Fates, #1)",
-      "author": "Megan Shade",
-      "goodreadsId": "255803383",
-      "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1784989603l/255803383._SY475_.jpg",
-      "progress": null
-    },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
       "author": "Sarah J. Maas",

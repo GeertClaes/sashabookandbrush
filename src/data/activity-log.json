@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-11-07T02:46:54.624Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads shelf sync",
+      "detail": "Now reading\nA Court of Wings and Ruin (A Court of Thorns and Roses, #3) (40%)\nCrown of Midnight (Throne of Glass, #2) (30%)\nUp next\nHollow Bones\nThe Knave and the Moon (The Stonewater Kingdom, #2)\nOf Her Blood\nThe Secret Paris Ingredient\nThe Memory Chamber\nA Time of Witches\nMad Mabel\nThe Lamplighters\nChanges\nLeft currently reading: The Washwoman at the River's End (The Curse of the Fates, #1)",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-11-06T03:26:18.596Z",
       "type": "goodreads",
       "ok": true,
@@ -306,14 +314,6 @@
     },
     {
       "at": "2026-09-14T05:28:45.265Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated Liquitex Basics acrylics",
-      "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
-      "by": "geert.wl.claes@gmail.com"
-    },
-    {
-      "at": "2026-09-14T05:28:32.120Z",
       "type": "admin",
       "ok": true,
       "title": "Updated Liquitex Basics acrylics",
