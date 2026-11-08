@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-11-08T02:29:11.644Z",
+      "type": "goodreads",
+      "ok": false,
+      "title": "Goodreads shelf sync failed",
+      "detail": "Goodreads profile lists 4 currently-reading books, but only 3 could be read.\nThe previous shelf was kept.",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-11-07T02:46:54.624Z",
       "type": "goodreads",
       "ok": true,
@@ -311,14 +319,6 @@
       "title": "Goodreads RSS sync",
       "detail": "4 currently reading, 8 up next. Started Heartless Hunter (The Crimson Moth, #1); Left currently reading: Wild Card (Rose Hill, #4); Left currently reading: The Last Witch",
       "by": "local"
-    },
-    {
-      "at": "2026-09-14T05:28:45.265Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated Liquitex Basics acrylics",
-      "detail": "Tool saved. It shows on the site after the rebuild (about a minute).",
-      "by": "geert.wl.claes@gmail.com"
     }
   ]
 }

@@ -1,16 +1,14 @@
 {
   "updated": "2026-11-07T02:46:54.624Z",
   "lastSync": {
-    "at": "2026-11-07T02:46:54.624Z",
-    "ok": true,
+    "at": "2026-11-08T02:29:11.644Z",
+    "ok": false,
     "source": "github-actions",
     "readingCount": 2,
     "upNextCount": 8,
-    "changes": [
-      "Left currently reading: The Washwoman at the River's End (The Curse of the Fates, #1)"
-    ],
+    "changes": [],
     "warning": null,
-    "error": null,
+    "error": "Goodreads profile lists 4 currently-reading books, but only 3 could be read.",
     "reading": [
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
