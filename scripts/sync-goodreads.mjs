@@ -97,7 +97,7 @@ function booksFromProfile(html) {
   const count = shelfCount(html, "currently-reading");
   const start = html.indexOf('id="currentlyReadingReviews"');
   if (start < 0) {
-    if (count === 0) return [];
+    if (count === 0) return { books: [], count: 0 };
     throw new Error("Goodreads profile did not include the currently-reading shelf.");
   }
   const end = html.indexOf("bigBoxBottom", start);
@@ -124,12 +124,13 @@ function booksFromProfile(html) {
       };
     })
     .filter((book) => book?.title && book.goodreadsId);
-  if (count != null && books.length < count) {
-    throw new Error(
-      `Goodreads profile lists ${count} currently-reading books, but only ${books.length} could be read.`,
-    );
+  // Goodreads' profile only shows recent "is currently reading" updates, so a book
+  // shelved a while ago without a new update can be missing even though it still
+  // counts toward the shelf total. Let the caller merge in what it already knows.
+  if (books.length === 0 && count > 0) {
+    throw new Error("Goodreads profile did not list any currently-reading books.");
   }
-  return books;
+  return { books, count };
 }
 
 function widgetHtml(source) {
@@ -356,7 +357,7 @@ try {
     "?cover_size=medium&num_books=8&order=d&shelf=to-read&sort=date_added&widget_id=1";
   const [profileHtml, widgetSource] = await Promise.all([curlText(profileUrl), curlText(widgetUrl)]);
   const known = knownBooks([previous.currentlyReading, previous.upNext]);
-  const parsedReading = booksFromProfile(profileHtml);
+  const { books: parsedReading, count: readingShelfCount } = booksFromProfile(profileHtml);
   const currentlyReading = [];
   for (const book of parsedReading) {
     const prev = known.get(String(book.goodreadsId));
@@ -377,6 +378,21 @@ try {
       image: details.image,
       progress: typeof percent === "number" ? percent : null,
     });
+  }
+
+  // The profile feed can omit shelved books that have no recent reading update.
+  // Carry those over from the last sync instead of treating it as a failure.
+  let readingWarning = "";
+  if (readingShelfCount != null && currentlyReading.length < readingShelfCount) {
+    const already = new Set(currentlyReading.map((book) => book.goodreadsId));
+    const carried = (previous.currentlyReading || []).filter(
+      (book) => book.goodreadsId && !already.has(String(book.goodreadsId)),
+    );
+    currentlyReading.push(...carried.slice(0, readingShelfCount - currentlyReading.length));
+    if (currentlyReading.length < readingShelfCount) {
+      readingWarning = `Goodreads lists ${readingShelfCount} currently-reading books, but only ${currentlyReading.length} could be matched to a title.`;
+      console.warn(readingWarning);
+    }
   }
 
   const parsedNext = booksFromWidget(widgetSource).slice(0, 8);
@@ -445,6 +461,7 @@ try {
   const lastSync = lastSyncFields({
     ok: true,
     changes,
+    warning: readingWarning,
     currentlyReading,
     upNext,
   });
@@ -457,10 +474,11 @@ try {
 
   if (shelfSnapshot(previous) === shelfSnapshot(payload) && previous.lastSync?.ok !== false) {
     console.log("Goodreads shelf unchanged.");
-    if (isManualSync()) {
+    if (isManualSync() || readingWarning) {
       await noteShelfCheck({
         ok: true,
         changes: [],
+        warning: readingWarning,
         currentlyReading,
         upNext,
         title: "Goodreads shelf sync",
@@ -475,7 +493,7 @@ try {
     type: "goodreads",
     ok: true,
     title: "Goodreads shelf sync",
-    detail: formatSyncDetail({ currentlyReading, upNext, changes, ok: true }),
+    detail: formatSyncDetail({ currentlyReading, upNext, changes, ok: true, warning: readingWarning }),
     by: source,
   });
   console.log(
@@ -519,5 +537,9 @@ try {
     console.warn(`Goodreads sync skipped (${message}). Using the last committed live file.`);
     process.exit(0);
   }
-  throw error;
+  // Print the real reason as the last output line instead of letting Node dump an
+  // uncaught-exception stack trace (whose last line is just "Node.js vX.Y.Z" and
+  // hides the message from tools that read the final line of output).
+  console.error(`Goodreads sync failed: ${message}`);
+  process.exitCode = 1;
 }

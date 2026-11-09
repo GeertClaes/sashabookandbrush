@@ -1,15 +1,28 @@
 {
-  "updated": "2026-11-07T02:46:54.624Z",
+  "updated": "2026-11-09T11:25:36.888Z",
   "lastSync": {
-    "at": "2026-11-09T11:14:58.973Z",
-    "ok": false,
-    "source": "github-actions",
-    "readingCount": 2,
+    "at": "2026-11-09T11:25:36.888Z",
+    "ok": true,
+    "source": "local",
+    "readingCount": 4,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Started Hollow Bones",
+      "Started Fourth Wing (The Empyrean, #1)",
+      "Up next: You With the Sad Eyes",
+      "Left up next: Hollow Bones"
+    ],
     "warning": null,
-    "error": "Goodreads profile lists 4 currently-reading books, but only 3 could be read.",
+    "error": null,
     "reading": [
+      {
+        "title": "Hollow Bones",
+        "progress": 17
+      },
+      {
+        "title": "Fourth Wing (The Empyrean, #1)",
+        "progress": 50
+      },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
         "progress": 40
@@ -20,9 +33,6 @@
       }
     ],
     "upNext": [
-      {
-        "title": "Hollow Bones"
-      },
       {
         "title": "The Knave and the Moon (The Stonewater Kingdom, #2)"
       },
@@ -43,10 +53,29 @@
       },
       {
         "title": "The Lamplighters"
+      },
+      {
+        "title": "You With the Sad Eyes"
       }
     ]
   },
   "currentlyReading": [
+    {
+      "title": "Hollow Bones",
+      "author": "Jodi Picoult",
+      "goodreadsId": "245670591",
+      "isbn": "9780593726259",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1771387435l/245670591._SX98_.jpg",
+      "progress": 17
+    },
+    {
+      "title": "Fourth Wing (The Empyrean, #1)",
+      "author": "Rebecca Yarros",
+      "goodreadsId": "61431922",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761312598l/61431922._SX98_.jpg",
+      "progress": 50
+    },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
       "author": "Sarah J. Maas",
@@ -65,13 +94,6 @@
     }
   ],
   "upNext": [
-    {
-      "title": "Hollow Bones",
-      "author": "Jodi Picoult",
-      "goodreadsId": "245670591",
-      "isbn": "9780593726259",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1771387435l/245670591._SX98_.jpg"
-    },
     {
       "title": "The Knave and the Moon (The Stonewater Kingdom, #2)",
       "author": "Rachel Gillig",
@@ -120,6 +142,13 @@
       "goodreadsId": "60538347",
       "isbn": "1984882171",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1646257003l/60538347.jpg"
+    },
+    {
+      "title": "You With the Sad Eyes",
+      "author": "",
+      "goodreadsId": "238286481",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761344174l/238286481._SX98_.jpg"
     }
   ]
 }

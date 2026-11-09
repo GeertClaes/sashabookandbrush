@@ -89,5 +89,6 @@ export function formatSyncDetail({ currentlyReading = [], upNext = [], changes =
   const next = upNext.map((book) => book.title).filter(Boolean);
   const lines = ["Now reading", ...(reading.length ? reading : ["None"]), "Up next", ...(next.length ? next : ["None"])];
   lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
+  if (warning) lines.push("Note", warning);
   return lines.join("\n");
 }

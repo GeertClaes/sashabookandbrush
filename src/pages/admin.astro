@@ -1305,6 +1305,7 @@ const pageCopy = editableCopy(site);
     }
     const changes = sync.changes || [];
     lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
+    if (sync.warning) lines.push("Note", sync.warning);
     return lines;
   }
 
@@ -1469,8 +1470,9 @@ const pageCopy = editableCopy(site);
   function syncOutcome(data) {
     const sync = data?.sync || {};
     if (!sync.ok) return "Goodreads sync had a problem. The previous shelf was kept.";
-    if ((sync.changes || []).length) return "Goodreads shelf updated. A changed shelf goes live on the next publish.";
-    return "Goodreads shelf is already up to date.";
+    const note = sync.warning ? ` ${sync.warning}` : "";
+    if ((sync.changes || []).length) return `Goodreads shelf updated. A changed shelf goes live on the next publish.${note}`;
+    return `Goodreads shelf is already up to date.${note}`;
   }
 
   function loadActivity(options = {}) {

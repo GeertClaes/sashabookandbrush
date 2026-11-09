@@ -28,7 +28,9 @@ jobs:
           node-version: "22"
       - name: Fetch shelves
         id: sync
-        run: node scripts/sync-goodreads.mjs
+        run: |
+          set -o pipefail
+          node scripts/sync-goodreads.mjs 2>&1 | tee sync-output.log
         continue-on-error: true
       - name: Commit shelf updates
         id: commit
@@ -57,4 +59,13 @@ jobs:
           echo "Triggered a Pages deploy."
       - name: Fail if Goodreads rejected the fetch
         if: steps.sync.outcome == 'failure'
+        run: |
+          {
+            echo "### Goodreads sync failed"
+            echo
+            echo '```'
+            tail -n 5 sync-output.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
         run: exit 1
