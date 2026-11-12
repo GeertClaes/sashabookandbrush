@@ -13,8 +13,8 @@
     "admin": "node scripts/admin-server.mjs",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "format": "oxfmt \"src/**/*.{astro,ts,js}\" \"scripts/**/*.{js,mjs}\" \"functions/**/*.js\"",
-    "format:check": "oxfmt --check \"src/**/*.{astro,ts,js}\" \"scripts/**/*.{js,mjs}\" \"functions/**/*.js\"",
+    "format": "oxfmt \"src/**/*.{ts,js}\" \"scripts/**/*.{js,mjs}\" \"functions/**/*.js\"",
+    "format:check": "oxfmt --check \"src/**/*.{ts,js}\" \"scripts/**/*.{js,mjs}\" \"functions/**/*.js\"",
     "test": "vitest run"
   },
   "dependencies": {
