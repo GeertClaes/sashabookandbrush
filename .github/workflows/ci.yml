@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  lint-test:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,3 +18,8 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run test
+      # Catches Astro compile/template errors on every push and PR. Uses
+      # build:ci (plain `astro build`), not `build`, because the full build
+      # script's prestep makes a real network call to Goodreads — not
+      # something a lint/compile check should depend on.
+      - run: npm run build:ci

@@ -404,7 +404,8 @@ Every book, painting, tool, and piece of site copy is a file in this repo (markd
 
 - **Lint/format**: [Oxlint](https://oxc.rs) + [Oxfmt](https://oxc.rs), scoped to JS/TS/Astro script code (`npm run lint`, `npm run format`, `npm run format:check`). Content markdown, JSON data, CSS, and Worker config are intentionally left out of the formatter's scope.
 - **Tests**: [Vitest](https://vitest.dev) (`npm run test`) covers the pure modules under `src/lib/`, `scripts/lib/`, and `functions/admin/api/_lib/` — things like affiliate-link building, series grouping, Goodreads HTML parsing, and the activity/deployment-status merge logic that the admin Overview page depends on.
-- **CI**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs `npm run lint`, `npm run format:check`, and `npm run test` on every push to `main` and on pull requests. It deliberately does not run `npm run build`, since that script's first step makes a real network call to Goodreads.
+- **CI**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs `npm run lint`, `npm run format:check`, `npm run test`, and `npm run build:ci` on every push to `main` and on pull requests. `build:ci` is a plain `astro build` with no Goodreads prestep — it catches Astro compile/template errors without depending on a real network call to Goodreads, which the full `npm run build` (used in production) makes.
+- **Dependency updates**: [Dependabot](.github/dependabot.yml) opens weekly PRs for npm and GitHub Actions dependencies, grouping minor/patch bumps together to cut down on noise.
 
 ### Build pipeline
 
