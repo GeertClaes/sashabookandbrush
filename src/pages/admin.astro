@@ -706,8 +706,12 @@ const pageCopy = editableCopy(site);
   <script is:inline type="application/json" id="art-catalog" set:html={JSON.stringify(art).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="supply-catalog" set:html={JSON.stringify(supplies).replace(/</g, "\\u003c")} />
   <script is:inline type="application/json" id="affiliate-config" set:html={JSON.stringify(affiliateConfig).replace(/</g, "\\u003c")} />
+  <script is:inline type="application/json" id="admin-config" set:html={JSON.stringify({ api, isDev }).replace(/</g, "\\u003c")} />
 
-  <script define:vars={{ api, isDev }}>
+  <script>
+  import { latestMark, mergeTimelineEvents, sameSync, syncOutcome } from "../lib/sync-timeline.js";
+
+  const { api, isDev } = JSON.parse(document.getElementById("admin-config")?.textContent || "{}");
   const status = document.querySelector("[data-status]");
   const login = document.querySelector("[data-login]");
   const app = document.querySelector("[data-app]");
@@ -1320,12 +1324,6 @@ const pageCopy = editableCopy(site);
     };
   }
 
-  function sameSync(left, right) {
-    const a = Date.parse(left || "");
-    const b = Date.parse(right || "");
-    return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) < 5000;
-  }
-
   function shortSyncProblem(text) {
     const value = String(text || "");
     const status = value.match(/returned error:\s*(\d+)/) || value.match(/HTTP (\d+)/);
@@ -1417,44 +1415,16 @@ const pageCopy = editableCopy(site);
       .join("");
   }
 
-  function eventFromSite(site) {
-    if (!site?.at) return null;
-    const failed = site.state === "failed";
-    return {
-      at: site.at,
-      type: "site",
-      ok: !failed,
-      busy: Boolean(site.building),
-      title: site.label || "Rebuild",
-      detail: site.commitHash ? `Build ${site.commitHash.slice(0, 7)}` : "",
-      by: site.trigger || "",
-    };
-  }
-
   function renderActivity(data) {
     lastActivity = data;
     const logEl = document.querySelector("[data-activity-log]");
     const more = document.querySelector("[data-activity-more]");
-    const site = data.site || {};
     const sync = data.sync || {};
     if (logEl) {
-      let events = [...(data.events || [])];
-      const siteEvent = eventFromSite(site);
-      if (siteEvent) events.push(siteEvent);
-      if (syncPending && latestMark(data) <= syncWatchMark) {
-        events.push({
-          at: syncPendingAt,
-          type: "goodreads",
-          ok: true,
-          title: "Checking Goodreads…",
-          detail: "",
-          by: "",
-        });
-      }
-      events.sort((left, right) => {
-        const a = Date.parse(left.at || "");
-        const b = Date.parse(right.at || "");
-        return (Number.isFinite(b) ? b : 0) - (Number.isFinite(a) ? a : 0);
+      const events = mergeTimelineEvents(data, {
+        active: syncPending,
+        watchMark: syncWatchMark,
+        at: syncPendingAt,
       });
       const limit = showAllActivity ? 20 : 3;
       if (!events.length) {
@@ -1468,28 +1438,6 @@ const pageCopy = editableCopy(site);
         more.textContent = hiddenCount > 0 ? `Show all (${Math.min(events.length, 20)})` : "Show all";
       }
     }
-  }
-
-  function latestMark(data) {
-    if (!data) return 0;
-    const times = [data.sync?.at];
-    for (const event of data.events || []) {
-      if (event?.type === "goodreads") times.push(event.at);
-    }
-    let best = 0;
-    for (const value of times) {
-      const time = Date.parse(value || "");
-      if (Number.isFinite(time) && time > best) best = time;
-    }
-    return best;
-  }
-
-  function syncOutcome(data) {
-    const sync = data?.sync || {};
-    if (!sync.ok) return "Goodreads sync had a problem. The previous shelf was kept.";
-    const note = sync.warning ? ` ${sync.warning}` : "";
-    if ((sync.changes || []).length) return `Goodreads shelf updated. A changed shelf goes live on the next publish.${note}`;
-    return `Goodreads shelf is already up to date.${note}`;
   }
 
   function loadActivity(options = {}) {
