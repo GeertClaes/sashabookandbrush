@@ -1,17 +1,12 @@
 {
   "updated": "2026-11-09T11:25:36.888Z",
   "lastSync": {
-    "at": "2026-11-09T11:25:36.888Z",
+    "at": "2026-11-12T11:45:30.273Z",
     "ok": true,
-    "source": "local",
+    "source": "github-actions",
     "readingCount": 4,
     "upNextCount": 8,
-    "changes": [
-      "Started Hollow Bones",
-      "Started Fourth Wing (The Empyrean, #1)",
-      "Up next: You With the Sad Eyes",
-      "Left up next: Hollow Bones"
-    ],
+    "changes": [],
     "warning": null,
     "error": null,
     "reading": [
