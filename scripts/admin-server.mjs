@@ -11,12 +11,10 @@ import {
   parseActivityLog,
   stringifyActivity,
 } from "./lib/activity.mjs";
-import {
-  applyYamlFields,
-  emptyAffiliateUrl,
-  taggedAmazonUrl,
-  yamlString,
-} from "../functions/admin/api/_lib/frontmatter.js";
+import { applyYamlFields } from "../functions/admin/api/_lib/frontmatter.js";
+import { deriveBookUpdates } from "../functions/admin/api/_lib/book.js";
+import { artMarkdown, deriveArtFields } from "../functions/admin/api/_lib/art.js";
+import { deriveSupplyFields, supplyMarkdown } from "../functions/admin/api/_lib/supply.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
 import {
   applySiteCopy,
@@ -325,20 +323,11 @@ const server = createServer(async (req, res) => {
       const body = JSON.parse((await readBody(req)) || "{}");
       const file = path.join(BOOKS_DIR, `${path.basename(body.slug)}.md`);
       let text = await readFile(file, "utf8");
-      const updates = {};
-      if (typeof body.title === "string" && body.title.trim()) updates.title = body.title.trim();
-      if (typeof body.author === "string" && body.author.trim())
-        updates.author = body.author.trim();
-      if (typeof body.genre === "string") updates.genre = body.genre.trim() || "Read";
-      if (typeof body.note === "string") updates.note = body.note;
-      if (typeof body.featured === "boolean") updates.featured = body.featured;
-      if (body.featured !== false && Number.isFinite(Number(body.order)))
-        updates.order = Number(body.order);
-      if (typeof body.isbn === "string") updates.isbn = String(body.isbn).replace(/[^\dXx]/g, "");
-      if (typeof body.isbn10 === "string")
-        updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
-      if (typeof body.bookshop === "string") updates.bookshop = emptyAffiliateUrl(body.bookshop);
-      if (typeof body.amazon === "string") updates.amazon = emptyAffiliateUrl(body.amazon);
+      const { error, updates } = deriveBookUpdates(body);
+      if (error) {
+        json(res, 400, { error });
+        return;
+      }
       text = applyYamlFields(text, updates);
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       await recordLocalActivity({
@@ -479,13 +468,12 @@ const server = createServer(async (req, res) => {
         json(res, 404, { error: "Painting not found" });
         return;
       }
-      const medium = String(body.medium || "Acrylic").trim() || "Acrylic";
-      const note = typeof body.note === "string" ? body.note : "";
-      const featured = Boolean(body.featured);
-      const available = Boolean(body.available);
-      const shop = available ? emptyAffiliateUrl(body.shop) : "";
-      const shopLabel = available ? String(body.shopLabel || "").trim() : "";
-      const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
+      const { error, fields } = deriveArtFields(body);
+      if (error) {
+        json(res, 400, { error });
+        return;
+      }
+      const { note, medium, featured, available, shop, shopLabel, order } = fields;
       const parsed = parseImageUpload(body, slug);
       if (!parsed.ok) {
         json(res, 400, { error: parsed.error });
@@ -495,15 +483,17 @@ const server = createServer(async (req, res) => {
       const image = photo?.publicPath || (typeof body.image === "string" ? body.image.trim() : "");
       let text = existing;
       if (!text) {
-        text = `---
-title: ${yamlString(title)}
-medium: ${yamlString(medium)}
-note: ${yamlString(note)}
-featured: ${featured}
-order: ${order}
-available: ${available}
-${shop ? `shop: ${yamlString(shop)}\n` : ""}${shopLabel ? `shopLabel: ${yamlString(shopLabel)}\n` : ""}${image ? `image: ${yamlString(image)}\n` : ""}---
-`;
+        text = artMarkdown({
+          title,
+          medium,
+          note,
+          featured,
+          order,
+          image,
+          available,
+          shop,
+          shopLabel,
+        });
       } else {
         const updates = { title, medium, note, featured, order, available, shop, shopLabel };
         if (image) updates.image = image;
@@ -561,22 +551,12 @@ ${shop ? `shop: ${yamlString(shop)}\n` : ""}${shopLabel ? `shopLabel: ${yamlStri
         json(res, 404, { error: "Tool not found" });
         return;
       }
-      const brand = String(body.brand || "").trim();
-      const category = String(body.category || "Studio").trim() || "Studio";
-      const note = typeof body.note === "string" ? body.note : "";
-      const pastedAmazon = emptyAffiliateUrl(body.amazon);
-      const amazon = taggedAmazonUrl(pastedAmazon, "sashabookandb-21");
-      if (pastedAmazon && !amazon) {
-        json(res, 400, {
-          error:
-            "That doesn't look like an Amazon product link. Paste the address from the product page.",
-        });
+      const { error, fields } = deriveSupplyFields(body);
+      if (error) {
+        json(res, 400, { error });
         return;
       }
-      const shop = emptyAffiliateUrl(body.shop);
-      const shopLabel = String(body.shopLabel || "").trim();
-      const featured = Boolean(body.featured);
-      const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
+      const { brand, category, note, amazon, shop, shopLabel, featured, order } = fields;
       const parsed = parseImageUpload(body, slug);
       if (!parsed.ok) {
         json(res, 400, { error: parsed.error });
@@ -586,15 +566,18 @@ ${shop ? `shop: ${yamlString(shop)}\n` : ""}${shopLabel ? `shopLabel: ${yamlStri
       const image = photo?.publicPath || (typeof body.image === "string" ? body.image.trim() : "");
       let text = existing;
       if (!text) {
-        text = `---
-title: ${yamlString(title)}
-brand: ${yamlString(brand)}
-category: ${yamlString(category)}
-note: ${yamlString(note)}
-${amazon ? `amazon: ${yamlString(amazon)}\n` : ""}${shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : ""}${image ? `image: ${yamlString(image)}\n` : ""}featured: ${featured}
-order: ${order}
----
-`;
+        text = supplyMarkdown({
+          title,
+          brand,
+          category,
+          note,
+          amazon,
+          shop,
+          shopLabel,
+          featured,
+          order,
+          image,
+        });
       } else {
         const updates = { title, brand, category, note, amazon, shop, shopLabel, featured, order };
         if (image) updates.image = image;

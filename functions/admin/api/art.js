@@ -1,18 +1,15 @@
 import {
   applyYamlFields,
-  emptyAffiliateUrl,
   fail,
   json,
   readJson,
   safeSlug,
   slugFromTitle,
-  yamlString,
 } from "./_lib/frontmatter.js";
+import { artMarkdown, deriveArtFields } from "./_lib/art.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { parseImageUpload } from "./_lib/photo.js";
 import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
-
-const MAX_NOTE = 8000;
 
 function yamlField(text, key) {
   const match = String(text || "").match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
@@ -54,21 +51,6 @@ async function deletePainting(env, slug, email = "") {
   return json({ ok: true, slug, deleted: true });
 }
 
-function artMarkdown({ title, medium, note, featured, order, image, available, shop, shopLabel }) {
-  const imageLine = image ? `image: ${yamlString(image)}\n` : "";
-  const shopLine = shop ? `shop: ${yamlString(shop)}\n` : "";
-  const labelLine = shopLabel ? `shopLabel: ${yamlString(shopLabel)}\n` : "";
-  return `---
-title: ${yamlString(title)}
-medium: ${yamlString(medium)}
-note: ${yamlString(note)}
-featured: ${featured}
-order: ${order}
-available: ${available}
-${shopLine}${labelLine}${imageLine}---
-`;
-}
-
 export async function onRequestPost(context) {
   try {
     const body = await readJson(context.request);
@@ -91,15 +73,10 @@ export async function onRequestPost(context) {
       return json({ error: "Painting not found" }, 404);
     }
 
-    const note = typeof body.note === "string" ? body.note : "";
-    if (note.length > MAX_NOTE) return json({ error: "That note is too long" }, 400);
+    const { error, fields } = deriveArtFields(body);
+    if (error) return json({ error }, 400);
+    const { note, medium, featured, available, shop, shopLabel, order } = fields;
 
-    const medium = String(body.medium || "Acrylic").trim() || "Acrylic";
-    const featured = Boolean(body.featured);
-    const available = Boolean(body.available);
-    const shop = available ? emptyAffiliateUrl(body.shop) : "";
-    const shopLabel = available ? String(body.shopLabel || "").trim() : "";
-    const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
     const parsed = parseImageUpload(body, slug);
     if (!parsed.ok) return json({ error: parsed.error }, 400);
     const photo = parsed.photo;

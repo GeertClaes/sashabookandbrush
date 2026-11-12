@@ -1,15 +1,7 @@
-import {
-  applyYamlFields,
-  emptyAffiliateUrl,
-  fail,
-  json,
-  readJson,
-  safeSlug,
-} from "./_lib/frontmatter.js";
+import { applyYamlFields, fail, json, readJson, safeSlug } from "./_lib/frontmatter.js";
+import { deriveBookUpdates } from "./_lib/book.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, getTextFile } from "./_lib/github.js";
-
-const MAX_NOTE = 8000;
 
 export async function onRequestPost(context) {
   try {
@@ -18,23 +10,8 @@ export async function onRequestPost(context) {
     const filePath = `src/content/books/${slug}.md`;
     let text = await getTextFile(context.env, filePath);
 
-    if (typeof body.note === "string" && body.note.length > MAX_NOTE) {
-      return json({ error: "That note is too long" }, 400);
-    }
-
-    const updates = {};
-    if (typeof body.title === "string" && body.title.trim()) updates.title = body.title.trim();
-    if (typeof body.author === "string" && body.author.trim()) updates.author = body.author.trim();
-    if (typeof body.genre === "string") updates.genre = body.genre.trim() || "Read";
-    if (typeof body.note === "string") updates.note = body.note;
-    if (typeof body.featured === "boolean") updates.featured = body.featured;
-    if (body.featured !== false && Number.isFinite(Number(body.order)))
-      updates.order = Number(body.order);
-    if (typeof body.isbn === "string") updates.isbn = String(body.isbn).replace(/[^\dXx]/g, "");
-    if (typeof body.isbn10 === "string")
-      updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
-    if (typeof body.bookshop === "string") updates.bookshop = emptyAffiliateUrl(body.bookshop);
-    if (typeof body.amazon === "string") updates.amazon = emptyAffiliateUrl(body.amazon);
+    const { error, updates } = deriveBookUpdates(body);
+    if (error) return json({ error }, 400);
 
     text = applyYamlFields(text, updates);
     if (!text.endsWith("\n")) text += "\n";

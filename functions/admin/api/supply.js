@@ -1,20 +1,15 @@
 import {
   applyYamlFields,
-  emptyAffiliateUrl,
   fail,
   json,
   readJson,
   safeSlug,
   slugFromTitle,
-  taggedAmazonUrl,
-  yamlString,
 } from "./_lib/frontmatter.js";
+import { deriveSupplyFields, supplyMarkdown } from "./_lib/supply.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { parseImageUpload } from "./_lib/photo.js";
 import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
-
-const MAX_NOTE = 8000;
-const AMAZON_TAG = "sashabookandb-21";
 
 function yamlField(text, key) {
   const match = String(text || "").match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
@@ -30,34 +25,6 @@ function supplyPhotoRepoPath(image) {
   const value = String(image || "").trim();
   const match = value.match(/^(?:\/images\/supplies\/)?([a-z0-9._-]+)$/i);
   return match ? `src/assets/supplies/${match[1]}` : "";
-}
-
-function supplyMarkdown({
-  title,
-  brand,
-  category,
-  note,
-  amazon,
-  shop,
-  shopLabel,
-  featured,
-  order,
-  image,
-}) {
-  const amazonLine = amazon ? `amazon: ${yamlString(amazon)}\n` : "";
-  const shopLines = shop
-    ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n`
-    : "";
-  const imageLine = image ? `image: ${yamlString(image)}\n` : "";
-  return `---
-title: ${yamlString(title)}
-brand: ${yamlString(brand)}
-category: ${yamlString(category)}
-note: ${yamlString(note)}
-${amazonLine}${shopLines}${imageLine}featured: ${featured}
-order: ${order}
----
-`;
 }
 
 async function deleteTool(env, slug, email = "") {
@@ -106,27 +73,10 @@ export async function onRequestPost(context) {
       return json({ error: "Tool not found" }, 404);
     }
 
-    const note = typeof body.note === "string" ? body.note : "";
-    if (note.length > MAX_NOTE) return json({ error: "That note is too long" }, 400);
+    const { error, fields } = deriveSupplyFields(body);
+    if (error) return json({ error }, 400);
+    const { brand, category, note, amazon, shop, shopLabel, featured, order } = fields;
 
-    const pastedAmazon = emptyAffiliateUrl(body.amazon);
-    const amazon = taggedAmazonUrl(pastedAmazon, AMAZON_TAG);
-    if (pastedAmazon && !amazon) {
-      return json(
-        {
-          error:
-            "That doesn't look like an Amazon product link. Paste the address from the product page.",
-        },
-        400,
-      );
-    }
-
-    const brand = String(body.brand || "").trim();
-    const category = String(body.category || "Studio").trim() || "Studio";
-    const shop = emptyAffiliateUrl(body.shop);
-    const shopLabel = String(body.shopLabel || "").trim();
-    const featured = Boolean(body.featured);
-    const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0;
     const parsed = parseImageUpload(body, slug);
     if (!parsed.ok) return json({ error: parsed.error }, 400);
     const photo = parsed.photo;
