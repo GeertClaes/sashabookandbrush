@@ -22,18 +22,23 @@ export function realUrl(value?: string) {
   return "";
 }
 
-export function taggedAmazon(value?: string, tag = site.affiliates?.amazonTag || "") {
-  const raw = realUrl(value);
-  if (!raw) return "";
-  if (!tag) return raw;
+// Rewrites an already-cleaned Amazon URL to carry our affiliate tag (ASIN
+// links get rewritten to a canonical /dp/ form; anything else just gets a
+// `tag` query param appended). Split out from taggedAmazon so callers with
+// their own URL-cleaning step (e.g. the admin editor's firstHttpUrl, which
+// also recognises bare domains and short links) can reuse this core logic
+// without going through realUrl's stricter https://-only parsing.
+export function tagAmazonUrl(cleanUrl: string, tag: string) {
+  if (!cleanUrl) return "";
+  if (!tag) return cleanUrl;
   let url: URL;
   try {
-    url = new URL(raw);
+    url = new URL(cleanUrl);
   } catch {
-    return raw;
+    return cleanUrl;
   }
   const host = url.hostname.replace(/^www\./i, "").toLowerCase();
-  if (host !== "amazon.co.uk" && host !== "amazon.com") return raw;
+  if (host !== "amazon.co.uk" && host !== "amazon.com") return cleanUrl;
   const match = url.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i);
   if (match) {
     const domain = host === "amazon.com" ? "www.amazon.com" : "www.amazon.co.uk";
@@ -41,6 +46,10 @@ export function taggedAmazon(value?: string, tag = site.affiliates?.amazonTag ||
   }
   url.searchParams.set("tag", tag);
   return url.toString();
+}
+
+export function taggedAmazon(value?: string, tag = site.affiliates?.amazonTag || "") {
+  return tagAmazonUrl(realUrl(value), tag);
 }
 
 export function affiliateLinks(book: AffiliateInput) {

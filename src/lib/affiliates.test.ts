@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { affiliateLinks, realUrl, taggedAmazon } from "./affiliates";
+import { affiliateLinks, realUrl, tagAmazonUrl, taggedAmazon } from "./affiliates";
 
 describe("realUrl", () => {
   it("returns an empty string for blank, placeholder, or missing values", () => {
@@ -54,6 +54,29 @@ describe("taggedAmazon", () => {
   it("returns the URL unchanged when there is no tag", () => {
     expect(taggedAmazon("https://www.amazon.co.uk/dp/1649374046", "")).toBe(
       "https://www.amazon.co.uk/dp/1649374046",
+    );
+  });
+});
+
+describe("tagAmazonUrl", () => {
+  const tag = "sashabookandb-21";
+
+  it("returns empty for a missing/empty cleaned URL", () => {
+    expect(tagAmazonUrl("", tag)).toBe("");
+  });
+
+  it("works on a pre-cleaned URL that didn't come from realUrl", () => {
+    // Exercises the admin editor's use case: its own firstHttpUrl() accepts
+    // bare domains/short links (e.g. "amazon.co.uk/dp/...") that realUrl
+    // would reject, so it calls tagAmazonUrl directly on its own output.
+    expect(tagAmazonUrl("https://amazon.co.uk/dp/1649374046", tag)).toBe(
+      "https://www.amazon.co.uk/dp/1649374046/ref=nosim?tag=sashabookandb-21",
+    );
+  });
+
+  it("leaves non-Amazon URLs unchanged", () => {
+    expect(tagAmazonUrl("https://uk.bookshop.org/a/1/123", tag)).toBe(
+      "https://uk.bookshop.org/a/1/123",
     );
   });
 });

@@ -222,6 +222,7 @@ const pageCopy = editableCopy(site);
   import { latestMark, mergeTimelineEvents, syncOutcome } from "../lib/sync-timeline.js";
   import { escapeHtml, formatWhen, toBase64 } from "../lib/admin-format.js";
   import { activityLog, saveSteps, syncSteps } from "../lib/admin-timeline-ui.js";
+  import { tagAmazonUrl } from "../lib/affiliates";
 
   const { api, isDev } = JSON.parse(document.getElementById("admin-config")?.textContent || "{}");
   const status = document.querySelector("[data-status]");
@@ -1003,22 +1004,7 @@ const pageCopy = editableCopy(site);
     const raw = firstHttpUrl(value);
     if (!raw) return "";
     const tag = JSON.parse(document.getElementById("affiliate-config")?.textContent || "{}").amazonTag || "";
-    if (!tag) return raw;
-    let url;
-    try {
-      url = new URL(raw);
-    } catch {
-      return raw;
-    }
-    const host = url.hostname.replace(/^www\./i, "").toLowerCase();
-    if (host !== "amazon.co.uk" && host !== "amazon.com") return raw;
-    const match = url.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i);
-    if (match) {
-      const domain = host === "amazon.com" ? "www.amazon.com" : "www.amazon.co.uk";
-      return `https://${domain}/dp/${match[1]}/ref=nosim?tag=${encodeURIComponent(tag)}`;
-    }
-    url.searchParams.set("tag", tag);
-    return url.toString();
+    return tagAmazonUrl(raw, tag);
   }
 
   function updateAmazonPreview() {
