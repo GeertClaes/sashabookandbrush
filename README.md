@@ -343,4 +343,72 @@ The site is served on port **8080**. Production is Cloudflare Pages; this compos
 
 Warm, bookish palette: cream background (`#F5EFE4`), burgundy primary, forest green secondary, rust accent. Headings use Fraunces; body uses DM Sans. Header and footer wordmark: `SashaBook&Brush`.
 
+## Prerequisites
+
+To develop or run this project locally you need:
+
+| Tool | Version | Why |
+| --- | --- | --- |
+| [Node.js](https://nodejs.org) | `>=22.23.4` | Required by Astro 7. The repo is developed against current Node LTS |
+| npm | `>=9.6.5` | Ships with Node; used for all scripts below |
+| git | any recent version | This repo is the content/data store — see [Architecture](#architecture) |
+| curl | any recent version | `scripts/sync-goodreads.mjs` shells out to `curl`/`curl.exe` to fetch Goodreads pages. Present by default on macOS, Linux, and Windows 10 1803+/11 |
+
+Optional, only if you touch the pieces that need them:
+
+| Tool | When |
+| --- | --- |
+| [Wrangler](https://developers.cloudflare.com/workers/wrangler/) (via `npx wrangler`, no global install needed) | Deploying or managing the cron Worker in `workers/rebuild-pages/` (see [Environment configuration](#environment-configuration)) |
+| [Docker](https://www.docker.com) + Docker Compose | Running the [home-server fallback](#docker-home-server) |
+
+No database, no separate backend server to install — see below.
+
+## Architecture
+
+A quick technical map for anyone picking this repo up.
+
+### No database — GitHub is the data store
+
+Every book, painting, tool, and piece of site copy is a file in this repo (markdown with frontmatter under `src/content/`, JSON under `src/data/`). There is no database to provision, patch, or back up: git history *is* the audit log, and reverting a bad edit is `git revert`. The `/admin` editor writes directly to `main` using GitHub's Git Data API (blobs → trees → commits → refs) rather than a simpler "update one file" call, so a single save can touch several files atomically in one commit.
+
+### Static site, two small backends
+
+- **Public site**: [Astro](https://astro.build) generates the whole thing (currently ~290 pages) as static HTML at build time. [Cloudflare Pages](https://pages.cloudflare.com) serves the output; there's no server rendering a request live.
+- **Admin API (production)**: `functions/admin/api/*` are Cloudflare Pages Functions — small, individually-deployed handlers behind `/admin/api/*` that read and write repo files via GitHub's REST/Git Data API. [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/) gates `/admin*` with Google sign-in before any of this is reachable.
+- **Admin API (local dev)**: `scripts/admin-server.mjs` is a standalone Node HTTP server (`npm run admin`) that mirrors the same endpoints by writing to the local filesystem directly. This means the admin UI can be developed fully offline, without Wrangler or a Cloudflare account — but it's a second implementation of similar logic, so behavior can drift from production at the edges (for example, build/deploy status is always a fixed "local editor" placeholder here, since there's no real Cloudflare deployment to report on).
+
+### Automation: GitHub Actions + one tiny cron Worker
+
+- [`.github/workflows/sync-goodreads.yml`](.github/workflows/sync-goodreads.yml) fetches the public Goodreads profile and to-read widget on a 23:15 UTC schedule, and also on-demand when **Sync now** is clicked in `/admin`. This has to run from GitHub's own runners (or locally): Goodreads blocks Cloudflare's build network with an HTTP 403. It commits `src/data/goodreads-live.json` and `src/data/activity-log.json` when anything changed.
+- [`.github/workflows/import-csv.yml`](.github/workflows/import-csv.yml) imports a Goodreads CSV export dropped via the admin UI's CSV upload.
+- `workers/rebuild-pages/` is a separate, minimal Cloudflare Worker with its own daily cron (00:00 UTC) that POSTs the Pages deploy hook, publishing whatever the Goodreads Action most recently committed to `main`.
+
+### Admin UI: one hand-rolled page, no framework
+
+[`src/pages/admin.astro`](src/pages/admin.astro) is a single Astro page with a large vanilla-JS `<script>` (bundled by Vite, not `is:inline`, so it can `import` from `src/lib/`) — there's no React/Vue/Svelte in this project, intentionally, to keep the shipped JS minimal. Pure logic that doesn't need the DOM (affiliate link building, series grouping, the Goodreads/Recent-timeline merge logic, Cloudflare deployment-status parsing) is factored out into small modules under `src/lib/` and `scripts/lib/`/`functions/admin/api/_lib/` instead of living inline, specifically so it can be unit tested — see Tooling below.
+
+### Directory map
+
+| Path | What's there |
+| --- | --- |
+| `src/pages`, `src/components`, `src/layouts` | The public site and the admin page |
+| `src/content/{books,art,supplies}` | Markdown content collections, one file per item |
+| `src/data` | JSON config and data (`site.json`, `goodreads-live.json`, `activity-log.json`) |
+| `src/lib` | Shared TS/JS logic used by pages/components, unit-tested with Vitest |
+| `functions/admin/api` | Cloudflare Pages Functions behind `/admin/api/*`, plus their shared `_lib/` |
+| `scripts` | Node CLI scripts (Goodreads sync/import, local admin server, brand asset rendering) and their shared `scripts/lib/` |
+| `workers/rebuild-pages` | The standalone daily-cron Worker that triggers a Pages rebuild |
+| `.github/workflows` | Scheduled/triggered automation (Goodreads sync, CSV import, CI) |
+
+### Tooling
+
+- **Lint/format**: [Oxlint](https://oxc.rs) + [Oxfmt](https://oxc.rs), scoped to JS/TS/Astro script code (`npm run lint`, `npm run format`, `npm run format:check`). Content markdown, JSON data, CSS, and Worker config are intentionally left out of the formatter's scope.
+- **Tests**: [Vitest](https://vitest.dev) (`npm run test`) covers the pure modules under `src/lib/`, `scripts/lib/`, and `functions/admin/api/_lib/` — things like affiliate-link building, series grouping, Goodreads HTML parsing, and the activity/deployment-status merge logic that the admin Overview page depends on.
+- **CI**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs `npm run lint`, `npm run format:check`, and `npm run test` on every push to `main` and on pull requests. It deliberately does not run `npm run build`, since that script's first step makes a real network call to Goodreads.
+
+### Build pipeline
+
+`npm run build` runs `node scripts/sync-goodreads.mjs --allow-fail` and then `astro build`. On Cloudflare's own build network (`CF_PAGES=1`), the sync step is a no-op that just republishes the `src/data/goodreads-live.json` already committed by the GitHub Action — it does not call Goodreads itself, since Cloudflare's IPs are blocked. Locally and in GitHub Actions, the same script does the real fetch. `--allow-fail` means a Goodreads outage degrades to "keep the last known shelf" instead of failing the whole build.
+
+
 The favicon and share image use a navy book and gold **S** on a cream tile (see above). The home hero and About photo use `public/images/SashaHero.jpg` in light mode and `public/images/SashaHeroDark.jpg` in dark mode.
