@@ -754,6 +754,7 @@ const pageCopy = editableCopy(site);
   let bookSnapshot = "";
   let saving = false;
   let saveWatch = 0;
+  let syncWatch = 0;
   let featuredBaseline = [];
   const QUEUES = ["currently-reading", "featured", "five-star-no-note", "no-note", "missing-isbn"];
   const TABS = ["overview", "book", "art", "supply", "copy"];
@@ -1103,7 +1104,7 @@ const pageCopy = editableCopy(site);
     status.innerHTML = message;
   }
 
-  function saveSteps({ title, editor, github, live, hint }) {
+  function progressSteps({ title, steps, hint }) {
     const pill = (state, label) => {
       const cls =
         state === "done"
@@ -1116,7 +1117,32 @@ const pageCopy = editableCopy(site);
       const mark = state === "done" ? "✓" : state === "busy" ? "…" : state === "error" ? "!" : "·";
       return `<span class="${cls}">${mark} ${label}</span>`;
     };
-    return `<p class="font-medium">${title}</p><p class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">${pill(editor, "This editor")}${pill(github, "GitHub")}${pill(live, "Live site")}</p>${hint ? `<p class="mt-1 text-xs text-muted-foreground">${hint}</p>` : ""}`;
+    const body = steps.map(([state, label]) => pill(state, label)).join("");
+    return `<p class="font-medium">${title}</p><p class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">${body}</p>${hint ? `<p class="mt-1 text-xs text-muted-foreground">${hint}</p>` : ""}`;
+  }
+
+  function saveSteps({ title, editor, github, live, hint }) {
+    return progressSteps({
+      title,
+      hint,
+      steps: [
+        [editor, "This editor"],
+        [github, "GitHub"],
+        [live, "Live site"],
+      ],
+    });
+  }
+
+  function syncSteps({ title, request, github, live, hint }) {
+    return progressSteps({
+      title,
+      hint,
+      steps: [
+        [request, "Sync request"],
+        [github, "GitHub"],
+        [live, "Live site"],
+      ],
+    });
   }
 
   function wait(ms) {
@@ -1512,13 +1538,117 @@ const pageCopy = editableCopy(site);
     }
   }
 
-  async function watchSyncActivity(previousMark) {
-    const deadline = Date.now() + (isDev ? 0 : 120000);
+  // Tracks a manual sync through both of its phases: the GitHub Action fetching
+  // and committing the shelf, then (if it committed) Cloudflare rebuilding the
+  // public site. Keeps rendering step pills the whole way instead of stopping
+  // once GitHub is merely detected.
+  async function watchSyncProgress(previousMark) {
+    const id = ++syncWatch;
+    const githubDeadline = Date.now() + (isDev ? 0 : 120000);
     let data = await loadActivity({ manual: true });
-    while (!isDev && Date.now() < deadline && latestMark(data) <= previousMark) {
+    while (!isDev && id === syncWatch && Date.now() < githubDeadline && latestMark(data) <= previousMark) {
+      setBanner(
+        "busy",
+        syncSteps({
+          title: "Syncing with Goodreads…",
+          request: "done",
+          github: "busy",
+          live: "wait",
+          hint: "GitHub is fetching the shelf. This usually takes under a minute.",
+        }),
+      );
       await wait(4000);
       data = await loadActivity({ manual: true });
     }
+    if (id !== syncWatch) return data;
+    renderActivity(data);
+
+    if (latestMark(data) <= previousMark) {
+      setBanner(
+        "ok",
+        syncSteps({
+          title: "Sync is still running",
+          request: "done",
+          github: "busy",
+          live: "wait",
+          hint: "GitHub is taking longer than usual. Recent will update here as soon as it finishes.",
+        }),
+      );
+      return data;
+    }
+
+    if (data?.sync?.ok === false) {
+      setBanner(
+        "error",
+        syncSteps({
+          title: "Goodreads sync had a problem",
+          request: "done",
+          github: "error",
+          live: "wait",
+          hint: "See Details for what GitHub reported. The previous shelf was kept, so nothing will rebuild.",
+        }),
+      );
+      return data;
+    }
+
+    const title = syncOutcome(data);
+    const rebuildDeadline = Date.now() + (isDev ? 0 : 150000);
+    while (!isDev && id === syncWatch && Date.now() < rebuildDeadline) {
+      const site = data.site || {};
+      if (site.live || site.deploymentsAvailable === false) {
+        setBanner(
+          "ok",
+          syncSteps({
+            title,
+            request: "done",
+            github: "done",
+            live: site.deploymentsAvailable === false ? "busy" : "done",
+            hint:
+              site.deploymentsAvailable === false
+                ? "GitHub has it. Refresh the public page in about a minute."
+                : "Live. Refresh the public page to see the change.",
+          }),
+        );
+        return data;
+      }
+      if (site.state === "failed") {
+        setBanner(
+          "error",
+          syncSteps({
+            title,
+            request: "done",
+            github: "done",
+            live: "error",
+            hint: "GitHub has the shelf, but the rebuild failed. Check Cloudflare Pages.",
+          }),
+        );
+        return data;
+      }
+      setBanner(
+        "busy",
+        syncSteps({
+          title,
+          request: "done",
+          github: "done",
+          live: "busy",
+          hint: "Cloudflare is rebuilding. The public site still shows the old version until this finishes (usually about a minute).",
+        }),
+      );
+      await wait(4000);
+      data = await loadActivity({ manual: true });
+      renderActivity(data);
+    }
+    if (id !== syncWatch) return data;
+    setBanner(
+      "ok",
+      syncSteps({
+        title,
+        request: "done",
+        github: "done",
+        live: "busy",
+        hint: "Cloudflare can take a couple of minutes. Refresh the public page shortly.",
+      }),
+    );
     return data;
   }
 
@@ -2418,16 +2548,21 @@ const pageCopy = editableCopy(site);
     syncPendingAt = new Date().toISOString();
     syncPending = true;
     if (lastActivity) renderActivity(lastActivity);
+    setBanner(
+      "busy",
+      syncSteps({
+        title: "Starting the Goodreads sync…",
+        request: "busy",
+        github: "wait",
+        live: "wait",
+        hint: "Asking GitHub to run the sync.",
+      }),
+    );
     try {
-      const result = await call("/sync-goodreads", { method: "POST", body: "{}" });
-      setBanner("ok", escapeHtml(result.message || "Sync started."));
-      const data = await watchSyncActivity(syncWatchMark);
+      await call("/sync-goodreads", { method: "POST", body: "{}" });
+      const data = await watchSyncProgress(syncWatchMark);
       syncPending = false;
       if (data) renderActivity(data);
-      if (!isDev && latestMark(data) > syncWatchMark) setBanner("ok", escapeHtml(syncOutcome(data)));
-      if (!isDev && latestMark(data) <= syncWatchMark) {
-        setBanner("ok", "Sync is still running. Recent will show it when GitHub finishes.");
-      }
     } catch (error) {
       syncPending = false;
       setBanner("error", escapeHtml(error instanceof Error ? error.message : "Sync failed."));
