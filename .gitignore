@@ -17,3 +17,4 @@ public/data/goodreads-live.json
 
 # Local drafts. Not part of the site.
 drafts/
+.git-commit-msg.txt
