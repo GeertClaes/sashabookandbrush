@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-11-12T12:29:17.696Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads shelf sync",
+      "detail": "Now reading\nHollow Bones (17%)\nFourth Wing (The Empyrean, #1) (50%)\nA Court of Wings and Ruin (A Court of Thorns and Roses, #3) (40%)\nCrown of Midnight (Throne of Glass, #2) (30%)\nUp next\nThe Knave and the Moon (The Stonewater Kingdom, #2)\nOf Her Blood\nThe Secret Paris Ingredient\nThe Memory Chamber\nA Time of Witches\nMad Mabel\nThe Lamplighters\nYou With the Sad Eyes\nChanges\nNo changes since the previous shelf.",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-11-12T12:00:12.313Z",
       "type": "goodreads",
       "ok": true,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Updated Winsor & Newton Galeria acrylic",
-      "detail": "Tool and photo saved. They show on the site after the rebuild (about a minute).",
-      "by": "geert.wl.claes@gmail.com"
-    },
-    {
-      "at": "2026-09-19T16:13:23.974Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated A5 Mixed Media Sketch Book",
       "detail": "Tool and photo saved. They show on the site after the rebuild (about a minute).",
       "by": "geert.wl.claes@gmail.com"
     }
