@@ -1,0 +1,195 @@
+---
+// Books tab: static markup only (populated client-side by the editor script).
+---
+
+<div data-panel="book" id="panel-book" role="tabpanel" aria-labelledby="tab-book" class="hidden">
+  <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
+  <div class="space-y-4 lg:sticky lg:top-32">
+  <details class="rounded-xl border border-border bg-card p-4">
+    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-foreground">
+      <span>Home featured</span>
+      <span class="text-xs font-normal text-muted-foreground" data-featured-count></span>
+    </summary>
+    <div class="mt-3 flex flex-wrap items-center justify-end gap-2">
+      <button
+        type="button"
+        data-featured-save
+        class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary"
+      >
+        Save order
+      </button>
+    </div>
+    <ol data-featured-board class="mt-3 space-y-2 text-sm"></ol>
+  </details>
+
+  <section class="rounded-xl border border-border bg-card p-4">
+    <h2 class="font-display mb-3 text-lg font-semibold text-foreground">Find a book</h2>
+    <input
+      type="search"
+      data-search
+      placeholder="Search any title or author…"
+      class="mb-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+    />
+    <div class="mb-3 flex gap-4 overflow-x-auto border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" data-queues role="tablist" aria-label="Book queues">
+      <button type="button" role="tab" data-queue="currently-reading" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">Reading <span data-queue-n="currently-reading"></span></button>
+      <button type="button" role="tab" data-queue="featured" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">Featured <span data-queue-n="featured"></span></button>
+      <button type="button" role="tab" data-queue="five-star-no-note" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">5★ no note <span data-queue-n="five-star-no-note"></span></button>
+      <button type="button" role="tab" data-queue="no-note" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">No note <span data-queue-n="no-note"></span></button>
+      <button type="button" role="tab" data-queue="missing-isbn" class="shrink-0 border-b-2 border-transparent pb-2 text-xs text-muted-foreground">No ISBN <span data-queue-n="missing-isbn"></span></button>
+    </div>
+    <p data-queue-count class="mb-2 text-xs text-muted-foreground"></p>
+    <ul data-results class="max-h-[min(70vh,40rem)] space-y-1.5 overflow-y-auto text-sm"></ul>
+  </section>
+  </div>
+
+  <div>
+  <p data-book-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
+    Pick a book to write a note, drop a cover, or feature it on Home.
+  </p>
+  <section data-book-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-32">
+    <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2 data-book-heading class="font-display text-xl font-semibold text-foreground"></h2>
+        <p data-book-meta class="mt-1 text-xs text-muted-foreground"></p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          data-book-view
+          class="rounded border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:border-primary"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on site
+        </a>
+        <button
+          type="button"
+          data-book-next
+          class="hidden rounded border border-border px-3 py-1.5 text-sm text-foreground hover:border-primary"
+        >
+          Next in list
+        </button>
+      </div>
+    </div>
+    <div class="mb-4 rounded-lg border border-border bg-background p-3">
+      <p class="mb-1 text-xs font-medium tracking-widest text-accent uppercase">For Instagram</p>
+      <p class="mb-2 text-xs text-muted-foreground">Paste into a Story link sticker.</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" data-copy="page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+          Copy page link
+        </button>
+        <button type="button" data-copy="bookshop" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+          Copy Bookshop
+        </button>
+        <button type="button" data-copy="amazon" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+          Copy Amazon
+        </button>
+      </div>
+    </div>
+    <label class="mb-1 block text-sm font-medium text-foreground">
+      Public note
+      <textarea
+        data-book-note
+        rows="7"
+        class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+      ></textarea>
+    </label>
+    <p class="mb-1 text-xs text-muted-foreground">To make a link, write [the words](https://the-site.com).</p>
+    <p data-book-note-count class="mb-4 text-xs text-muted-foreground"></p>
+    <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
+      <input type="checkbox" data-book-featured />
+      Feature on the home page
+    </label>
+    <p class="mb-2 text-sm font-medium text-foreground">Cover</p>
+    <button
+      type="button"
+      data-book-drop
+      class="mb-4 flex min-h-36 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-5 text-center text-sm text-muted-foreground hover:border-primary"
+    >
+      <img data-book-preview class="hidden max-h-40 rounded object-cover shadow" alt="" />
+      <span data-book-drop-label>Drop a cover here, or click to choose a photo</span>
+    </button>
+    <input type="file" data-book-cover accept="image/jpeg,image/png,image/webp" class="hidden" />
+    <details class="mb-4 rounded-lg border border-border bg-background px-4 py-3">
+      <summary class="cursor-pointer text-sm font-medium text-foreground">Title, ISBN, and buy links</summary>
+      <div class="mt-4 space-y-4">
+        <label class="block text-sm font-medium text-foreground">
+          Title
+          <input data-book-title class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+        </label>
+        <label class="block text-sm font-medium text-foreground">
+          Author
+          <input data-book-author class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+        </label>
+        <label class="block text-sm font-medium text-foreground">
+          Genre on the site
+          <input data-book-genre class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+        </label>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block text-sm font-medium text-foreground">
+            ISBN-13
+            <input data-book-isbn class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+          </label>
+          <label class="block text-sm font-medium text-foreground">
+            ISBN-10
+            <input data-book-isbn10 class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+          </label>
+        </div>
+        <div>
+          <p class="mb-2 text-sm font-medium text-foreground">Generated buy links</p>
+          <p data-book-buy class="text-sm text-muted-foreground"></p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block text-sm font-medium text-foreground">
+            Bookshop.org URL
+            <input
+              data-book-bookshop
+              placeholder="Leave blank to use ISBN"
+              class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            />
+          </label>
+          <label class="block text-sm font-medium text-foreground">
+            Amazon URL
+            <input
+              data-book-amazon
+              placeholder="Leave blank to use ISBN"
+              class="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            />
+          </label>
+        </div>
+      </div>
+    </details>
+    <button type="button" data-book-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+      Save book
+    </button>
+  </section>
+  </div>
+  </div>
+  <div class="mt-10 rounded-xl border border-border bg-card px-5 py-4 text-sm">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="max-w-xl">
+        <p class="font-medium text-foreground">Download the site library</p>
+        <p class="mt-1 text-muted-foreground">
+          Same columns as a Goodreads export, so My Rating can be compared with the file from Goodreads.
+          The review column is the public note on the site. Average Rating is not stored here.
+        </p>
+      </div>
+      <button type="button" data-export-csv class="rounded border border-border px-4 py-2 text-sm text-foreground hover:border-primary">
+        Download CSV
+      </button>
+    </div>
+  </div>
+  <details class="mt-4 rounded-xl border border-border bg-card px-5 py-4 text-sm">
+    <summary class="cursor-pointer font-medium text-muted-foreground">
+      Import a Goodreads CSV
+    </summary>
+    <p class="mt-3 text-muted-foreground">
+      Only needed when ratings or new finished books should land on the site. Notes, covers, and featured
+      flags are kept.
+    </p>
+    <input type="file" data-csv accept=".csv" class="mt-4 block text-sm" />
+    <button type="button" data-import class="mt-3 rounded border border-border px-4 py-2 text-sm">
+      Import CSV
+    </button>
+    <pre data-log class="mt-3 overflow-x-auto text-xs text-muted-foreground"></pre>
+  </details>
+</div>

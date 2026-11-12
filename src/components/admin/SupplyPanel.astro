@@ -1,0 +1,129 @@
+---
+// Tools tab: static markup only (populated client-side by the editor script).
+---
+
+<div data-panel="supply" id="panel-supply" role="tabpanel" aria-labelledby="tab-supply" class="hidden">
+  <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
+  <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-32">
+    <div class="mb-4 flex items-center justify-between gap-3">
+      <h2 class="font-display text-lg font-semibold text-foreground">Tools</h2>
+      <button
+        type="button"
+        data-supply-new
+        class="rounded border border-border px-3 py-1.5 text-sm"
+      >
+        New
+      </button>
+    </div>
+    <p class="mb-3 text-xs text-muted-foreground">
+      Drag the handle, or use the arrows. Order saves in one go. Featured tools also show on Home.
+    </p>
+    <ul data-supply-list class="space-y-2 text-sm"></ul>
+  </section>
+  <div>
+  <p data-supply-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
+    Pick a tool to add an Amazon link, or add a new one.
+  </p>
+
+  <section data-supply-editor class="hidden rounded-xl border border-border bg-card p-5">
+    <label class="mb-4 block text-sm font-medium text-foreground">
+      Title
+      <input data-supply-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+    </label>
+    <div class="mb-4 grid gap-4 sm:grid-cols-2">
+      <label class="block text-sm font-medium text-foreground">
+        Brand
+        <input data-supply-brand class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+      </label>
+      <label class="block text-sm font-medium text-foreground">
+        Category
+        <input
+          data-supply-category
+          placeholder="Paint, Brushes, Paper…"
+          class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+        />
+      </label>
+    </div>
+    <label class="mb-2 block text-sm font-medium text-foreground">
+      Amazon URL
+      <input
+        data-supply-amazon
+        placeholder="Paste any Amazon.co.uk product link"
+        class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+      />
+      <span data-supply-amazon-preview class="mt-1 block text-xs font-normal text-muted-foreground">
+        Paste the product page address — a long Amazon link is fine. We tidy it and add your tag on save.
+      </span>
+    </label>
+    <div class="mb-4 flex flex-wrap gap-2">
+      <button type="button" data-copy="tool-amazon" title="Clean Amazon affiliate link for a Story sticker" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+        Copy Amazon
+      </button>
+      <button type="button" data-copy="tool-page" title="This tool on the Art page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+        Copy tool link
+      </button>
+      <button type="button" data-copy="tools-index" title="The Tools I recommend section" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+        Copy tools page
+      </button>
+    </div>
+    <p class="mb-4 text-xs text-muted-foreground">
+      Copy Amazon is the shop link. Copy tool link is this item on the site. Copy tools page is the whole kit section.
+    </p>
+    <label class="mb-1 block text-sm font-medium text-foreground">
+      Note
+      <textarea
+        data-supply-note
+        rows="5"
+        class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+      ></textarea>
+    </label>
+    <p class="mb-4 text-xs text-muted-foreground">To make a link, write [the words](https://the-site.com).</p>
+    <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
+      <input type="checkbox" data-supply-featured />
+      Feature on the home page
+    </label>
+    <input type="hidden" data-supply-order />
+    <p class="mb-2 text-sm font-medium text-foreground">Product photo</p>
+    <button
+      type="button"
+      data-supply-drop
+      class="mb-4 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary"
+    >
+      <img data-supply-preview class="hidden max-h-48 rounded object-cover shadow" alt="" />
+      <span data-supply-drop-label>Drop a product photo here, or click to choose. Large phone photos are resized.</span>
+    </button>
+    <input type="file" data-supply-image accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="hidden" />
+    <div class="mb-4 grid gap-4 sm:grid-cols-2">
+      <label class="block text-sm font-medium text-foreground">
+        Other shop URL
+        <input
+          data-supply-shop
+          placeholder="Jackson's, Cass Art…"
+          class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+        />
+      </label>
+      <label class="block text-sm font-medium text-foreground">
+        Shop button label
+        <input
+          data-supply-shop-label
+          placeholder="Jackson's"
+          class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+        />
+      </label>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" data-supply-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+        Save tool
+      </button>
+      <button
+        type="button"
+        data-supply-delete
+        class="hidden rounded border border-border px-4 py-2 text-sm text-muted-foreground hover:border-primary hover:text-foreground"
+      >
+        Delete
+      </button>
+    </div>
+  </section>
+  </div>
+  </div>
+</div>

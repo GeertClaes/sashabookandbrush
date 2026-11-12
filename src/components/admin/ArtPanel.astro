@@ -1,0 +1,115 @@
+---
+// Art tab: static markup only (populated client-side by the editor script).
+---
+
+<div data-panel="art" id="panel-art" role="tabpanel" aria-labelledby="tab-art" class="hidden">
+  <div class="grid items-start gap-6 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)]">
+  <section class="rounded-xl border border-border bg-card p-4 lg:sticky lg:top-32">
+    <div class="mb-4 flex items-center justify-between gap-3">
+      <h2 class="font-display text-lg font-semibold text-foreground">Paintings</h2>
+      <button
+        type="button"
+        data-art-new
+        class="rounded border border-border px-3 py-1.5 text-sm"
+      >
+        New
+      </button>
+    </div>
+    <p class="mb-3 text-xs text-muted-foreground">
+      Drag the handle, or use the arrows. Order saves in one go and is the order on the Art page. Most pieces stay display-only — tick For sale only on originals she wants to sell.
+    </p>
+    <ul data-art-list class="space-y-2 text-sm"></ul>
+  </section>
+  <div>
+  <p data-art-empty class="rounded-xl border border-dashed border-border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
+    Pick a painting, or add a new one.
+  </p>
+  <section data-art-editor class="hidden rounded-xl border border-border bg-card p-5 lg:sticky lg:top-32">
+    <label class="mb-4 block text-sm font-medium text-foreground">
+      Title
+      <input data-art-title class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+    </label>
+    <label class="mb-4 block text-sm font-medium text-foreground">
+      Medium
+      <input
+        data-art-medium
+        placeholder="Acrylic"
+        class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+      />
+    </label>
+    <label class="mb-1 block text-sm font-medium text-foreground">
+      Note
+      <textarea
+        data-art-note
+        rows="5"
+        class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+      ></textarea>
+    </label>
+    <p class="mb-4 text-xs text-muted-foreground">To make a link, write [the words](https://the-site.com).</p>
+    <label class="mb-4 flex items-center gap-2 text-sm text-foreground">
+      <input type="checkbox" data-art-featured />
+      Feature on the home page
+    </label>
+    <label class="mb-1 flex items-center gap-2 text-sm text-foreground">
+      <input type="checkbox" data-art-available />
+      For sale
+    </label>
+    <p class="mb-4 text-xs text-muted-foreground">
+      Off by default. Fan pieces and anything she is not selling stay on the wall — no buy button, no sale link.
+    </p>
+    <input type="hidden" data-art-order />
+    <div data-art-sale-fields class="hidden">
+      <label class="mb-4 block text-sm font-medium text-foreground">
+        Sale link (optional)
+        <input
+          data-art-shop
+          placeholder="Etsy, Gumroad… leave blank to send people to Instagram"
+          class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+        />
+      </label>
+      <label class="mb-4 block text-sm font-medium text-foreground">
+        Button label
+        <input
+          data-art-shop-label
+          placeholder="Available — DM me"
+          class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+        />
+      </label>
+    </div>
+    <div class="mb-4 flex flex-wrap gap-2">
+      <button type="button" data-copy="art-page" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+        Copy painting link
+      </button>
+      <button type="button" data-copy="art-shop" class="hidden rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+        Copy sale link
+      </button>
+      <button type="button" data-copy="art-index" class="rounded border border-border px-3 py-1.5 text-xs text-foreground hover:border-primary">
+        Copy Art page
+      </button>
+    </div>
+    <p class="mb-2 text-sm font-medium text-foreground">Photo</p>
+    <button
+      type="button"
+      data-art-drop
+      class="mb-4 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary"
+    >
+      <img data-art-preview class="hidden max-h-48 rounded object-cover shadow" alt="" />
+      <span data-art-drop-label>Drop a photo here, or click to choose. Large phone photos are resized.</span>
+    </button>
+    <input type="file" data-art-image accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="hidden" />
+    <div class="flex flex-wrap gap-2">
+      <button type="button" data-art-save class="rounded bg-primary px-4 py-2 text-sm text-primary-foreground">
+        Save painting
+      </button>
+      <button
+        type="button"
+        data-art-delete
+        class="hidden rounded border border-border px-4 py-2 text-sm text-muted-foreground hover:border-primary hover:text-foreground"
+      >
+        Delete
+      </button>
+    </div>
+  </section>
+  </div>
+  </div>
+</div>

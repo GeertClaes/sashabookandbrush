@@ -1,0 +1,77 @@
+---
+// Overview tab: the Recent timeline (rendered client-side) and the To do list
+// (computed server-side from `todos`, passed in as a prop).
+interface Todo {
+  count: number;
+  label: string;
+  tab: string;
+  queue: string;
+}
+
+interface Props {
+  todos: Todo[];
+}
+
+const { todos } = Astro.props;
+---
+
+<div data-panel="overview" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="space-y-10">
+  <section>
+    <div class="mb-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <h2 class="font-display text-xl font-semibold text-foreground">Recent</h2>
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          data-activity-refresh
+          class="text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground disabled:opacity-60"
+        >
+          Refresh
+        </button>
+        <button
+          type="button"
+          data-sync-now
+          class="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+        >
+          Sync now
+        </button>
+      </div>
+    </div>
+    <p data-activity-checked class="mb-4 text-xs text-muted-foreground"></p>
+    <div class="grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3 text-sm">
+      <ol data-activity-log class="col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"></ol>
+      <button
+        type="button"
+        data-activity-more
+        class="col-start-3 mt-4 hidden justify-self-start text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+      >
+        Show all
+      </button>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="font-display mb-1 text-xl font-semibold text-foreground">To do</h2>
+    <p class="mb-3 text-sm text-muted-foreground">Counts update after the next rebuild.</p>
+    {
+      todos.length ? (
+        <ul class="divide-y divide-border border-y border-border">
+          {todos.map((item) => (
+            <li>
+              <button
+                type="button"
+                data-health-tab={item.tab}
+                data-health-queue={item.queue}
+                class="flex w-full items-baseline justify-between gap-4 py-3 text-left text-sm text-foreground hover:text-accent"
+              >
+                <span>{item.label}</span>
+                <span class="font-display text-lg font-semibold tabular-nums">{item.count}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="text-sm text-muted-foreground">Nothing waiting.</p>
+      )
+    }
+  </section>
+</div>
