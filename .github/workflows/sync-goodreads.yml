@@ -68,4 +68,3 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           exit 1
-        run: exit 1
