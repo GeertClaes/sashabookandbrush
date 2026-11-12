@@ -51,7 +51,7 @@ const isbnLine = [
 
 const moreByAuthor = (await getCollection("books"))
   .filter((entry) => entry.id !== book.id && entry.data.author === data.author)
-  .sort((a, b) => (b.data.dateRead || b.data.dateAdded || "").localeCompare(a.data.dateRead || a.data.dateAdded || ""))
+  .toSorted((a, b) => (b.data.dateRead || b.data.dateAdded || "").localeCompare(a.data.dateRead || a.data.dateAdded || ""))
   .slice(0, 4);
 const buy = affiliateLinks(data);
 const progress = reading ? liveProgress(live, data.title, data.goodreadsId) : null;

@@ -146,7 +146,7 @@ async function listBooks() {
       status: frontField(text, "status") || "read",
     });
   }
-  return books.sort((a, b) => a.title.localeCompare(b.title));
+  return books.toSorted((a, b) => a.title.localeCompare(b.title));
 }
 
 async function readBody(req) {

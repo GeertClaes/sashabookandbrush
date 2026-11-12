@@ -38,11 +38,11 @@ export function groupSeries<T extends { data: { title: string } }>(books: T[], m
     .filter((group) => group.books.length >= min)
     .map((group) => ({
       ...group,
-      books: group.books.sort((a, b) => {
+      books: group.books.toSorted((a, b) => {
         const left = seriesFromTitle(a.data.title)?.number || 0;
         const right = seriesFromTitle(b.data.title)?.number || 0;
         return left - right;
       }),
     }))
-    .sort((a, b) => b.books.length - a.books.length);
+    .toSorted((a, b) => b.books.length - a.books.length);
 }

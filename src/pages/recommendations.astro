@@ -15,7 +15,7 @@ const books = (await getCollection("books"))
     if (status === book.data.status) return book;
     return { ...book, data: { ...book.data, status } };
   })
-  .sort((a, b) => {
+  .toSorted((a, b) => {
     if (a.data.status !== b.data.status) {
       return a.data.status === "currently-reading" ? -1 : 1;
     }
@@ -32,7 +32,7 @@ const books = (await getCollection("books"))
   });
 const fiveStars = books.filter((book) => book.data.rating === 5);
 const seriesGroups = groupSeries(books, 3);
-const years = [...new Set(books.map((book) => book.data.dateRead?.slice(0, 4)).filter(Boolean) as string[])].sort(
+const years = [...new Set(books.map((book) => book.data.dateRead?.slice(0, 4)).filter(Boolean) as string[])].toSorted(
   (a, b) => b.localeCompare(a),
 );
 const shelves = [
@@ -45,7 +45,7 @@ const genreChips = [
     books
       .map((book) => book.data.genre)
       .filter((genre) => genre && genre !== "Currently reading" && genre !== "Read"),
-  )].sort((a, b) => a.localeCompare(b)),
+  )].toSorted((a, b) => a.localeCompare(b)),
 ];
 const total = books.length;
 const selectClass =

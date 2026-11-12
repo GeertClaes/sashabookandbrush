@@ -18,7 +18,7 @@ const books = await getCollection("books");
 
 const featured = books
   .filter((book) => book.data.featured)
-  .sort((a, b) => a.data.order - b.data.order);
+  .toSorted((a, b) => a.data.order - b.data.order);
 
 function liveIsbn(item: { isbn?: string }, local?: (typeof books)[number]) {
   const raw = String(item.isbn || "").replace(/[^\dXx]/g, "");
@@ -44,7 +44,7 @@ const currentlyReading = (live.currentlyReading || []).map((item) => {
     progress,
     buy: affiliateLinks(liveIsbn(item, local)),
   };
-}).sort((a, b) => {
+}).toSorted((a, b) => {
   const left = typeof a.progress === "number" ? a.progress : -1;
   const right = typeof b.progress === "number" ? b.progress : -1;
   return right - left;
@@ -64,11 +64,11 @@ const upNext = (live.upNext || []).slice(0, 8).map((item) => {
 
 const featuredArt = (await getCollection("art"))
   .filter((piece) => piece.data.featured)
-  .sort((a, b) => a.data.order - b.data.order);
+  .toSorted((a, b) => a.data.order - b.data.order);
 
 const featuredSupplies = (await getCollection("supplies"))
   .filter((item) => item.data.featured)
-  .sort((a, b) => a.data.order - b.data.order);
+  .toSorted((a, b) => a.data.order - b.data.order);
 
 const readingHref = currentlyReading.length > 0 ? "#currently-reading" : "/recommendations";
 const readingLabel = currentlyReading.length > 0 ? "What I'm reading →" : "Browse books →";

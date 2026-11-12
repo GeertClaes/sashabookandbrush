@@ -53,7 +53,7 @@ const books = (await getCollection("books"))
     order: book.data.order || 0,
     buy: affiliateLinks(book.data),
   }))
-  .sort((a, b) => a.title.localeCompare(b.title));
+  .toSorted((a, b) => a.title.localeCompare(b.title));
 const art = (await getCollection("art"))
   .map((piece) => ({
     slug: piece.id,
@@ -68,7 +68,7 @@ const art = (await getCollection("art"))
     shop: piece.data.shop || "",
     shopLabel: piece.data.shopLabel || "",
   }))
-  .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+  .toSorted((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 const supplies = (await getCollection("supplies"))
   .map((item) => ({
     slug: item.id,
@@ -84,7 +84,7 @@ const supplies = (await getCollection("supplies"))
     featured: Boolean(item.data.featured),
     order: item.data.order || 0,
   }))
-  .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+  .toSorted((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
 function todoItem(count: number, singular: string, plural: string, tab: string, queue = "") {
   return { count, label: count === 1 ? singular : plural, tab, queue };
@@ -1982,7 +1982,7 @@ const pageCopy = editableCopy(site);
     }
     if (currentQueue === "currently-reading") return books.filter((book) => book.status === "currently-reading");
     if (currentQueue === "featured") {
-      return books.filter((book) => book.featured).sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+      return books.filter((book) => book.featured).toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
     }
     if (currentQueue === "five-star-no-note") {
       return books.filter((book) => book.rating === 5 && !String(book.note || "").trim());
@@ -2085,7 +2085,7 @@ const pageCopy = editableCopy(site);
   function featuredList() {
     return books
       .filter((book) => book.featured)
-      .sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+      .toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
   }
 
   function renderFeaturedBoard() {
@@ -2191,7 +2191,7 @@ const pageCopy = editableCopy(site);
       artList.innerHTML = `<li class="text-muted-foreground">No paintings yet.</li>`;
       return;
     }
-    const sorted = [...artPieces].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const sorted = artPieces.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
     artList.innerHTML = sorted
       .map((piece, index) => {
         const flags = [];
@@ -2218,7 +2218,7 @@ const pageCopy = editableCopy(site);
       supplyList.innerHTML = `<li class="text-muted-foreground">No tools yet.</li>`;
       return;
     }
-    const sorted = [...supplies].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const sorted = supplies.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
     supplyList.innerHTML = sorted
       .map((item, index) => {
         const flags = [];
@@ -2318,11 +2318,11 @@ const pageCopy = editableCopy(site);
   }
 
   function sortedArt() {
-    return [...artPieces].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    return artPieces.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
   }
 
   function sortedSupply() {
-    return [...supplies].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    return supplies.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
   }
 
   async function persistKindOrder(kind) {
@@ -2707,7 +2707,7 @@ const pageCopy = editableCopy(site);
     if (event.target.closest("[data-copy-value], [data-drag]")) return;
     const row = event.target.closest("[data-art-slug]");
     if (!row) return;
-    const sorted = [...artPieces].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const sorted = artPieces.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
     const index = sorted.findIndex((item) => item.slug === row.dataset.artSlug);
     if (index < 0) return;
     if (event.target.closest("[data-art-up]") || event.target.closest("[data-art-down]")) {
@@ -2753,7 +2753,7 @@ const pageCopy = editableCopy(site);
     if (event.target.closest("[data-copy-value], [data-drag]")) return;
     const row = event.target.closest("[data-supply-slug]");
     if (!row) return;
-    const sorted = [...supplies].sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const sorted = supplies.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
     const index = sorted.findIndex((item) => item.slug === row.dataset.supplySlug);
     if (index < 0) return;
     if (event.target.closest("[data-supply-up]") || event.target.closest("[data-supply-down]")) {

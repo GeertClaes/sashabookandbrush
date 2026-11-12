@@ -105,7 +105,7 @@ function rowFor(book) {
 }
 
 export function libraryCsv(books) {
-  const rows = [...(books || [])].sort((a, b) =>
+  const rows = (books || []).toSorted((a, b) =>
     String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" }),
   );
   return `\uFEFF${[LIBRARY_CSV_COLUMNS.join(","), ...rows.map(rowFor)].join("\r\n")}\r\n`;
