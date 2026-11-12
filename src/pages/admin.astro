@@ -199,30 +199,9 @@ const pageCopy = editableCopy(site);
       <div data-app class="hidden">
         <div data-panel="overview" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="space-y-10">
           <section>
-            <p data-activity-site class="text-sm text-foreground">Checking the live site…</p>
-            <p data-activity-build class="mt-1 text-xs text-muted-foreground"></p>
-            <p class="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span data-sync-line class="text-sm text-muted-foreground">Checking Goodreads…</span>
-              <button
-                type="button"
-                data-sync-details-toggle
-                aria-expanded="false"
-                aria-controls="sync-details"
-                class="text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
-              >
-                Details
-              </button>
-              <button
-                type="button"
-                data-sync-now
-                class="text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground disabled:opacity-60"
-              >
-                Sync now
-              </button>
-            </p>
-            <div id="sync-details" data-sync-details class="mt-4 hidden rounded-xl border border-border bg-card p-5">
-              <div class="mb-3 flex items-center justify-between gap-3">
-                <p data-activity-checked class="text-xs text-muted-foreground"></p>
+            <div class="mb-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <h2 class="font-display text-xl font-semibold text-foreground">Recent</h2>
+              <div class="flex items-center gap-3">
                 <button
                   type="button"
                   data-activity-refresh
@@ -230,8 +209,25 @@ const pageCopy = editableCopy(site);
                 >
                   Refresh
                 </button>
+                <button
+                  type="button"
+                  data-sync-now
+                  class="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+                >
+                  Sync now
+                </button>
               </div>
-              <div data-activity-sync class="text-sm"></div>
+            </div>
+            <p data-activity-checked class="mb-4 text-xs text-muted-foreground"></p>
+            <div class="grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3 text-sm">
+              <ol data-activity-log class="col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"></ol>
+              <button
+                type="button"
+                data-activity-more
+                class="col-start-3 mt-4 hidden justify-self-start text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+              >
+                Show all
+              </button>
             </div>
           </section>
 
@@ -259,20 +255,6 @@ const pageCopy = editableCopy(site);
                 <p class="text-sm text-muted-foreground">Nothing waiting.</p>
               )
             }
-          </section>
-
-          <section>
-            <h2 class="font-display mb-4 text-xl font-semibold text-foreground">Recent</h2>
-            <div class="grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3 text-sm">
-              <ol data-activity-log class="col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"></ol>
-              <button
-                type="button"
-                data-activity-more
-                class="col-start-3 mt-4 hidden justify-self-start text-sm text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
-              >
-                Show all
-              </button>
-            </div>
           </section>
         </div>
 
@@ -1391,8 +1373,11 @@ const pageCopy = editableCopy(site);
 
   function activityItem(event, time, placement, sync) {
     const failed = event.ok === false;
-    const mark = failed ? "Failed" : event.type === "goodreads" ? "Goodreads" : "Editor";
-    const dot = failed ? "border-2 border-accent bg-background" : "bg-sage";
+    const busy = Boolean(event.busy);
+    const mark = busy ? "Rebuilding" : failed ? "Failed" : event.type === "goodreads" ? "Goodreads" : event.type === "site" ? "Site" : "Editor";
+    const dotMark = busy
+      ? `<span class="relative z-10 mt-1 flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true"><span class="absolute h-3.5 w-3.5 animate-ping rounded-full bg-warning/60"></span><span class="relative h-2.5 w-2.5 rounded-full bg-warning"></span></span>`
+      : `<span class="relative z-10 mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${failed ? "border-2 border-accent bg-background" : "bg-sage"}" aria-hidden="true"></span>`;
     const rail = placement === "last" || placement === "only"
       ? ""
       : `<span class="absolute ${placement === "first" ? "top-3" : "top-0"} -bottom-2 left-1/2 w-0.5 -translate-x-1/2 bg-muted-foreground" aria-hidden="true"></span>`;
@@ -1402,7 +1387,7 @@ const pageCopy = editableCopy(site);
         ? syncLines(sync)
         : String(event.detail || "").split("\n").map((line) => line.trim()).filter(Boolean),
     );
-    return `<li class="group col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"><p class="pt-0.5 text-right text-xs text-muted-foreground tabular-nums">${escapeHtml(time)}</p><div class="relative flex justify-center">${rail}<span class="relative z-10 mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${dot}" aria-hidden="true"></span></div><div class="min-w-0 pb-7 group-last:pb-0"><p class="text-xs text-muted-foreground">${escapeHtml(mark)}${by}</p><p class="font-medium text-foreground">${escapeHtml(event.title)}</p>${activityDetail(lines)}</div></li>`;
+    return `<li class="group col-span-3 grid grid-cols-[3.25rem_1.25rem_minmax(0,1fr)] gap-x-3"><p class="pt-0.5 text-right text-xs text-muted-foreground tabular-nums">${escapeHtml(time)}</p><div class="relative flex justify-center">${rail}${dotMark}</div><div class="min-w-0 pb-7 group-last:pb-0"><p class="text-xs text-muted-foreground">${escapeHtml(mark)}${by}</p><p class="font-medium text-foreground">${escapeHtml(event.title)}</p>${activityDetail(lines)}</div></li>`;
   }
 
   function activityLog(events, sync) {
@@ -1432,57 +1417,30 @@ const pageCopy = editableCopy(site);
       .join("");
   }
 
-  function syncList(sync) {
-    const labels = new Set(["Now reading", "Up next", "Changes"]);
-    return `<ul class="space-y-0.5">${syncLines(sync)
-      .map((line) => {
-        const label = labels.has(line);
-        return `<li class="${label ? "mt-3 text-foreground first:mt-0" : "text-muted-foreground"}">${escapeHtml(line)}</li>`;
-      })
-      .join("")}</ul>`;
+  function eventFromSite(site) {
+    if (!site?.at) return null;
+    const failed = site.state === "failed";
+    return {
+      at: site.at,
+      type: "site",
+      ok: !failed,
+      busy: Boolean(site.building),
+      title: site.label || "Rebuild",
+      detail: site.commitHash ? `Build ${site.commitHash.slice(0, 7)}` : "",
+      by: site.trigger || "",
+    };
   }
 
   function renderActivity(data) {
     lastActivity = data;
-    const siteEl = document.querySelector("[data-activity-site]");
-    const buildEl = document.querySelector("[data-activity-build]");
-    const syncLine = document.querySelector("[data-sync-line]");
-    const syncEl = document.querySelector("[data-activity-sync]");
     const logEl = document.querySelector("[data-activity-log]");
     const more = document.querySelector("[data-activity-more]");
     const site = data.site || {};
     const sync = data.sync || {};
-    if (siteEl) {
-      if (site.deploymentsAvailable === false && !site.deploymentsError) {
-        siteEl.textContent = "Saves are stored. The public site usually updates within a minute.";
-      } else {
-        siteEl.textContent = site.label || "Rebuild status unknown";
-      }
-    }
-    if (buildEl) {
-      const hash = site.commitHash ? site.commitHash.slice(0, 7) : "";
-      buildEl.textContent = hash && site.at ? `Build ${hash} · ${formatWhen(site.at)}` : "";
-    }
-    if (syncLine) {
-      if (!sync.at) {
-        syncLine.textContent = "No Goodreads sync recorded yet.";
-        syncLine.className = "text-sm text-muted-foreground";
-      } else if (sync.ok) {
-        syncLine.textContent = `Goodreads synced ${formatWhen(sync.at)} · ${sync.readingCount || 0} reading`;
-        syncLine.className = "text-sm text-muted-foreground";
-      } else {
-        syncLine.textContent = `Goodreads sync had a problem · ${formatWhen(sync.at)}`;
-        syncLine.className = "text-sm text-accent";
-      }
-    }
-    if (syncEl) {
-      const problem = site.deploymentsError
-        ? `<p class="mt-3 text-xs text-muted-foreground">${escapeHtml(site.deploymentsError)}</p>`
-        : "";
-      syncEl.innerHTML = `${sync.at ? syncList(sync) : `<p class="text-muted-foreground">No Goodreads sync recorded yet.</p>`}${problem}`;
-    }
     if (logEl) {
       let events = [...(data.events || [])];
+      const siteEvent = eventFromSite(site);
+      if (siteEvent) events.push(siteEvent);
       if (syncPending && latestMark(data) <= syncWatchMark) {
         events.push({
           at: syncPendingAt,
@@ -1554,14 +1512,19 @@ const pageCopy = editableCopy(site);
     try {
       const data = await call("/activity");
       renderActivity(data);
-      if (checkedEl) checkedEl.textContent = `Checked ${formatWhen(new Date().toISOString())}`;
+      if (checkedEl) {
+        const checked = `Checked ${formatWhen(new Date().toISOString())}`;
+        checkedEl.textContent = data.site?.deploymentsError ? `${checked} · Cloudflare: ${data.site.deploymentsError}` : checked;
+        checkedEl.className = "mb-4 text-xs " + (data.site?.deploymentsError ? "text-accent" : "text-muted-foreground");
+      }
       if (activityTimer) window.clearInterval(activityTimer);
       activityTimer = window.setInterval(() => loadActivity(), data.site?.building ? 15000 : 60000);
       return data;
     } catch (error) {
-      const siteEl = document.querySelector("[data-activity-site]");
-      if (siteEl) siteEl.textContent = error instanceof Error ? error.message : "Could not load activity.";
-      if (checkedEl) checkedEl.textContent = "";
+      if (checkedEl) {
+        checkedEl.textContent = error instanceof Error ? error.message : "Could not load activity.";
+        checkedEl.className = "mb-4 text-xs text-accent";
+      }
       return lastActivity;
     } finally {
       if (button) {
@@ -2574,15 +2537,6 @@ const pageCopy = editableCopy(site);
 
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => setTab(button.dataset.tab));
-  });
-
-  document.querySelector("[data-sync-details-toggle]")?.addEventListener("click", () => {
-    const panel = document.querySelector("[data-sync-details]");
-    const toggle = document.querySelector("[data-sync-details-toggle]");
-    if (!panel || !toggle) return;
-    const open = panel.classList.toggle("hidden") === false;
-    toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    toggle.textContent = open ? "Hide details" : "Details";
   });
 
   document.querySelector("[data-sync-now]")?.addEventListener("click", async () => {
