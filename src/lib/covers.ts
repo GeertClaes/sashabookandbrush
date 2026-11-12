@@ -6,7 +6,10 @@ const modules = import.meta.glob<{ default: ImageMetadata }>(
 );
 
 export function coverModule(cover?: string): ImageMetadata | undefined {
-  const filename = String(cover || "").split("/").pop() || "";
+  const filename =
+    String(cover || "")
+      .split("/")
+      .pop() || "";
   if (!filename) return undefined;
   const match = Object.entries(modules).find(([key]) => key.endsWith(`/${filename}`));
   return match?.[1].default;

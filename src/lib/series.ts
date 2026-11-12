@@ -10,7 +10,10 @@ const SERIES_ALIASES: Record<string, { name: string; number: number }> = {
 };
 
 export function seriesFromTitle(title: string) {
-  const plain = String(title).replace(/\s*\([^)]*\)\s*$/, "").trim().toLowerCase();
+  const plain = String(title)
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .trim()
+    .toLowerCase();
   if (SERIES_ALIASES[plain]) return SERIES_ALIASES[plain];
   const match = String(title).match(/\(([^)]+)\)\s*$/);
   if (!match) return null;

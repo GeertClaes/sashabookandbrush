@@ -1,4 +1,13 @@
-import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug, slugFromTitle, yamlString } from "./_lib/frontmatter.js";
+import {
+  applyYamlFields,
+  emptyAffiliateUrl,
+  fail,
+  json,
+  readJson,
+  safeSlug,
+  slugFromTitle,
+  yamlString,
+} from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { parseImageUpload } from "./_lib/photo.js";
 import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
@@ -98,7 +107,17 @@ export async function onRequestPost(context) {
 
     let text = existing;
     if (!text) {
-      text = artMarkdown({ title, medium, note, featured, order, image, available, shop, shopLabel });
+      text = artMarkdown({
+        title,
+        medium,
+        note,
+        featured,
+        order,
+        image,
+        available,
+        shop,
+        shopLabel,
+      });
     } else {
       const updates = { title, medium, note, featured, order, available, shop, shopLabel };
       if (image) updates.image = image;

@@ -11,9 +11,18 @@ import {
   parseActivityLog,
   stringifyActivity,
 } from "./lib/activity.mjs";
-import { applyYamlFields, emptyAffiliateUrl, taggedAmazonUrl, yamlString } from "../functions/admin/api/_lib/frontmatter.js";
+import {
+  applyYamlFields,
+  emptyAffiliateUrl,
+  taggedAmazonUrl,
+  yamlString,
+} from "../functions/admin/api/_lib/frontmatter.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
-import { applySiteCopy, prepareCopySave, stringifySite } from "../functions/admin/api/_lib/site-copy.js";
+import {
+  applySiteCopy,
+  prepareCopySave,
+  stringifySite,
+} from "../functions/admin/api/_lib/site-copy.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -46,7 +55,9 @@ const DATA_DIR = path.join(ROOT, "data");
 const PORT = Number(process.env.ADMIN_PORT || 8787);
 const SITE = String(process.env.PUBLIC_SITE_URL || "http://127.0.0.1:4321").replace(/\/$/, "");
 const PASSWORD = process.env.ADMIN_PASSWORD || "";
-const TOKEN = createHash("sha256").update(`sbb:${PASSWORD || "local"}`).digest("hex");
+const TOKEN = createHash("sha256")
+  .update(`sbb:${PASSWORD || "local"}`)
+  .digest("hex");
 
 function json(res, status, body) {
   res.writeHead(status, {
@@ -95,7 +106,11 @@ async function recordLocalActivity(entry) {
   try {
     const file = path.join(ROOT, ACTIVITY_FILE);
     const log = parseActivityLog(await readFile(file, "utf8").catch(() => ""));
-    await writeFile(file, stringifyActivity(appendActivity(log, { ...entry, by: "local" })), "utf8");
+    await writeFile(
+      file,
+      stringifyActivity(appendActivity(log, { ...entry, by: "local" })),
+      "utf8",
+    );
   } catch {
     // Local activity log is best-effort.
   }
@@ -152,7 +167,8 @@ function lastOutputLine(output) {
 
 function syncSuccessMessage(output) {
   if (/shelf unchanged/i.test(output)) return "Goodreads shelf is already up to date.";
-  if (/kept the previous shelf/i.test(output)) return "Goodreads returned an empty shelf. The previous one was kept.";
+  if (/kept the previous shelf/i.test(output))
+    return "Goodreads returned an empty shelf. The previous one was kept.";
   if (/^Wrote /m.test(output)) return "Goodreads shelf updated on this computer.";
   return "Goodreads sync finished.";
 }
@@ -210,7 +226,10 @@ const server = createServer(async (req, res) => {
   const pathname = url.pathname.replace(/^\/admin(?=\/)/, "") || "/";
 
   try {
-    if (req.method === "GET" && (pathname === "/" || pathname === "/admin" || pathname === "/admin/")) {
+    if (
+      req.method === "GET" &&
+      (pathname === "/" || pathname === "/admin" || pathname === "/admin/")
+    ) {
       const dest = new URL("/admin", SITE);
       dest.search = url.search;
       res.writeHead(302, {
@@ -247,9 +266,13 @@ const server = createServer(async (req, res) => {
 
     if ((pathname === "/activity" || pathname === "/api/activity") && req.method === "GET") {
       const live = JSON.parse(
-        await readFile(path.join(ROOT, "src", "data", "goodreads-live.json"), "utf8").catch(() => "{}"),
+        await readFile(path.join(ROOT, "src", "data", "goodreads-live.json"), "utf8").catch(
+          () => "{}",
+        ),
       );
-      const log = parseActivityLog(await readFile(path.join(ROOT, ACTIVITY_FILE), "utf8").catch(() => ""));
+      const log = parseActivityLog(
+        await readFile(path.join(ROOT, ACTIVITY_FILE), "utf8").catch(() => ""),
+      );
       json(res, 200, {
         ok: true,
         sync: {
@@ -288,7 +311,11 @@ const server = createServer(async (req, res) => {
       const books = await listBooks();
       json(res, 200, {
         books: q
-          ? books.filter((book) => `${book.title} ${book.author} ${book.slug}`.toLowerCase().includes(q)).slice(0, 40)
+          ? books
+              .filter((book) =>
+                `${book.title} ${book.author} ${book.slug}`.toLowerCase().includes(q),
+              )
+              .slice(0, 40)
           : books.slice(0, 40),
       });
       return;
@@ -300,13 +327,16 @@ const server = createServer(async (req, res) => {
       let text = await readFile(file, "utf8");
       const updates = {};
       if (typeof body.title === "string" && body.title.trim()) updates.title = body.title.trim();
-      if (typeof body.author === "string" && body.author.trim()) updates.author = body.author.trim();
+      if (typeof body.author === "string" && body.author.trim())
+        updates.author = body.author.trim();
       if (typeof body.genre === "string") updates.genre = body.genre.trim() || "Read";
       if (typeof body.note === "string") updates.note = body.note;
       if (typeof body.featured === "boolean") updates.featured = body.featured;
-      if (body.featured !== false && Number.isFinite(Number(body.order))) updates.order = Number(body.order);
+      if (body.featured !== false && Number.isFinite(Number(body.order)))
+        updates.order = Number(body.order);
       if (typeof body.isbn === "string") updates.isbn = String(body.isbn).replace(/[^\dXx]/g, "");
-      if (typeof body.isbn10 === "string") updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
+      if (typeof body.isbn10 === "string")
+        updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
       if (typeof body.bookshop === "string") updates.bookshop = emptyAffiliateUrl(body.bookshop);
       if (typeof body.amazon === "string") updates.amazon = emptyAffiliateUrl(body.amazon);
       text = applyYamlFields(text, updates);
@@ -483,7 +513,10 @@ ${shop ? `shop: ${yamlString(shop)}\n` : ""}${shopLabel ? `shopLabel: ${yamlStri
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       if (photo) {
         await mkdir(ART_IMAGES_DIR, { recursive: true });
-        await writeFile(path.join(ART_IMAGES_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
+        await writeFile(
+          path.join(ART_IMAGES_DIR, photo.filename),
+          Buffer.from(photo.contentBase64, "base64"),
+        );
       }
       json(res, 200, { ok: true, slug, image: image || undefined });
       return;
@@ -534,7 +567,10 @@ ${shop ? `shop: ${yamlString(shop)}\n` : ""}${shopLabel ? `shopLabel: ${yamlStri
       const pastedAmazon = emptyAffiliateUrl(body.amazon);
       const amazon = taggedAmazonUrl(pastedAmazon, "sashabookandb-21");
       if (pastedAmazon && !amazon) {
-        json(res, 400, { error: "That doesn't look like an Amazon product link. Paste the address from the product page." });
+        json(res, 400, {
+          error:
+            "That doesn't look like an Amazon product link. Paste the address from the product page.",
+        });
         return;
       }
       const shop = emptyAffiliateUrl(body.shop);
@@ -568,7 +604,10 @@ order: ${order}
       await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
       if (photo) {
         await mkdir(SUPPLY_IMAGES_DIR, { recursive: true });
-        await writeFile(path.join(SUPPLY_IMAGES_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
+        await writeFile(
+          path.join(SUPPLY_IMAGES_DIR, photo.filename),
+          Buffer.from(photo.contentBase64, "base64"),
+        );
       }
       json(res, 200, { ok: true, slug, amazon, image: image || undefined });
       return;
@@ -590,7 +629,10 @@ order: ${order}
       const photo = parsed.photo;
       if (kind === "art") {
         await mkdir(ART_IMAGES_DIR, { recursive: true });
-        await writeFile(path.join(ART_IMAGES_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
+        await writeFile(
+          path.join(ART_IMAGES_DIR, photo.filename),
+          Buffer.from(photo.contentBase64, "base64"),
+        );
         const file = path.join(ART_DIR, `${slug}.md`);
         let text = await readFile(file, "utf8");
         text = applyYamlFields(text, { image: photo.publicPath });
@@ -598,7 +640,10 @@ order: ${order}
         json(res, 200, { ok: true, image: photo.publicPath });
         return;
       }
-      await writeFile(path.join(COVERS_DIR, photo.filename), Buffer.from(photo.contentBase64, "base64"));
+      await writeFile(
+        path.join(COVERS_DIR, photo.filename),
+        Buffer.from(photo.contentBase64, "base64"),
+      );
       const file = path.join(BOOKS_DIR, `${slug}.md`);
       let text = await readFile(file, "utf8");
       text = applyYamlFields(text, { cover: photo.filename });
@@ -647,7 +692,11 @@ order: ${order}
             : "Saved on this computer. Refresh Home, About, and Work with me to see it.",
         });
       }
-      json(res, 200, { ok: true, unchanged: content === current, image: prepared.next.about?.image || "" });
+      json(res, 200, {
+        ok: true,
+        unchanged: content === current,
+        image: prepared.next.about?.image || "",
+      });
       return;
     }
 

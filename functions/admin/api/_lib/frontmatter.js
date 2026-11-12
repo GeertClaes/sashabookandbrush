@@ -1,7 +1,9 @@
 const INVISIBLE = /[\u200B-\u200D\uFEFF\u00AD]/g;
 
 export function emptyAffiliateUrl(value) {
-  const trimmed = String(value || "").replace(INVISIBLE, "").trim();
+  const trimmed = String(value || "")
+    .replace(INVISIBLE, "")
+    .trim();
   if (!trimmed || trimmed === "#") return "";
   return trimmed;
 }

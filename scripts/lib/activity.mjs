@@ -70,13 +70,22 @@ export function describeUpNextChanges(previous = [], next = []) {
     if (!nextMap.has(bookKey(book))) changes.push(`Left up next: ${book.title}`);
   }
 
-  const sameBooks = previous.length === next.length && previous.every((book) => nextMap.has(bookKey(book)));
-  const orderChanged = previous.map((book) => bookKey(book)).join("|") !== next.map((book) => bookKey(book)).join("|");
+  const sameBooks =
+    previous.length === next.length && previous.every((book) => nextMap.has(bookKey(book)));
+  const orderChanged =
+    previous.map((book) => bookKey(book)).join("|") !== next.map((book) => bookKey(book)).join("|");
   if (sameBooks && orderChanged) changes.push("Up next order changed.");
   return changes;
 }
 
-export function formatSyncDetail({ currentlyReading = [], upNext = [], changes = [], ok = true, warning = "", error = "" }) {
+export function formatSyncDetail({
+  currentlyReading = [],
+  upNext = [],
+  changes = [],
+  ok = true,
+  warning = "",
+  error = "",
+}) {
   if (!ok) {
     const lines = [warning || error || "Goodreads shelf sync had a problem."];
     if (currentlyReading.length || upNext.length) lines.push("The previous shelf was kept.");
@@ -87,7 +96,12 @@ export function formatSyncDetail({ currentlyReading = [], upNext = [], changes =
     return `${book.title}${percent}`;
   });
   const next = upNext.map((book) => book.title).filter(Boolean);
-  const lines = ["Now reading", ...(reading.length ? reading : ["None"]), "Up next", ...(next.length ? next : ["None"])];
+  const lines = [
+    "Now reading",
+    ...(reading.length ? reading : ["None"]),
+    "Up next",
+    ...(next.length ? next : ["None"]),
+  ];
   lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
   if (warning) lines.push("Note", warning);
   return lines.join("\n");

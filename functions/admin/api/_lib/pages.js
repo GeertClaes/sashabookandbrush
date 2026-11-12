@@ -25,7 +25,11 @@ function commitHash(deployment) {
 function triggerLabel(deployment) {
   const triggerType = String(deployment?.deployment_trigger?.type || "");
   if (triggerType === "ad_hoc") return "Goodreads cron / deploy hook";
-  if (triggerType === "github" || triggerType === "github:push" || triggerType === "github:pull_request") {
+  if (
+    triggerType === "github" ||
+    triggerType === "github:push" ||
+    triggerType === "github:pull_request"
+  ) {
     return "GitHub (admin save or push)";
   }
   return triggerType || "rebuild";
@@ -41,7 +45,9 @@ export function isSkippedDeployment(deployment) {
 export function isBuildingDeployment(deployment) {
   if (!deployment || isSkippedDeployment(deployment)) return false;
   const status = stageStatus(deployment);
-  return status === "active" || status === "idle" || status === "initialized" || status === "queued";
+  return (
+    status === "active" || status === "idle" || status === "initialized" || status === "queued"
+  );
 }
 
 export async function listDeployments(env) {

@@ -104,6 +104,9 @@ const shareImage = new URL(image, Astro.site);
             data-domains="sashabookandbrush.com"
             data-before-send="umamiBeforeSend"></script>
           <script is:inline>
+            // Vendor snippet (BetterStack), kept verbatim — the leading `!` turns the
+            // function into an expression so it can self-invoke without ASI issues.
+            // oxlint-disable-next-line no-unused-expressions
             !function (b, e, t, r) {
               b[t] = b[t] || function (...args) { (b[t].q = b[t].q || []).push(args); };
               b[t].l = +new Date;

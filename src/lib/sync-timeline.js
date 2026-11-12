@@ -55,7 +55,8 @@ export function syncOutcome(data) {
   const sync = data?.sync || {};
   if (!sync.ok) return "Goodreads sync had a problem. The previous shelf was kept.";
   const note = sync.warning ? ` ${sync.warning}` : "";
-  if ((sync.changes || []).length) return `Goodreads shelf updated. A changed shelf goes live on the next publish.${note}`;
+  if ((sync.changes || []).length)
+    return `Goodreads shelf updated. A changed shelf goes live on the next publish.${note}`;
   return `Goodreads shelf is already up to date.${note}`;
 }
 

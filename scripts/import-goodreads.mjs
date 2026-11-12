@@ -144,7 +144,11 @@ function cleanReview(text) {
   value = value.replace(/<\s*\/?\s*div[^>]*>/gi, "\n");
   value = value.replace(/<[^>]+>/g, "");
   value = decodeEntities(value);
-  return value.replace(/\r\n/g, "\n").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  return value
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function genreFromShelves(shelves) {
@@ -200,7 +204,7 @@ function sleep(ms) {
 }
 
 async function mapLimit(items, limit, fn) {
-  const results = new Array(items.length);
+  const results = Array.from({ length: items.length });
   let next = 0;
   async function worker() {
     while (next < items.length) {
@@ -214,24 +218,24 @@ async function mapLimit(items, limit, fn) {
 }
 
 async function curlFile(url, dest) {
-  await execFileP(CURL, ["-L", "--fail", "-sS", "-A", USER_AGENT, "-o", dest, url], { timeout: 45000 });
+  await execFileP(CURL, ["-L", "--fail", "-sS", "-A", USER_AGENT, "-o", dest, url], {
+    timeout: 45000,
+  });
 }
 
 async function curlText(url, ua = USER_AGENT) {
-  const { stdout } = await execFileP(
-    CURL,
-    ["-L", "--fail", "-sS", "-A", ua, url],
-    { encoding: "utf8", timeout: 45000, maxBuffer: 8_000_000 },
-  );
+  const { stdout } = await execFileP(CURL, ["-L", "--fail", "-sS", "-A", ua, url], {
+    encoding: "utf8",
+    timeout: 45000,
+    maxBuffer: 8_000_000,
+  });
   return stdout;
 }
 
 function largerGoodreadsCover(url) {
   if (!url) return url;
   if (/nophoto|no-cover|nocover/i.test(url)) return "";
-  return url
-    .replace("http://", "https://")
-    .replace(/\._[A-Z]{2}\d+_(?=\.)/g, "._SX800_");
+  return url.replace("http://", "https://").replace(/\._[A-Z]{2}\d+_(?=\.)/g, "._SX800_");
 }
 
 async function goodreadsCoverUrl(id) {
@@ -256,10 +260,7 @@ async function goodreadsCoverUrl(id) {
 }
 
 function unescapeYaml(value) {
-  return String(value)
-    .replace(/\\n/g, "\n")
-    .replace(/\\"/g, '"')
-    .replace(/\\\\/g, "\\");
+  return String(value).replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
 }
 
 function frontField(text, key) {
@@ -461,7 +462,14 @@ async function fillMissingCovers() {
     if (cached && (!cover || cover.startsWith("/"))) {
       const updated = text.replace(/^cover:.*$/m, `cover: ${yamlString(cached)}`);
       await writeFile(file, updated.endsWith("\n") ? updated : `${updated}\n`, "utf8");
-      missing.push({ file, name, slug, text: updated, title: frontField(updated, "title"), already: cached });
+      missing.push({
+        file,
+        name,
+        slug,
+        text: updated,
+        title: frontField(updated, "title"),
+        already: cached,
+      });
       continue;
     }
     missing.push({
@@ -634,15 +642,20 @@ for (const row of rows) {
   const isbn = isbn13.length === 13 ? isbn13 : isbn10 || isbn13;
   const status = isReading ? "currently-reading" : "read";
   const goodreadsId = col(row, "Book Id").trim();
-  const existing = (goodreadsId && library.byId.get(goodreadsId)) || library.byTitle.get(key) || null;
+  const existing =
+    (goodreadsId && library.byId.get(goodreadsId)) || library.byTitle.get(key) || null;
   const book = {
     title,
     author,
     note: cleanReview(col(row, "My Review")),
     rating,
-    genre: isReading && !col(row, "Bookshelves").replace(/currently-reading/gi, "").trim()
-      ? "Currently reading"
-      : genreFromShelves(col(row, "Bookshelves")),
+    genre:
+      isReading &&
+      !col(row, "Bookshelves")
+        .replace(/currently-reading/gi, "")
+        .trim()
+        ? "Currently reading"
+        : genreFromShelves(col(row, "Bookshelves")),
     status,
     isbn,
     isbn10: isbn10.length === 10 ? isbn10 : "",

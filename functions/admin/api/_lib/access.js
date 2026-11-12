@@ -9,7 +9,10 @@ function teamHost(value) {
 }
 
 function b64UrlToBytes(value) {
-  const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+  const padded = value
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(value.length / 4) * 4, "=");
   const binary = atob(padded);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
@@ -42,14 +45,19 @@ export async function assertAccess(request, env, options = {}) {
   const host = teamHost(env.CF_ACCESS_TEAM_DOMAIN);
   const audience = String(env.CF_ACCESS_AUD || "").trim();
   const token = request.headers.get("Cf-Access-Jwt-Assertion") || "";
-  const headerEmail = (request.headers.get("Cf-Access-Authenticated-User-Email") || "").toLowerCase();
+  const headerEmail = (
+    request.headers.get("Cf-Access-Authenticated-User-Email") || ""
+  ).toLowerCase();
   const requireGithub = options.requireGithub !== false;
 
   if (requireGithub && !env.ADMIN_GITHUB_TOKEN && !env.GITHUB_TOKEN) {
     return { ok: false, error: "Writes are not configured. Set ADMIN_GITHUB_TOKEN on Pages." };
   }
   if (!host || !audience) {
-    return { ok: false, error: "Set CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD on Pages, then retry the deploy." };
+    return {
+      ok: false,
+      error: "Set CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD on Pages, then retry the deploy.",
+    };
   }
   if (!token) {
     return { ok: false, error: "Missing Access token. Sign in with Google, then refresh." };
@@ -92,7 +100,9 @@ export async function assertAccess(request, env, options = {}) {
     return { ok: false, error: "Unauthorized" };
   }
 
-  const email = String(payload.email || headerEmail || "").trim().toLowerCase();
+  const email = String(payload.email || headerEmail || "")
+    .trim()
+    .toLowerCase();
   const allow = String(env.ADMIN_EMAILS || "")
     .split(",")
     .map((item) => item.trim().toLowerCase())

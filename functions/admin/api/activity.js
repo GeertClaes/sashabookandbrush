@@ -50,7 +50,12 @@ function syncDetail(sync) {
   }
   const reading = shelfTitles(sync.reading, true);
   const next = shelfTitles(sync.upNext, false).filter(Boolean);
-  const lines = ["Now reading", ...(reading.length ? reading : ["None"]), "Up next", ...(next.length ? next : ["None"])];
+  const lines = [
+    "Now reading",
+    ...(reading.length ? reading : ["None"]),
+    "Up next",
+    ...(next.length ? next : ["None"]),
+  ];
   const changes = sync.changes || [];
   lines.push("Changes", ...(changes.length ? changes : ["No changes since the previous shelf."]));
   return lines.join("\n");
@@ -83,14 +88,18 @@ export function chooseLive(deployed, git) {
   const deployedTime = timeValue(deployed?.lastSync?.at || deployed?.updated);
   const gitTime = timeValue(git?.lastSync?.at || git?.updated);
   if (git && gitTime >= deployedTime) return git;
-  if (deployed && (deployed.lastSync || deployed.updated || deployed.currentlyReading)) return deployed;
+  if (deployed && (deployed.lastSync || deployed.updated || deployed.currentlyReading))
+    return deployed;
   return git || deployed || {};
 }
 
 export function mergeActivityEvents(logEvents, sync) {
   const fromSync = eventFromSync(sync);
   const events = Array.isArray(logEvents) ? [...logEvents] : [];
-  if (fromSync && !events.some((event) => event.type === "goodreads" && sameSync(event.at, fromSync.at))) {
+  if (
+    fromSync &&
+    !events.some((event) => event.type === "goodreads" && sameSync(event.at, fromSync.at))
+  ) {
     events.push(fromSync);
   }
   events.sort((left, right) => timeValue(right.at) - timeValue(left.at));

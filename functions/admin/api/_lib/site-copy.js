@@ -6,7 +6,13 @@ const LONG = 2000;
 const MAX_ITEMS = 8;
 
 function clean(value) {
-  return String(value ?? "").replace(/\u0000/g, "").trim();
+  // Strips stray NUL bytes some editors/exports leave in text fields.
+  return (
+    String(value ?? "")
+      // oxlint-disable-next-line no-control-regex
+      .replace(/\u0000/g, "")
+      .trim()
+  );
 }
 
 function requireText(value, label, max) {
@@ -23,7 +29,8 @@ function optionalText(value, label, max) {
 }
 
 function take(source, key, label, max, required) {
-  if (!source || typeof source !== "object" || !Object.prototype.hasOwnProperty.call(source, key)) return undefined;
+  if (!source || typeof source !== "object" || !Object.prototype.hasOwnProperty.call(source, key))
+    return undefined;
   return required ? requireText(source[key], label, max) : optionalText(source[key], label, max);
 }
 
@@ -68,7 +75,8 @@ const WORK_FIELDS = [
 
 function cards(value, label) {
   if (!Array.isArray(value)) throw new Error(`${label} is missing.`);
-  if (value.length > MAX_ITEMS) throw new Error(`Keep ${label.toLowerCase()} to ${MAX_ITEMS} or fewer.`);
+  if (value.length > MAX_ITEMS)
+    throw new Error(`Keep ${label.toLowerCase()} to ${MAX_ITEMS} or fewer.`);
   return value.map((item, index) => ({
     title: requireText(item?.title, `${label} ${index + 1} title`, SHORT),
     desc: optionalText(item?.desc, `${label} ${index + 1} text`, LONG),
@@ -88,9 +96,11 @@ function paragraphs(value) {
   if (!Array.isArray(value)) throw new Error("About paragraphs are missing.");
   const cleaned = value.map((item) => clean(item)).filter(Boolean);
   if (!cleaned.length) throw new Error("About needs at least one paragraph.");
-  if (cleaned.length > MAX_ITEMS) throw new Error(`Keep the about page to ${MAX_ITEMS} paragraphs.`);
+  if (cleaned.length > MAX_ITEMS)
+    throw new Error(`Keep the about page to ${MAX_ITEMS} paragraphs.`);
   for (const paragraph of cleaned) {
-    if (paragraph.length > LONG) throw new Error(`An about paragraph is too long (max ${LONG} characters).`);
+    if (paragraph.length > LONG)
+      throw new Error(`An about paragraph is too long (max ${LONG} characters).`);
   }
   return cleaned;
 }
@@ -139,12 +149,12 @@ export function applySiteCopy(site, body) {
   const next = structuredClone(site);
 
   if (source.hero && typeof source.hero === "object") {
-    next.hero = { ...(next.hero || {}) };
+    next.hero = { ...next.hero };
     assignPresent(next.hero, source.hero, HERO_FIELDS);
   }
 
   if (source.about && typeof source.about === "object") {
-    next.about = { ...(next.about || {}) };
+    next.about = { ...next.about };
     assignPresent(next.about, source.about, ABOUT_FIELDS);
     if (Object.prototype.hasOwnProperty.call(source.about, "paragraphs")) {
       next.about.paragraphs = paragraphs(source.about.paragraphs);
@@ -156,7 +166,7 @@ export function applySiteCopy(site, body) {
   }
 
   if (source.work && typeof source.work === "object") {
-    next.work = { ...(next.work || {}) };
+    next.work = { ...next.work };
     assignPresent(next.work, source.work, WORK_FIELDS);
   }
 
@@ -168,7 +178,7 @@ export function applySiteCopy(site, body) {
   }
 
   if (source.credentials && typeof source.credentials === "object") {
-    next.credentials = { ...(next.credentials || {}) };
+    next.credentials = { ...next.credentials };
     assignPresent(next.credentials, source.credentials, [
       { key: "title", label: "Also heading", max: SHORT },
       { key: "org", label: "Also text", max: LONG },
@@ -198,7 +208,7 @@ export function prepareCopySave(site, body) {
   const stored = aboutImageFile(parsed.photo);
   const previousImage = site?.about?.image || "";
   const previousDark = site?.about?.imageDark || "";
-  next.about = { ...(next.about || {}) };
+  next.about = { ...next.about };
   next.about.image = stored.publicPath;
   next.about.imageDark = stored.publicPath;
   const photo = previousImage !== stored.publicPath || previousDark !== stored.publicPath;
@@ -210,7 +220,9 @@ export function prepareCopySave(site, body) {
       ? [{ path: stored.repoPath, content: parsed.photo.contentBase64, encoding: "base64" }]
       : [],
     removals: photo
-      ? managedAboutImagePaths(previousImage, previousDark).filter((item) => item !== stored.repoPath)
+      ? managedAboutImagePaths(previousImage, previousDark).filter(
+          (item) => item !== stored.repoPath,
+        )
       : [],
   };
 }

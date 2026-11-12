@@ -14,7 +14,10 @@ export function shortHash(value) {
 }
 
 export function aboutImageFile(photo) {
-  let ext = String(photo?.filename || "").toLowerCase().match(/\.[a-z0-9]+$/)?.[0] || ".jpg";
+  let ext =
+    String(photo?.filename || "")
+      .toLowerCase()
+      .match(/\.[a-z0-9]+$/)?.[0] || ".jpg";
   if (ext === ".jpeg") ext = ".jpg";
   if (!ALLOWED_IMAGE_EXT.has(ext)) ext = ".jpg";
   const name = `about-${shortHash(photo?.contentBase64)}${ext}`;

@@ -1,4 +1,11 @@
-import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug } from "./_lib/frontmatter.js";
+import {
+  applyYamlFields,
+  emptyAffiliateUrl,
+  fail,
+  json,
+  readJson,
+  safeSlug,
+} from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { commitFiles, getTextFile } from "./_lib/github.js";
 
@@ -21,9 +28,11 @@ export async function onRequestPost(context) {
     if (typeof body.genre === "string") updates.genre = body.genre.trim() || "Read";
     if (typeof body.note === "string") updates.note = body.note;
     if (typeof body.featured === "boolean") updates.featured = body.featured;
-    if (body.featured !== false && Number.isFinite(Number(body.order))) updates.order = Number(body.order);
+    if (body.featured !== false && Number.isFinite(Number(body.order)))
+      updates.order = Number(body.order);
     if (typeof body.isbn === "string") updates.isbn = String(body.isbn).replace(/[^\dXx]/g, "");
-    if (typeof body.isbn10 === "string") updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
+    if (typeof body.isbn10 === "string")
+      updates.isbn10 = String(body.isbn10).replace(/[^\dXx]/g, "");
     if (typeof body.bookshop === "string") updates.bookshop = emptyAffiliateUrl(body.bookshop);
     if (typeof body.amazon === "string") updates.amazon = emptyAffiliateUrl(body.amazon);
 
@@ -42,6 +51,9 @@ export async function onRequestPost(context) {
     );
     return json({ ok: true });
   } catch (error) {
-    return fail(error, error instanceof Error && /not found|invalid name/i.test(error.message) ? 400 : 500);
+    return fail(
+      error,
+      error instanceof Error && /not found|invalid name/i.test(error.message) ? 400 : 500,
+    );
   }
 }

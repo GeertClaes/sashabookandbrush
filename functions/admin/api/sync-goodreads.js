@@ -1,7 +1,8 @@
 import { fail, json } from "./_lib/frontmatter.js";
 import { commitFiles, dispatchWorkflow } from "./_lib/github.js";
 
-const STARTED = "Sync started. GitHub is fetching the shelf. A changed shelf goes live on the next publish.";
+const STARTED =
+  "Sync started. GitHub is fetching the shelf. A changed shelf goes live on the next publish.";
 
 export async function onRequestPost(context) {
   try {

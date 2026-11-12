@@ -13,7 +13,10 @@ type LiveFeed = {
 };
 
 function baseTitle(value: string) {
-  return value.toLowerCase().replace(/\s*\([^)]*\)\s*$/g, "").trim();
+  return value
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)\s*$/g, "")
+    .trim();
 }
 
 function titlesMatch(left: string, right: string) {

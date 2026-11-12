@@ -61,6 +61,9 @@ export async function onRequestPost(context) {
     );
     return json({ ok: true, cover: photo.filename });
   } catch (error) {
-    return fail(error, error instanceof Error && /not found|invalid name/i.test(error.message) ? 400 : 500);
+    return fail(
+      error,
+      error instanceof Error && /not found|invalid name/i.test(error.message) ? 400 : 500,
+    );
   }
 }

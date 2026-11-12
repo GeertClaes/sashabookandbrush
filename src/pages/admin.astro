@@ -1730,7 +1730,7 @@ const pageCopy = editableCopy(site);
     const response = await fetch(`${api}/admin/api${path}`, {
       credentials: "include",
       cache: "no-store",
-      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      headers: { "Content-Type": "application/json", ...options.headers },
       ...options,
     });
     const type = response.headers.get("content-type") || "";
@@ -2883,7 +2883,7 @@ const pageCopy = editableCopy(site);
           shop: currentArt.shop,
           shopLabel: currentArt.shopLabel,
           order: currentArt.order,
-          ...(photo || {}),
+          ...photo,
         }),
       });
       currentArt.slug = created.slug || currentArt.slug;
@@ -2968,7 +2968,7 @@ const pageCopy = editableCopy(site);
           amazon: currentSupply.amazon,
           shop: currentSupply.shop,
           shopLabel: currentSupply.shopLabel,
-          ...(photo || {}),
+          ...photo,
         }),
       });
       currentSupply.slug = created.slug || currentSupply.slug;

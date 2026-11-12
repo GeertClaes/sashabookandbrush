@@ -52,12 +52,13 @@ export function affiliateLinks(book: AffiliateInput) {
   const shopId = site.affiliates?.bookshopUkId || "";
 
   const bookshop =
-    overrideBookshop ||
-    (shopId && isbn13 ? `https://uk.bookshop.org/a/${shopId}/${isbn13}` : "");
+    overrideBookshop || (shopId && isbn13 ? `https://uk.bookshop.org/a/${shopId}/${isbn13}` : "");
   const asin = isbn10 || isbn13;
   const amazon =
     taggedAmazon(overrideAmazon, tag) ||
-    (tag && asin ? `https://www.amazon.co.uk/dp/${asin}/ref=nosim?tag=${encodeURIComponent(tag)}` : "");
+    (tag && asin
+      ? `https://www.amazon.co.uk/dp/${asin}/ref=nosim?tag=${encodeURIComponent(tag)}`
+      : "");
 
   return { bookshop, amazon };
 }

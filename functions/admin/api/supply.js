@@ -1,4 +1,14 @@
-import { applyYamlFields, emptyAffiliateUrl, fail, json, readJson, safeSlug, slugFromTitle, taggedAmazonUrl, yamlString } from "./_lib/frontmatter.js";
+import {
+  applyYamlFields,
+  emptyAffiliateUrl,
+  fail,
+  json,
+  readJson,
+  safeSlug,
+  slugFromTitle,
+  taggedAmazonUrl,
+  yamlString,
+} from "./_lib/frontmatter.js";
 import { filesWithActivity } from "./_lib/activity.js";
 import { parseImageUpload } from "./_lib/photo.js";
 import { commitFiles, fileExists, tryGetTextFile } from "./_lib/github.js";
@@ -22,9 +32,22 @@ function supplyPhotoRepoPath(image) {
   return match ? `src/assets/supplies/${match[1]}` : "";
 }
 
-function supplyMarkdown({ title, brand, category, note, amazon, shop, shopLabel, featured, order, image }) {
+function supplyMarkdown({
+  title,
+  brand,
+  category,
+  note,
+  amazon,
+  shop,
+  shopLabel,
+  featured,
+  order,
+  image,
+}) {
   const amazonLine = amazon ? `amazon: ${yamlString(amazon)}\n` : "";
-  const shopLines = shop ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n` : "";
+  const shopLines = shop
+    ? `shop: ${yamlString(shop)}\nshopLabel: ${yamlString(shopLabel || "Shop")}\n`
+    : "";
   const imageLine = image ? `image: ${yamlString(image)}\n` : "";
   return `---
 title: ${yamlString(title)}
@@ -89,7 +112,13 @@ export async function onRequestPost(context) {
     const pastedAmazon = emptyAffiliateUrl(body.amazon);
     const amazon = taggedAmazonUrl(pastedAmazon, AMAZON_TAG);
     if (pastedAmazon && !amazon) {
-      return json({ error: "That doesn't look like an Amazon product link. Paste the address from the product page." }, 400);
+      return json(
+        {
+          error:
+            "That doesn't look like an Amazon product link. Paste the address from the product page.",
+        },
+        400,
+      );
     }
 
     const brand = String(body.brand || "").trim();
@@ -105,7 +134,18 @@ export async function onRequestPost(context) {
 
     let text = existing;
     if (!text) {
-      text = supplyMarkdown({ title, brand, category, note, amazon, shop, shopLabel, featured, order, image });
+      text = supplyMarkdown({
+        title,
+        brand,
+        category,
+        note,
+        amazon,
+        shop,
+        shopLabel,
+        featured,
+        order,
+        image,
+      });
     } else {
       const updates = { title, brand, category, note, amazon, featured, order, shop, shopLabel };
       if (image) updates.image = image;

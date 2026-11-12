@@ -22,7 +22,8 @@ export async function onRequestPost(context) {
         {
           type: "admin",
           title: "Goodreads CSV uploaded",
-          detail: "GitHub will import ratings, then the site rebuilds. New covers can be added afterwards.",
+          detail:
+            "GitHub will import ratings, then the site rebuilds. New covers can be added afterwards.",
           by: context.data.email || "",
         },
       ),

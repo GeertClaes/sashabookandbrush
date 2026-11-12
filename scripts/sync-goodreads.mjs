@@ -32,11 +32,11 @@ function sleep(ms) {
 // Retry those a few times with backoff before giving up.
 async function curlText(url, attempt = 1) {
   try {
-    const { stdout } = await execFileP(
-      CURL,
-      ["-L", "--fail", "-sS", "-A", BROWSER_UA, url],
-      { encoding: "utf8", timeout: 45000, maxBuffer: 8_000_000 },
-    );
+    const { stdout } = await execFileP(CURL, ["-L", "--fail", "-sS", "-A", BROWSER_UA, url], {
+      encoding: "utf8",
+      timeout: 45000,
+      maxBuffer: 8_000_000,
+    });
     return stdout;
   } catch (error) {
     const stderr = typeof error?.stderr === "string" ? error.stderr : "";
@@ -81,7 +81,9 @@ function shelfCount(html, shelf) {
 
 function percentIn(chunk) {
   const labeled = chunk.match(/\((\d{1,3})%\)/);
-  const bar = chunk.match(/style="width:\s*(\d{1,3})%[^"]*"[^>]*class="graphBar"|class="graphBar"[^>]*style="width:\s*(\d{1,3})%/i);
+  const bar = chunk.match(
+    /style="width:\s*(\d{1,3})%[^"]*"[^>]*class="graphBar"|class="graphBar"[^>]*style="width:\s*(\d{1,3})%/i,
+  );
   const raw = labeled?.[1] || bar?.[1] || bar?.[2];
   if (raw == null) return undefined;
   const percent = Number(raw);
@@ -110,8 +112,8 @@ function booksFromProfile(html) {
         /<a class="bookTitle" href="(?:https:\/\/www\.goodreads\.com)?\/book\/show\/(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/i,
       );
       if (!titleMatch) return null;
-      const authors = [...chunk.matchAll(/<a class="authorName"[^>]*>([\s\S]*?)<\/a>/gi)].map((match) =>
-        stripTags(match[1]),
+      const authors = [...chunk.matchAll(/<a class="authorName"[^>]*>([\s\S]*?)<\/a>/gi)].map(
+        (match) => stripTags(match[1]),
       );
       const image = chunk.match(/<img[^>]+src="(https:\/\/[^"]+)"/i)?.[1] || "";
       return {
@@ -172,7 +174,8 @@ function booksFromWidget(source) {
     const img = match[2];
     const src = img.match(/\bsrc="([^"]+)"/i)?.[1] || "";
     const goodreadsId = src.match(/\/(\d+)(?:\._[A-Z]{2}\d+_)?\.(?:jpe?g|png)\b/i)?.[1] || "";
-    const title = decodeEntities(match[1]) || decodeEntities(img.match(/\balt="([^"]*)"/i)?.[1] || "");
+    const title =
+      decodeEntities(match[1]) || decodeEntities(img.match(/\balt="([^"]*)"/i)?.[1] || "");
     if (!title || !goodreadsId) continue;
     books.push({
       title,
@@ -237,7 +240,9 @@ function previousProgress(previousBooks, book) {
   const prev =
     (book.goodreadsId && list.find((item) => item.goodreadsId === book.goodreadsId)) ||
     list.find(
-      (item) => baseTitle(item.title) === baseTitle(book.title) || item.title.toLowerCase() === book.title.toLowerCase(),
+      (item) =>
+        baseTitle(item.title) === baseTitle(book.title) ||
+        item.title.toLowerCase() === book.title.toLowerCase(),
     );
   return typeof prev?.progress === "number" ? prev.progress : undefined;
 }
@@ -281,7 +286,11 @@ async function writeLive(payload) {
 
 const previous = await readJson(OUT, { currentlyReading: [], upNext: [] });
 const source =
-  process.env.GITHUB_ACTIONS === "true" ? "github-actions" : process.env.CF_PAGES === "1" ? "pages-build" : "local";
+  process.env.GITHUB_ACTIONS === "true"
+    ? "github-actions"
+    : process.env.CF_PAGES === "1"
+      ? "pages-build"
+      : "local";
 
 function shelfSnapshot(data) {
   return JSON.stringify({
@@ -330,7 +339,15 @@ function isManualSync() {
   );
 }
 
-async function noteShelfCheck({ ok, changes = [], warning = "", error = "", currentlyReading, upNext, title }) {
+async function noteShelfCheck({
+  ok,
+  changes = [],
+  warning = "",
+  error = "",
+  currentlyReading,
+  upNext,
+  title,
+}) {
   const lastSync = lastSyncFields({ ok, changes, warning, error, currentlyReading, upNext });
   await writeLive({
     ...previous,
@@ -355,7 +372,10 @@ try {
   const widgetUrl =
     `https://www.goodreads.com/review/grid_widget/${USER_ID}` +
     "?cover_size=medium&num_books=8&order=d&shelf=to-read&sort=date_added&widget_id=1";
-  const [profileHtml, widgetSource] = await Promise.all([curlText(profileUrl), curlText(widgetUrl)]);
+  const [profileHtml, widgetSource] = await Promise.all([
+    curlText(profileUrl),
+    curlText(widgetUrl),
+  ]);
   const known = knownBooks([previous.currentlyReading, previous.upNext]);
   const { books: parsedReading, count: readingShelfCount } = booksFromProfile(profileHtml);
   const currentlyReading = [];
@@ -425,7 +445,12 @@ try {
   if (currentlyReading.length === 0 && previous.currentlyReading?.length) {
     const warning = "Goodreads returned no currently-reading books; kept the previous shelf.";
     console.warn(warning);
-    if (previous.lastSync?.ok === false && previous.lastSync?.warning === warning && !isManualSync()) process.exit(0);
+    if (
+      previous.lastSync?.ok === false &&
+      previous.lastSync?.warning === warning &&
+      !isManualSync()
+    )
+      process.exit(0);
     const lastSync = lastSyncFields({
       ok: false,
       warning,
@@ -493,7 +518,13 @@ try {
     type: "goodreads",
     ok: true,
     title: "Goodreads shelf sync",
-    detail: formatSyncDetail({ currentlyReading, upNext, changes, ok: true, warning: readingWarning }),
+    detail: formatSyncDetail({
+      currentlyReading,
+      upNext,
+      changes,
+      ok: true,
+      warning: readingWarning,
+    }),
     by: source,
   });
   console.log(

@@ -25,28 +25,32 @@ export async function onRequestPost(context) {
 
     const content = stringifySite(prepared.next);
     const current = raw.endsWith("\n") ? raw : `${raw}\n`;
-    if (content === current) return json({ ok: true, unchanged: true, image: prepared.next.about?.image || "" });
+    if (content === current)
+      return json({ ok: true, unchanged: true, image: prepared.next.about?.image || "" });
 
     const source = { ...body };
     delete source.aboutPhoto;
     const textChanged = stringifySite(applySiteCopy(site, source)) !== current;
-    const activity = textChanged && prepared.photo
-      ? {
-          commit: "Admin: update pages",
-          title: "Updated page text and the about photo",
-          detail: "Home, About, and Work with me update after the site rebuilds (about a minute).",
-        }
-      : prepared.photo
+    const activity =
+      textChanged && prepared.photo
         ? {
-            commit: "Admin: update about photo",
-            title: "Updated the about photo",
-            detail: "About and Work with me show it after the site rebuilds (about a minute).",
+            commit: "Admin: update pages",
+            title: "Updated page text and the about photo",
+            detail:
+              "Home, About, and Work with me update after the site rebuilds (about a minute).",
           }
-        : {
-            commit: "Admin: update page text",
-            title: "Updated page text",
-            detail: "Home, About, and Work with me update after the site rebuilds (about a minute).",
-          };
+        : prepared.photo
+          ? {
+              commit: "Admin: update about photo",
+              title: "Updated the about photo",
+              detail: "About and Work with me show it after the site rebuilds (about a minute).",
+            }
+          : {
+              commit: "Admin: update page text",
+              title: "Updated page text",
+              detail:
+                "Home, About, and Work with me update after the site rebuilds (about a minute).",
+            };
 
     const files = [{ path: SITE_FILE, content, encoding: "utf-8" }, ...prepared.uploads];
     for (const path of prepared.removals) {
