@@ -191,7 +191,7 @@ const pageCopy = editableCopy(site);
           data-tabs
           role="tablist"
           aria-label="Editor"
-          class="hidden overflow-x-auto border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          class="hidden overflow-x-auto border-b border-border scrollbar-none"
         >
           <button type="button" role="tab" id="tab-overview" data-tab="overview" aria-selected="true" aria-controls="panel-overview" class="shrink-0 border-b-2 border-accent px-4 py-3 text-sm text-foreground">Overview</button>
           <button type="button" role="tab" id="tab-book" data-tab="book" aria-selected="false" aria-controls="panel-book" class="shrink-0 border-b-2 border-transparent px-4 py-3 text-sm text-muted-foreground">Books</button>
@@ -219,10 +219,24 @@ const pageCopy = editableCopy(site);
   <script is:inline type="application/json" id="admin-config" set:html={JSON.stringify({ api, isDev }).replace(/</g, "\\u003c")} />
 
   <script>
+  // @ts-nocheck -- This page's DOM-wiring script predates strict typing and
+  // mixes untyped editor state with direct Element property access. See the
+  // README's Tooling section for the plan to retype it incrementally as
+  // pieces get extracted into src/lib/*.
   import { latestMark, mergeTimelineEvents, syncOutcome } from "../lib/sync-timeline.js";
   import { escapeHtml, formatWhen, toBase64 } from "../lib/admin-format.js";
   import { activityLog, saveSteps, syncSteps } from "../lib/admin-timeline-ui.js";
   import { tagAmazonUrl } from "../lib/affiliates";
+  import {
+    COPY_MAX,
+    cardRow,
+    copySection,
+    copySubhead,
+    labelledField,
+    listBlock,
+    paragraphRow,
+    readCopy,
+  } from "../lib/admin-copy-ui.js";
 
   const { api, isDev } = JSON.parse(document.getElementById("admin-config")?.textContent || "{}");
   const status = document.querySelector("[data-status]");
@@ -260,121 +274,6 @@ const pageCopy = editableCopy(site);
   const MAX_NOTE = 8000;
   const pageCopy = JSON.parse(document.getElementById("page-copy")?.textContent || "{}");
   let copySnapshot = "";
-  const COPY_MAX = { short: 160, medium: 800, long: 2000, items: 8 };
-
-  function copyInputClass() {
-    return "mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-normal";
-  }
-
-  function labelledField(label, value, options = {}) {
-    const wrap = document.createElement("label");
-    wrap.className = "mb-4 block text-sm font-medium text-foreground";
-    wrap.append(document.createTextNode(label));
-    const input = document.createElement(options.long ? "textarea" : "input");
-    input.className = copyInputClass();
-    if (options.long) input.rows = options.rows || 4;
-    input.maxLength = options.max || COPY_MAX.short;
-    input.value = value || "";
-    if (options.path) input.dataset.copyPath = options.path;
-    if (options.key) input.dataset.copyKey = options.key;
-    wrap.append(input);
-    if (options.hint) {
-      const hint = document.createElement("span");
-      hint.className = "mt-1 block text-xs font-normal text-muted-foreground";
-      hint.textContent = options.hint;
-      wrap.append(hint);
-    }
-    return wrap;
-  }
-
-  function copySection(title, hint, copyName) {
-    const section = document.createElement("details");
-    section.className = "rounded-xl border border-border bg-card px-5 pb-5";
-    const summary = document.createElement("summary");
-    summary.className = "flex cursor-pointer list-none items-center justify-between gap-3 py-4";
-    const heading = document.createElement("span");
-    heading.className = "font-display text-xl font-semibold text-foreground";
-    heading.textContent = title;
-    summary.append(heading);
-    if (copyName) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.dataset.copy = copyName;
-      button.className =
-        "shrink-0 text-sm font-normal text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground";
-      button.textContent = "Copy link";
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const origin = siteOrigin();
-        if (copyName === "home") copyText("Home link", origin);
-        else if (copyName === "about") copyText("About link", `${origin}/about`);
-        else if (copyName === "work") copyText("Work with me link", `${origin}/work`);
-      });
-      summary.append(button);
-    }
-    const note = document.createElement("p");
-    note.className = "text-sm text-muted-foreground";
-    note.textContent = hint;
-    const linkNote = document.createElement("p");
-    linkNote.className = "mt-1 mb-4 text-xs text-muted-foreground";
-    linkNote.textContent = "To make a link, write [the words](https://the-site.com).";
-    section.append(summary, note, linkNote);
-    return section;
-  }
-
-  function copySubhead(text) {
-    const heading = document.createElement("h3");
-    heading.className = "font-display mt-2 mb-3 text-lg font-semibold text-foreground";
-    heading.textContent = text;
-    return heading;
-  }
-
-  function copyRemoveButton(name) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.dataset.copyRemove = name;
-    button.className = "text-xs text-muted-foreground hover:text-foreground";
-    button.textContent = "Remove";
-    return button;
-  }
-
-  function paragraphRow(value) {
-    const row = document.createElement("div");
-    row.dataset.copyItem = "paragraphs";
-    row.className = "mb-3 rounded-lg border border-border p-3";
-    const field = labelledField("Paragraph", value, { long: true, max: COPY_MAX.long, rows: 5, key: "body" });
-    field.classList.remove("mb-4");
-    row.append(field, copyRemoveButton("paragraphs"));
-    return row;
-  }
-
-  function cardRow(name, item) {
-    const row = document.createElement("div");
-    row.dataset.copyItem = name;
-    row.className = "mb-3 rounded-lg border border-border p-3";
-    const title = labelledField("Title", item.title, { key: "title" });
-    const text = labelledField("Text", item.desc, { long: true, max: COPY_MAX.long, rows: 3, key: "desc" });
-    text.classList.remove("mb-4");
-    row.append(title, text, copyRemoveButton(name));
-    return row;
-  }
-
-  function listBlock(name, addLabel, items, renderItem) {
-    const block = document.createElement("div");
-    block.dataset.copyBlock = name;
-    block.className = "mb-4";
-    const list = document.createElement("div");
-    list.dataset.copyList = name;
-    items.forEach((item) => list.append(renderItem(item)));
-    const add = document.createElement("button");
-    add.type = "button";
-    add.dataset.copyAdd = name;
-    add.className = "rounded border border-border px-3 py-1.5 text-sm text-foreground hover:border-primary";
-    add.textContent = addLabel;
-    block.append(list, add);
-    return block;
-  }
 
   function onCopyClick(event) {
     const add = event.target.closest("[data-copy-add]");
@@ -397,67 +296,6 @@ const pageCopy = editableCopy(site);
       return;
     }
     card?.remove();
-  }
-
-  function copyValue(path) {
-    return document.querySelector(`[data-copy-path="${CSS.escape(path)}"]`)?.value ?? "";
-  }
-
-  function readCards(name) {
-    return [...document.querySelectorAll(`[data-copy-item="${name}"]`)]
-      .map((card) => ({
-        title: card.querySelector('[data-copy-key="title"]')?.value.trim() || "",
-        desc: card.querySelector('[data-copy-key="desc"]')?.value.trim() || "",
-      }))
-      .filter((item) => item.title || item.desc);
-  }
-
-  function readCopy() {
-    const work = {};
-    [
-      "eyebrow",
-      "headline",
-      "headlineItalic",
-      "lede",
-      "note",
-      "photoCaption",
-      "offersEyebrow",
-      "offersHeadline",
-      "offersLede",
-      "packagesEyebrow",
-      "packagesHeadline",
-      "packagesLede",
-      "pricesNote",
-      "closeHeadline",
-      "closeLede",
-    ].forEach((key) => {
-      work[key] = copyValue(`work.${key}`).trim();
-    });
-    return {
-      hero: {
-        eyebrow: copyValue("hero.eyebrow").trim(),
-        headline: copyValue("hero.headline").trim(),
-        headlineItalic: copyValue("hero.headlineItalic").trim(),
-        lede: copyValue("hero.lede").trim(),
-      },
-      about: {
-        eyebrow: copyValue("about.eyebrow").trim(),
-        headline: copyValue("about.headline").trim(),
-        headlineItalic: copyValue("about.headlineItalic").trim(),
-        imageAlt: copyValue("about.imageAlt").trim(),
-        paragraphs: [...document.querySelectorAll('[data-copy-item="paragraphs"] [data-copy-key="body"]')]
-          .map((el) => el.value.trim())
-          .filter(Boolean),
-      },
-      workIntro: copyValue("workIntro").trim(),
-      work,
-      offers: readCards("offers"),
-      packages: readCards("packages"),
-      credentials: {
-        title: copyValue("credentials.title").trim(),
-        org: copyValue("credentials.org").trim(),
-      },
-    };
   }
 
   function copyState() {
@@ -485,7 +323,12 @@ const pageCopy = editableCopy(site);
     const work = pageCopy.work || {};
     const credentials = pageCopy.credentials || {};
 
-    const home = copySection("Home", "The big words on the first screen. The buttons stay as they are.", "home");
+    const home = copySection(
+      "Home",
+      "The big words on the first screen. The buttons stay as they are.",
+      "home",
+      copyPageLink,
+    );
     home.append(
       labelledField("Small line above the title", hero.eyebrow, { path: "hero.eyebrow" }),
       labelledField("Headline", hero.headline, { path: "hero.headline" }),
@@ -497,6 +340,7 @@ const pageCopy = editableCopy(site);
       "About",
       "The portrait and the bio. Each box is its own paragraph. Fact chips stay as they are.",
       "about",
+      copyPageLink,
     );
     aboutSection.append(
       aboutPhotoControl(about),
@@ -510,6 +354,7 @@ const pageCopy = editableCopy(site);
       "Work with me",
       "The words on Work with me. The Instagram buttons stay as they are.",
       "work",
+      copyPageLink,
     );
     workSection.append(
       labelledField("Short summary", pageCopy.workIntro || "", {
@@ -1250,6 +1095,14 @@ const pageCopy = editableCopy(site);
         if (status) status.textContent = "Could not copy — long-press the link instead.";
       },
     );
+  }
+
+  // Passed into copySection() as its "Copy link" click callback.
+  function copyPageLink(copyName) {
+    const origin = siteOrigin();
+    if (copyName === "home") copyText("Home link", origin);
+    else if (copyName === "about") copyText("About link", `${origin}/about`);
+    else if (copyName === "work") copyText("Work with me link", `${origin}/work`);
   }
 
   function copyChip(label, value) {
