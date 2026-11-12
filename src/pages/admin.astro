@@ -1104,43 +1104,60 @@ const pageCopy = editableCopy(site);
     status.innerHTML = message;
   }
 
-  function progressSteps({ title, steps, hint }) {
-    const pill = (state, label) => {
-      const cls =
-        state === "done"
-          ? "text-foreground"
-          : state === "busy"
-            ? "text-primary"
-            : state === "error"
-              ? "text-accent"
-              : "text-muted-foreground";
-      const mark = state === "done" ? "✓" : state === "busy" ? "…" : state === "error" ? "!" : "·";
-      return `<span class="${cls}">${mark} ${label}</span>`;
+  // Renders a vertical step tracker in a bordered card, styled like the Recent
+  // timeline (dot + connecting rail), so a multi-stage process (save or sync)
+  // reads as a single ongoing operation rather than a one-line status message.
+  function progressSteps({ title, steps }) {
+    const mark = (state) => {
+      if (state === "done") {
+        return `<span class="relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sage text-[11px] leading-none text-cream" aria-hidden="true">✓</span>`;
+      }
+      if (state === "error") {
+        return `<span class="relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] leading-none text-primary-foreground" aria-hidden="true">✕</span>`;
+      }
+      if (state === "busy") {
+        return `<span class="relative z-10 flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden="true"><span class="absolute h-3 w-3 animate-ping rounded-full bg-warning/60"></span><span class="relative h-2.5 w-2.5 rounded-full bg-warning"></span></span>`;
+      }
+      return `<span class="relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-border bg-card" aria-hidden="true"></span>`;
     };
-    const body = steps.map(([state, label]) => pill(state, label)).join("");
-    return `<p class="font-medium">${title}</p><p class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">${body}</p>${hint ? `<p class="mt-1 text-xs text-muted-foreground">${hint}</p>` : ""}`;
+    const labelClass = (state) =>
+      state === "done"
+        ? "text-foreground"
+        : state === "error"
+          ? "text-accent"
+          : state === "busy"
+            ? "text-warning"
+            : "text-muted-foreground";
+    const rows = steps
+      .map(([state, label, detail], index) => {
+        const rail =
+          index < steps.length - 1
+            ? `<span class="absolute left-1/2 top-5 bottom-0 w-px -translate-x-1/2 bg-border" aria-hidden="true"></span>`
+            : "";
+        return `<li class="relative flex gap-3 pb-4 last:pb-0"><div class="relative flex w-5 shrink-0 justify-center">${mark(state)}${rail}</div><div class="min-w-0 pt-0.5"><p class="text-sm font-medium ${labelClass(state)}">${label}</p>${detail ? `<p class="mt-0.5 text-xs text-muted-foreground">${detail}</p>` : ""}</div></li>`;
+      })
+      .join("");
+    return `<div class="rounded-xl border border-border bg-card p-4"><p class="font-medium text-foreground">${title}</p><ol class="mt-3">${rows}</ol></div>`;
   }
 
-  function saveSteps({ title, editor, github, live, hint }) {
+  function saveSteps({ title, editor, editorDetail, github, githubDetail, live, liveDetail }) {
     return progressSteps({
       title,
-      hint,
       steps: [
-        [editor, "This editor"],
-        [github, "GitHub"],
-        [live, "Live site"],
+        [editor, "This editor", editorDetail],
+        [github, "GitHub", githubDetail],
+        [live, "Live site", liveDetail],
       ],
     });
   }
 
-  function syncSteps({ title, request, github, live, hint }) {
+  function syncSteps({ title, request, requestDetail, github, githubDetail, live, liveDetail }) {
     return progressSteps({
       title,
-      hint,
       steps: [
-        [request, "Sync request"],
-        [github, "GitHub"],
-        [live, "Live site"],
+        [request, "Sync request", requestDetail],
+        [github, "GitHub", githubDetail],
+        [live, "Live site", liveDetail],
       ],
     });
   }
@@ -1164,9 +1181,11 @@ const pageCopy = editableCopy(site);
             saveSteps({
               title: `Saved ${escapeHtml(label)}`,
               editor: "done",
+              editorDetail: "This editor already has your edits.",
               github: "done",
+              githubDetail: "Committed.",
               live: "busy",
-              hint: "Cloudflare is rebuilding. The public site still shows the old version until this finishes (usually about a minute).",
+              liveDetail: "Cloudflare is rebuilding. The public site still shows the old version until this finishes (usually about a minute).",
             }),
           );
           continue;
@@ -1177,9 +1196,11 @@ const pageCopy = editableCopy(site);
             saveSteps({
               title: `Saved ${escapeHtml(label)} to GitHub, but the rebuild failed.`,
               editor: "done",
+              editorDetail: "This editor already has your edits.",
               github: "done",
+              githubDetail: "Committed.",
               live: "error",
-              hint: "Try Save again, or check Cloudflare Pages.",
+              liveDetail: "Try Save again, or check Cloudflare Pages.",
             }),
           );
           return;
@@ -1190,9 +1211,11 @@ const pageCopy = editableCopy(site);
             saveSteps({
               title: `Saved ${escapeHtml(label)}`,
               editor: "done",
+              editorDetail: "This editor already has your edits.",
               github: "done",
+              githubDetail: "Committed.",
               live: site.deploymentsAvailable === false ? "busy" : "done",
-              hint:
+              liveDetail:
                 site.deploymentsAvailable === false
                   ? "GitHub has it. Refresh the public page in about a minute."
                   : "Live. Refresh the public page to see the change.",
@@ -1210,9 +1233,11 @@ const pageCopy = editableCopy(site);
       saveSteps({
         title: `Saved ${escapeHtml(label)} to GitHub`,
         editor: "done",
+        editorDetail: "This editor already has your edits.",
         github: "done",
+        githubDetail: "Committed.",
         live: "busy",
-        hint: "Cloudflare can take a couple of minutes. Refresh the public page shortly.",
+        liveDetail: "Cloudflare can take a couple of minutes. Refresh the public page shortly.",
       }),
     );
   }
@@ -1232,9 +1257,13 @@ const pageCopy = editableCopy(site);
       saveSteps({
         title: isDev ? "Saving on this computer…" : "Saving to GitHub… this can take a few seconds.",
         editor: "busy",
+        editorDetail: "Writing your changes.",
         github: isDev ? "wait" : "busy",
+        githubDetail: isDev ? "Skipped on this computer." : "Committing to the repository.",
         live: "wait",
-        hint: isDev ? "The public site on this computer updates after you refresh." : "Then Cloudflare rebuilds the live site — usually about a minute.",
+        liveDetail: isDev
+          ? "The public site on this computer updates after you refresh."
+          : "Cloudflare rebuilds the live site after GitHub — usually about a minute.",
       }),
     );
     try {
@@ -1246,9 +1275,11 @@ const pageCopy = editableCopy(site);
           saveSteps({
             title: `Saved ${escapeHtml(label)}`,
             editor: "done",
+            editorDetail: "Saved.",
             github: "wait",
+            githubDetail: "Skipped on this computer.",
             live: "wait",
-            hint: result?.hint || "Refresh the site on this computer to see it.",
+            liveDetail: result?.hint || "Refresh the site on this computer to see it.",
           }),
         );
       } else {
@@ -1257,9 +1288,11 @@ const pageCopy = editableCopy(site);
           saveSteps({
             title: `Saved ${escapeHtml(label)} to GitHub`,
             editor: "done",
+            editorDetail: "This editor already has your edits.",
             github: "done",
+            githubDetail: "Committed.",
             live: "busy",
-            hint: "Cloudflare is rebuilding the live site — usually about a minute. This editor already has your edits.",
+            liveDetail: "Cloudflare is rebuilding the live site — usually about a minute.",
           }),
         );
         watchRebuild(label);
@@ -1552,9 +1585,11 @@ const pageCopy = editableCopy(site);
         syncSteps({
           title: "Syncing with Goodreads…",
           request: "done",
+          requestDetail: "Sent.",
           github: "busy",
+          githubDetail: "Fetching the shelf. This usually takes under a minute.",
           live: "wait",
-          hint: "GitHub is fetching the shelf. This usually takes under a minute.",
+          liveDetail: "Waiting for GitHub to finish.",
         }),
       );
       await wait(4000);
@@ -1569,9 +1604,11 @@ const pageCopy = editableCopy(site);
         syncSteps({
           title: "Sync is still running",
           request: "done",
+          requestDetail: "Sent.",
           github: "busy",
+          githubDetail: "Taking longer than usual. Recent will update here as soon as it finishes.",
           live: "wait",
-          hint: "GitHub is taking longer than usual. Recent will update here as soon as it finishes.",
+          liveDetail: "Waiting for GitHub to finish.",
         }),
       );
       return data;
@@ -1583,9 +1620,11 @@ const pageCopy = editableCopy(site);
         syncSteps({
           title: "Goodreads sync had a problem",
           request: "done",
+          requestDetail: "Sent.",
           github: "error",
+          githubDetail: "See Details for what GitHub reported.",
           live: "wait",
-          hint: "See Details for what GitHub reported. The previous shelf was kept, so nothing will rebuild.",
+          liveDetail: "The previous shelf was kept, so nothing will rebuild.",
         }),
       );
       return data;
@@ -1601,9 +1640,11 @@ const pageCopy = editableCopy(site);
           syncSteps({
             title,
             request: "done",
+            requestDetail: "Sent.",
             github: "done",
+            githubDetail: "Shelf checked.",
             live: site.deploymentsAvailable === false ? "busy" : "done",
-            hint:
+            liveDetail:
               site.deploymentsAvailable === false
                 ? "GitHub has it. Refresh the public page in about a minute."
                 : "Live. Refresh the public page to see the change.",
@@ -1617,9 +1658,11 @@ const pageCopy = editableCopy(site);
           syncSteps({
             title,
             request: "done",
+            requestDetail: "Sent.",
             github: "done",
+            githubDetail: "Shelf checked.",
             live: "error",
-            hint: "GitHub has the shelf, but the rebuild failed. Check Cloudflare Pages.",
+            liveDetail: "GitHub has the shelf, but the rebuild failed. Check Cloudflare Pages.",
           }),
         );
         return data;
@@ -1629,9 +1672,11 @@ const pageCopy = editableCopy(site);
         syncSteps({
           title,
           request: "done",
+          requestDetail: "Sent.",
           github: "done",
+          githubDetail: "Shelf checked.",
           live: "busy",
-          hint: "Cloudflare is rebuilding. The public site still shows the old version until this finishes (usually about a minute).",
+          liveDetail: "Cloudflare is rebuilding. The public site still shows the old version until this finishes (usually about a minute).",
         }),
       );
       await wait(4000);
@@ -1644,9 +1689,11 @@ const pageCopy = editableCopy(site);
       syncSteps({
         title,
         request: "done",
+        requestDetail: "Sent.",
         github: "done",
+        githubDetail: "Shelf checked.",
         live: "busy",
-        hint: "Cloudflare can take a couple of minutes. Refresh the public page shortly.",
+        liveDetail: "Cloudflare can take a couple of minutes. Refresh the public page shortly.",
       }),
     );
     return data;
@@ -2553,9 +2600,11 @@ const pageCopy = editableCopy(site);
       syncSteps({
         title: "Starting the Goodreads sync…",
         request: "busy",
+        requestDetail: "Asking GitHub to run the sync.",
         github: "wait",
+        githubDetail: "Will fetch the shelf and commit any changes.",
         live: "wait",
-        hint: "Asking GitHub to run the sync.",
+        liveDetail: "Rebuilds only if the shelf changed.",
       }),
     );
     try {

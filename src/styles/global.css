@@ -20,6 +20,7 @@
   --sbb-border: #d6c9b6;
   --sbb-ring: #8c3340;
   --sbb-sage: #a8c4a2;
+  --sbb-amber: #b3791e;
   --sbb-cream: #fbf7f0;
   --sbb-parchment: #d6c9b6;
   --sbb-ink-soft: #7a6652;
@@ -43,6 +44,7 @@
   --sbb-border: #3d2a24;
   --sbb-ring: #d4a574;
   --sbb-sage: #b5c9b0;
+  --sbb-amber: #e8b04c;
   --sbb-cream: #fbf7f0;
   --sbb-parchment: #d6c9b6;
   --sbb-ink-soft: #b8a08c;
@@ -68,6 +70,7 @@
   --color-border: var(--sbb-border);
   --color-ring: var(--sbb-ring);
   --color-sage: var(--sbb-sage);
+  --color-warning: var(--sbb-amber);
   --color-cream: var(--sbb-cream);
   --color-parchment: var(--sbb-parchment);
   --color-ink-soft: var(--sbb-ink-soft);
