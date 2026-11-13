@@ -1,12 +1,14 @@
 {
-  "updated": "2026-11-09T11:25:36.888Z",
+  "updated": "2026-11-13T03:26:07.179Z",
   "lastSync": {
-    "at": "2026-11-12T12:29:17.696Z",
+    "at": "2026-11-13T03:26:07.179Z",
     "ok": true,
     "source": "github-actions",
     "readingCount": 4,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Fourth Wing (The Empyrean, #1): 50% → 65%"
+    ],
     "warning": null,
     "error": null,
     "reading": [
@@ -16,7 +18,7 @@
       },
       {
         "title": "Fourth Wing (The Empyrean, #1)",
-        "progress": 50
+        "progress": 65
       },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
@@ -69,7 +71,7 @@
       "goodreadsId": "61431922",
       "isbn": "",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761312598l/61431922._SX98_.jpg",
-      "progress": 50
+      "progress": 65
     },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
