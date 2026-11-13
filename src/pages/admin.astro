@@ -225,18 +225,27 @@ const pageCopy = editableCopy(site);
   // pieces get extracted into src/lib/*.
   import { latestMark, mergeTimelineEvents, syncOutcome } from "../lib/sync-timeline.js";
   import { escapeHtml, formatWhen, toBase64 } from "../lib/admin-format.js";
-  import { activityLog, saveSteps, syncSteps } from "../lib/admin-timeline-ui.js";
+  import { activityLog, syncSteps } from "../lib/admin-timeline-ui.js";
   import { tagAmazonUrl } from "../lib/affiliates";
+  import { readCopy } from "../lib/admin-copy-ui.js";
+  import { renderKindList, sortByOrderThenTitle } from "../lib/admin-lists.js";
   import {
-    COPY_MAX,
-    cardRow,
-    copySection,
-    copySubhead,
-    labelledField,
-    listBlock,
-    paragraphRow,
-    readCopy,
-  } from "../lib/admin-copy-ui.js";
+    BOOK_QUEUES,
+    defaultQueueId,
+    featuredBooks,
+    fillBookEditor,
+    filterQueue,
+    nextQueuedBook,
+    paintBookQueue,
+    paintNextButton,
+    renderBookQueue,
+    renderFeaturedBoard as paintFeaturedBoard,
+    searchQuery,
+  } from "../lib/admin-books-ui.js";
+  import { acceptCopySnapshot, copyTextChanged, isCopyDirty, renderCopyPage } from "../lib/admin-copy-page.js";
+  import { createSaveUi } from "../lib/admin-save-ui.js";
+  import { firstHttpUrl } from "../../functions/admin/api/_lib/frontmatter.js";
+  import { BOOK_MAX_NOTE } from "../../functions/admin/api/_lib/book.js";
 
   const { api, isDev } = JSON.parse(document.getElementById("admin-config")?.textContent || "{}");
   const status = document.querySelector("[data-status]");
@@ -265,179 +274,13 @@ const pageCopy = editableCopy(site);
   let currentTab = "overview";
   let currentQueue = "currently-reading";
   let bookSnapshot = "";
-  let saving = false;
-  let saveWatch = 0;
   let syncWatch = 0;
   let featuredBaseline = [];
-  const QUEUES = ["currently-reading", "featured", "five-star-no-note", "no-note", "missing-isbn"];
   const TABS = ["overview", "book", "art", "supply", "copy"];
-  const MAX_NOTE = 8000;
   const pageCopy = JSON.parse(document.getElementById("page-copy")?.textContent || "{}");
-  let copySnapshot = "";
-
-  function onCopyClick(event) {
-    const add = event.target.closest("[data-copy-add]");
-    const remove = event.target.closest("[data-copy-remove]");
-    if (add) {
-      const name = add.dataset.copyAdd;
-      const list = add.closest("[data-copy-block]")?.querySelector("[data-copy-list]");
-      if (!list) return;
-      if (list.children.length >= COPY_MAX.items) {
-        setBanner("error", "That's as many as this page can hold.");
-        return;
-      }
-      list.append(name === "paragraphs" ? paragraphRow("") : cardRow(name, { title: "", desc: "" }));
-      return;
-    }
-    if (!remove) return;
-    const card = remove.closest("[data-copy-item]");
-    if (remove.dataset.copyRemove === "paragraphs" && card?.parentElement?.children.length <= 1) {
-      setBanner("error", "About needs at least one paragraph.");
-      return;
-    }
-    card?.remove();
-  }
-
-  function copyState() {
-    const root = document.querySelector("[data-copy-root]");
-    if (!root || !root.childElementCount) return "";
-    return JSON.stringify(readCopy());
-  }
-
-  function aboutPhotoPending() {
-    return Boolean(document.querySelector("[data-about-image]")?.files?.[0]);
-  }
-
-  function isCopyDirty() {
-    return Boolean(copySnapshot) && (copyState() !== copySnapshot || aboutPhotoPending());
-  }
 
   function renderCopyEditor() {
-    const root = document.querySelector("[data-copy-root]");
-    if (!root || root.childElementCount) {
-      if (!copySnapshot) copySnapshot = copyState();
-      return;
-    }
-    const hero = pageCopy.hero || {};
-    const about = pageCopy.about || {};
-    const work = pageCopy.work || {};
-    const credentials = pageCopy.credentials || {};
-
-    const home = copySection(
-      "Home",
-      "The big words on the first screen. The buttons stay as they are.",
-      "home",
-      copyPageLink,
-    );
-    home.append(
-      labelledField("Small line above the title", hero.eyebrow, { path: "hero.eyebrow" }),
-      labelledField("Headline", hero.headline, { path: "hero.headline" }),
-      labelledField("Italic line", hero.headlineItalic, { path: "hero.headlineItalic" }),
-      labelledField("Intro", hero.lede, { path: "hero.lede", long: true, max: COPY_MAX.medium, rows: 4 }),
-    );
-
-    const aboutSection = copySection(
-      "About",
-      "The portrait and the bio. Each box is its own paragraph. Fact chips stay as they are.",
-      "about",
-      copyPageLink,
-    );
-    aboutSection.append(
-      aboutPhotoControl(about),
-      labelledField("Small line above the title", about.eyebrow, { path: "about.eyebrow" }),
-      labelledField("Headline", about.headline, { path: "about.headline" }),
-      labelledField("Italic line", about.headlineItalic, { path: "about.headlineItalic" }),
-      listBlock("paragraphs", "Add paragraph", about.paragraphs?.length ? about.paragraphs : [""], (value) => paragraphRow(value)),
-    );
-
-    const workSection = copySection(
-      "Work with me",
-      "The words on Work with me. The Instagram buttons stay as they are.",
-      "work",
-      copyPageLink,
-    );
-    workSection.append(
-      labelledField("Short summary", pageCopy.workIntro || "", {
-        path: "workIntro",
-        long: true,
-        max: COPY_MAX.medium,
-        rows: 3,
-        hint: "Used for search and link previews. It does not show as a heading on the page.",
-      }),
-      labelledField("Small line above the title", work.eyebrow, { path: "work.eyebrow" }),
-      labelledField("Headline", work.headline, { path: "work.headline" }),
-      labelledField("Italic line", work.headlineItalic, { path: "work.headlineItalic" }),
-      labelledField("Intro", work.lede, { path: "work.lede", long: true, max: COPY_MAX.long, rows: 4 }),
-      labelledField("Second paragraph", work.note, { path: "work.note", long: true, max: COPY_MAX.long, rows: 4 }),
-      labelledField("Line under the photo", work.photoCaption, { path: "work.photoCaption", long: true, max: COPY_MAX.medium, rows: 2 }),
-      copySubhead("What I like making"),
-      labelledField("Small line", work.offersEyebrow, { path: "work.offersEyebrow" }),
-      labelledField("Heading", work.offersHeadline, { path: "work.offersHeadline" }),
-      labelledField("Intro", work.offersLede, { path: "work.offersLede", long: true, max: COPY_MAX.long, rows: 3 }),
-      listBlock("offers", "Add offer", pageCopy.offers || [], (item) => cardRow("offers", item)),
-      copySubhead("Ways it can look"),
-      labelledField("Small line", work.packagesEyebrow, { path: "work.packagesEyebrow" }),
-      labelledField("Heading", work.packagesHeadline, { path: "work.packagesHeadline" }),
-      labelledField("Intro", work.packagesLede, { path: "work.packagesLede", long: true, max: COPY_MAX.long, rows: 3 }),
-      listBlock("packages", "Add a way of working", pageCopy.packages || [], (item) => cardRow("packages", item)),
-      labelledField("Note under those cards", work.pricesNote, { path: "work.pricesNote", long: true, max: COPY_MAX.medium, rows: 2 }),
-      copySubhead("Also"),
-      labelledField("Small heading", credentials.title, { path: "credentials.title" }),
-      labelledField("Text", credentials.org, { path: "credentials.org", long: true, max: COPY_MAX.long, rows: 3 }),
-      copySubhead("Closing"),
-      labelledField("Heading", work.closeHeadline, { path: "work.closeHeadline" }),
-      labelledField("Paragraph", work.closeLede, { path: "work.closeLede", long: true, max: COPY_MAX.long, rows: 4 }),
-    );
-
-    root.append(home, aboutSection, workSection);
-    root.addEventListener("click", onCopyClick);
-    bindDrop("about");
-    const samePhoto = about.image && about.image === about.imageDark;
-    resetDrop(
-      "about",
-      about.image || "",
-      samePhoto
-        ? "Drop a new photo to replace it."
-        : "Drop a new photo to replace the light and dark portraits.",
-    );
-    copySnapshot = copyState();
-  }
-
-  function aboutPhotoControl(about) {
-    const wrap = document.createElement("div");
-    wrap.className = "mb-4";
-    const heading = document.createElement("p");
-    heading.className = "mb-2 text-sm font-medium text-foreground";
-    heading.textContent = "Photo";
-    const drop = document.createElement("button");
-    drop.type = "button";
-    drop.dataset.aboutDrop = "";
-    drop.className =
-      "mb-2 flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground hover:border-primary";
-    const preview = document.createElement("img");
-    preview.dataset.aboutPreview = "";
-    preview.alt = "";
-    preview.className = "hidden max-h-72 rounded object-cover shadow";
-    const label = document.createElement("span");
-    label.dataset.aboutDropLabel = "";
-    label.textContent = "Drop a photo here, or click to choose. Large phone photos are resized.";
-    drop.append(preview, label);
-    const input = document.createElement("input");
-    input.type = "file";
-    input.dataset.aboutImage = "";
-    input.accept = "image/jpeg,image/png,image/webp,image/heic,image/heif";
-    input.className = "hidden";
-    const hint = document.createElement("p");
-    hint.className = "mt-2 text-xs font-normal text-muted-foreground";
-    hint.textContent =
-      "This portrait is on About and on Work with me. A new photo is used in light and dark. The home photo stays as it is.";
-    const alt = labelledField("Photo description", about.imageAlt, {
-      path: "about.imageAlt",
-      hint: "A short line for someone who cannot see the photo.",
-    });
-    alt.classList.remove("mb-4");
-    wrap.append(heading, drop, input, hint, alt);
-    return wrap;
+    renderCopyPage(pageCopy, { copyPageLink, setBanner, bindDrop, resetDrop });
   }
 
   function setBanner(kind, message) {
@@ -450,149 +293,6 @@ const pageCopy = editableCopy(site);
 
   function wait(ms) {
     return new Promise((resolve) => window.setTimeout(resolve, ms));
-  }
-
-  async function watchRebuild(label) {
-    const id = ++saveWatch;
-    for (let i = 0; i < 18; i++) {
-      await wait(i === 0 ? 4000 : 8000);
-      if (id !== saveWatch) return;
-      try {
-        const data = await call("/activity");
-        renderActivity(data);
-        const site = data.site || {};
-        if (site.building) {
-          setBanner(
-            "busy",
-            saveSteps({
-              title: `Saved ${escapeHtml(label)}`,
-              editor: "done",
-              editorDetail: "This editor already has your edits.",
-              github: "done",
-              githubDetail: "Committed.",
-              live: "busy",
-              liveDetail: "Cloudflare is rebuilding. The public site still shows the old version until this finishes (usually about a minute).",
-            }),
-          );
-          continue;
-        }
-        if (site.state === "failed") {
-          setBanner(
-            "error",
-            saveSteps({
-              title: `Saved ${escapeHtml(label)} to GitHub, but the rebuild failed.`,
-              editor: "done",
-              editorDetail: "This editor already has your edits.",
-              github: "done",
-              githubDetail: "Committed.",
-              live: "error",
-              liveDetail: "Try Save again, or check Cloudflare Pages.",
-            }),
-          );
-          return;
-        }
-        if (site.live || site.deploymentsAvailable === false) {
-          setBanner(
-            "ok",
-            saveSteps({
-              title: `Saved ${escapeHtml(label)}`,
-              editor: "done",
-              editorDetail: "This editor already has your edits.",
-              github: "done",
-              githubDetail: "Committed.",
-              live: site.deploymentsAvailable === false ? "busy" : "done",
-              liveDetail:
-                site.deploymentsAvailable === false
-                  ? "GitHub has it. Refresh the public page in about a minute."
-                  : "Live. Refresh the public page to see the change.",
-            }),
-          );
-          if (site.live) return;
-        }
-      } catch {
-        // Keep waiting — activity is best-effort.
-      }
-    }
-    if (id !== saveWatch) return;
-    setBanner(
-      "ok",
-      saveSteps({
-        title: `Saved ${escapeHtml(label)} to GitHub`,
-        editor: "done",
-        editorDetail: "This editor already has your edits.",
-        github: "done",
-        githubDetail: "Committed.",
-        live: "busy",
-        liveDetail: "Cloudflare can take a couple of minutes. Refresh the public page shortly.",
-      }),
-    );
-  }
-
-  async function withSave(button, idleLabel, work) {
-    if (saving) {
-      setBanner("busy", "Already saving — wait for GitHub to finish this one.");
-      return;
-    }
-    saving = true;
-    if (button) {
-      button.disabled = true;
-      button.textContent = "Saving…";
-    }
-    setBanner(
-      "busy",
-      saveSteps({
-        title: isDev ? "Saving on this computer…" : "Saving to GitHub… this can take a few seconds.",
-        editor: "busy",
-        editorDetail: "Writing your changes.",
-        github: isDev ? "wait" : "busy",
-        githubDetail: isDev ? "Skipped on this computer." : "Committing to the repository.",
-        live: "wait",
-        liveDetail: isDev
-          ? "The public site on this computer updates after you refresh."
-          : "Cloudflare rebuilds the live site after GitHub — usually about a minute.",
-      }),
-    );
-    try {
-      const result = await work();
-      const label = result?.label || "changes";
-      if (isDev) {
-        setBanner(
-          "ok",
-          saveSteps({
-            title: `Saved ${escapeHtml(label)}`,
-            editor: "done",
-            editorDetail: "Saved.",
-            github: "wait",
-            githubDetail: "Skipped on this computer.",
-            live: "wait",
-            liveDetail: result?.hint || "Refresh the site on this computer to see it.",
-          }),
-        );
-      } else {
-        setBanner(
-          "ok",
-          saveSteps({
-            title: `Saved ${escapeHtml(label)} to GitHub`,
-            editor: "done",
-            editorDetail: "This editor already has your edits.",
-            github: "done",
-            githubDetail: "Committed.",
-            live: "busy",
-            liveDetail: "Cloudflare is rebuilding the live site — usually about a minute.",
-          }),
-        );
-        watchRebuild(label);
-      }
-      loadActivity();
-    } catch (error) {
-      setBanner("error", error instanceof Error ? error.message : "Save failed.");
-    } finally {
-      saving = false;
-      if (button) {
-        button.disabled = false;
-        button.textContent = idleLabel;
-      }
-    }
   }
 
   function renderActivity(data) {
@@ -661,6 +361,8 @@ const pageCopy = editableCopy(site);
       }
     }
   }
+
+  const { withSave } = createSaveUi({ isDev, call, renderActivity, setBanner, loadActivity });
 
   // Tracks a manual sync through both of its phases: the GitHub Action fetching
   // and committing the shelf, then (if it committed) Cloudflare rebuilding the
@@ -831,20 +533,6 @@ const pageCopy = editableCopy(site);
     return value && value !== "#" ? value : "";
   }
 
-  function firstHttpUrl(value) {
-    const text = String(value || "")
-      .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, "")
-      .trim();
-    if (!text || text === "#") return "";
-    const http = text.match(/https?:\/\/[^\s<>"')\]]+/i);
-    if (http) return http[0].replace(/[.,);]+$/g, "");
-    const amazon = text.match(/(?:www\.)?amazon\.(?:co\.uk|com)\/[^\s<>"')\]]+/i);
-    if (amazon) return `https://${amazon[0]}`.replace(/[.,);]+$/g, "");
-    const short = text.match(/(?:amzn\.(?:eu|to|asia)|a\.co)\/[^\s<>"')\]]+/i);
-    if (short) return `https://${short[0]}`.replace(/[.,);]+$/g, "");
-    return "";
-  }
-
   function taggedAmazon(value) {
     const raw = firstHttpUrl(value);
     if (!raw) return "";
@@ -918,10 +606,6 @@ const pageCopy = editableCopy(site);
     applyUrlState();
   }
 
-  function defaultQueue() {
-    return books.some((book) => book.status === "currently-reading") ? "currently-reading" : "five-star-no-note";
-  }
-
   function syncUrl() {
     const params = new URLSearchParams();
     params.set("tab", currentTab);
@@ -944,7 +628,7 @@ const pageCopy = editableCopy(site);
       tab = slug || queue ? "book" : "overview";
     }
     currentTab = tab;
-    currentQueue = QUEUES.includes(queue) ? queue : defaultQueue();
+    currentQueue = BOOK_QUEUES.includes(queue) ? queue : defaultQueueId(books);
     paintTab(currentTab);
     if (currentTab === "book") {
       paintQueue();
@@ -1071,9 +755,9 @@ const pageCopy = editableCopy(site);
     const el = document.querySelector("[data-book-note-count]");
     const n = (document.querySelector("[data-book-note]")?.value || "").length;
     if (!el) return;
-    el.textContent = `${n} / ${MAX_NOTE}`;
-    el.classList.toggle("text-accent", n > MAX_NOTE);
-    el.classList.toggle("text-muted-foreground", n <= MAX_NOTE);
+    el.textContent = `${n} / ${BOOK_MAX_NOTE}`;
+    el.classList.toggle("text-accent", n > BOOK_MAX_NOTE);
+    el.classList.toggle("text-muted-foreground", n <= BOOK_MAX_NOTE);
   }
 
   function siteOrigin() {
@@ -1105,11 +789,6 @@ const pageCopy = editableCopy(site);
     else if (copyName === "work") copyText("Work with me link", `${origin}/work`);
   }
 
-  function copyChip(label, value) {
-    if (!value) return "";
-    return `<button type="button" class="rounded border border-border px-2.5 py-1 text-xs text-foreground hover:border-primary" data-copy-value="${escapeHtml(value)}" data-copy-label="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
-  }
-
   function nextFeaturedOrder() {
     const max = books.reduce((high, book) => {
       if (!book.featured) return high;
@@ -1118,101 +797,21 @@ const pageCopy = editableCopy(site);
     return max + 1;
   }
 
-  function searchQuery() {
-    return (document.querySelector("[data-search]")?.value || "").trim().toLowerCase();
-  }
-
-  function queueCount(id) {
-    if (id === "currently-reading") return books.filter((book) => book.status === "currently-reading").length;
-    if (id === "featured") return books.filter((book) => book.featured).length;
-    if (id === "five-star-no-note") return books.filter((book) => book.rating === 5 && !String(book.note || "").trim()).length;
-    if (id === "no-note") return books.filter((book) => !String(book.note || "").trim()).length;
-    if (id === "missing-isbn") return books.filter((book) => !book.isbn && !book.isbn10).length;
-    return 0;
-  }
-
   function queueBooks() {
-    const q = searchQuery();
-    if (q.length >= 2) {
-      return books.filter((book) => `${book.title} ${book.author} ${book.slug}`.toLowerCase().includes(q));
-    }
-    if (currentQueue === "currently-reading") return books.filter((book) => book.status === "currently-reading");
-    if (currentQueue === "featured") {
-      return books.filter((book) => book.featured).toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
-    }
-    if (currentQueue === "five-star-no-note") {
-      return books.filter((book) => book.rating === 5 && !String(book.note || "").trim());
-    }
-    if (currentQueue === "no-note") return books.filter((book) => !String(book.note || "").trim());
-    if (currentQueue === "missing-isbn") return books.filter((book) => !book.isbn && !book.isbn10);
-    return [];
-  }
-
-  function bookRow(book) {
-    const selected = currentBook?.slug === book.slug;
-    const badges = [];
-    if (book.rating > 0) badges.push(`${book.rating}★`);
-    badges.push(String(book.note || "").trim() ? "Note" : "No note");
-    if (book.featured) badges.push("Home");
-    if (!book.isbn && !book.isbn10) badges.push("No ISBN");
-    const badgeHtml = badges
-      .map((label) => {
-        const accent = label === "No note" || label === "No ISBN";
-        return `<span class="${accent ? "text-accent" : "text-muted-foreground"}">${escapeHtml(label)}</span>`;
-      })
-      .join(" · ");
-    const cover = book.coverUrl
-      ? `<img src="${escapeHtml(book.coverUrl)}" alt="" class="h-14 w-9 shrink-0 rounded object-cover bg-muted" />`
-      : `<span class="h-14 w-9 shrink-0 rounded bg-muted"></span>`;
-    const ring = selected ? "border-primary bg-muted" : "border-border hover:border-primary";
-    return `<li><button type="button" class="flex w-full items-start gap-3 rounded-lg border px-2 py-2 text-left ${ring}" data-slug="${escapeHtml(book.slug)}">${cover}<span class="min-w-0 flex-1"><span class="font-medium text-foreground">${escapeHtml(book.title)}</span><span class="mt-0.5 block text-xs text-muted-foreground">${escapeHtml(book.author)}</span><span class="mt-1 block text-xs">${badgeHtml}</span></span></button></li>`;
+    return filterQueue(books, currentQueue, searchQuery());
   }
 
   function paintQueue() {
-    document.querySelectorAll("[data-queue]").forEach((button) => {
-      const on = button.dataset.queue === currentQueue && searchQuery().length < 2;
-      button.setAttribute("aria-selected", on ? "true" : "false");
-      button.classList.toggle("border-accent", on);
-      button.classList.toggle("text-foreground", on);
-      button.classList.toggle("border-transparent", !on);
-      button.classList.toggle("text-muted-foreground", !on);
-    });
-    document.querySelectorAll("[data-queue-n]").forEach((el) => {
-      el.textContent = String(queueCount(el.getAttribute("data-queue-n") || ""));
-    });
+    paintBookQueue({ books, queue: currentQueue });
   }
 
   function renderQueue() {
-    if (!results) return;
-    paintQueue();
-    const matches = queueBooks();
-    const q = searchQuery();
-    const searching = q.length >= 2;
-    const cap = searching || currentQueue === "no-note" ? 40 : matches.length;
-    const shown = matches.slice(0, cap);
-    const count = document.querySelector("[data-queue-count]");
-    if (count) {
-      if (searching) {
-        count.textContent =
-          shown.length < matches.length
-            ? `${shown.length} of ${matches.length} matches`
-            : `${matches.length} match${matches.length === 1 ? "" : "es"}`;
-      } else {
-        count.textContent =
-          shown.length < matches.length
-            ? `Showing ${shown.length} of ${matches.length}`
-            : `${matches.length} book${matches.length === 1 ? "" : "s"}`;
-      }
-    }
-    results.innerHTML = shown.length
-      ? shown.map(bookRow).join("")
-      : `<li class="px-1 py-6 text-center text-muted-foreground">${searching ? "No titles match." : "Nothing in this list."}</li>`;
-    updateNextButton();
+    renderBookQueue({ results, books, queue: currentQueue, currentBook });
   }
 
   function setQueue(queue) {
     if (!confirmLeave()) return;
-    currentQueue = QUEUES.includes(queue) ? queue : defaultQueue();
+    currentQueue = BOOK_QUEUES.includes(queue) ? queue : defaultQueueId(books);
     const search = document.querySelector("[data-search]");
     if (search) search.value = "";
     currentBook = null;
@@ -1223,50 +822,19 @@ const pageCopy = editableCopy(site);
   }
 
   function nextInQueue() {
-    if (!currentBook) return null;
-    const list = queueBooks();
-    const index = list.findIndex((book) => book.slug === currentBook.slug);
-    if (index < 0) return list[0] || null;
-    return list[index + 1] || null;
+    return nextQueuedBook(books, currentQueue, currentBook);
   }
 
   function updateNextButton() {
-    const button = document.querySelector("[data-book-next]");
-    if (!button) return;
-    const next = nextInQueue();
-    button.classList.toggle("hidden", !next);
-    if (next) button.textContent = "Next →";
+    paintNextButton(books, currentQueue, currentBook);
   }
 
   function featuredList() {
-    return books
-      .filter((book) => book.featured)
-      .toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    return featuredBooks(books);
   }
 
   function renderFeaturedBoard() {
-    const list = document.querySelector("[data-featured-board]");
-    const count = document.querySelector("[data-featured-count]");
-    const featured = featuredList();
-    if (count) {
-      count.textContent =
-        featured.length > 8
-          ? `Featured ${featured.length} / target 6–8 — maybe rotate one off before adding.`
-          : `Featured ${featured.length} / target 6–8`;
-    }
-    if (!list) return;
-    if (!featured.length) {
-      list.innerHTML = `<li class="text-muted-foreground">No featured books yet.</li>`;
-      return;
-    }
-    list.innerHTML = featured
-      .map((book, index) => {
-        const cover = book.coverUrl
-          ? `<img src="${escapeHtml(book.coverUrl)}" alt="" class="h-10 w-7 shrink-0 rounded object-cover bg-muted" />`
-          : `<span class="h-10 w-7 shrink-0 rounded bg-muted"></span>`;
-        return `<li class="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5" data-featured-slug="${escapeHtml(book.slug)}">${cover}<span class="w-4 text-xs text-muted-foreground">${index + 1}</span><button type="button" class="min-w-0 flex-1 truncate text-left text-sm font-medium text-foreground" data-featured-open>${escapeHtml(book.title)}</button><button type="button" class="rounded border border-border px-2 py-1 text-xs" data-featured-up ${index === 0 ? "disabled" : ""}>↑</button><button type="button" class="rounded border border-border px-2 py-1 text-xs" data-featured-down ${index === featured.length - 1 ? "disabled" : ""}>↓</button><button type="button" class="rounded border border-border px-2 py-1 text-xs" data-featured-off>Remove</button></li>`;
-      })
-      .join("");
+    paintFeaturedBoard(books);
   }
 
   function dropInputSelector(kind) {
@@ -1342,90 +910,42 @@ const pageCopy = editableCopy(site);
   }
 
   function renderArtList() {
-    if (!artList) return;
-    if (!artPieces.length) {
-      artList.innerHTML = `<li class="text-muted-foreground">No paintings yet.</li>`;
-      return;
-    }
-    const sorted = artPieces.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
-    artList.innerHTML = sorted
-      .map((piece, index) => {
-        const flags = [];
-        if (!piece.image) flags.push("No image");
-        if (!String(piece.note || "").trim()) flags.push("No note");
-        if (piece.featured) flags.push("Home");
-        if (piece.available) flags.push("For sale");
-        const extra = flags.length
-          ? `<span class="mt-1 block text-xs ${flags.includes("Home") && flags.length === 1 ? "text-muted-foreground" : "text-accent"}">${escapeHtml(flags.join(" · "))}</span>`
-          : "";
-        const thumb = piece.imageUrl
-          ? `<img src="${escapeHtml(piece.imageUrl)}" alt="" class="h-12 w-12 shrink-0 rounded object-cover bg-muted" />`
-          : `<span class="h-12 w-12 shrink-0 rounded bg-muted"></span>`;
-        const selected = currentArt?.slug === piece.slug && !currentArt?.create;
-        const ring = selected ? "border-primary bg-muted" : "border-border";
-        return `<li class="flex items-center gap-2 rounded-lg border ${ring} px-2 py-2" draggable="false" data-art-slug="${escapeHtml(piece.slug)}"><button type="button" class="cursor-grab touch-none px-1 text-muted-foreground" data-drag aria-label="Drag to reorder">⋮⋮</button><span class="w-4 text-xs text-muted-foreground">${index + 1}</span>${thumb}<button type="button" class="min-w-0 flex-1 text-left" data-art-open><span class="font-medium text-foreground">${escapeHtml(piece.title)}</span><span class="mt-0.5 block text-xs text-muted-foreground">${escapeHtml(piece.medium)}</span>${extra}</button>${copyChip("Link", `${siteOrigin()}/art#${piece.slug}`)}<div class="flex flex-col gap-1"><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-art-up ${index === 0 ? "disabled" : ""}>↑</button><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-art-down ${index === sorted.length - 1 ? "disabled" : ""}>↓</button></div></li>`;
-      })
-      .join("");
+    renderKindList(artList, artPieces, {
+      kind: "art",
+      selectedSlug: currentArt?.slug,
+      creating: currentArt?.create,
+      origin: siteOrigin(),
+    });
   }
 
   function renderSupplyList() {
-    if (!supplyList) return;
-    if (!supplies.length) {
-      supplyList.innerHTML = `<li class="text-muted-foreground">No tools yet.</li>`;
-      return;
-    }
-    const sorted = supplies.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
-    supplyList.innerHTML = sorted
-      .map((item, index) => {
-        const flags = [];
-        if (!item.amazon) flags.push("No Amazon URL");
-        if (item.featured) flags.push("Home");
-        const extra = flags.length
-          ? `<span class="mt-1 block text-xs ${item.amazon ? "text-muted-foreground" : "text-accent"}">${escapeHtml(flags.join(" · "))}</span>`
-          : "";
-        const selected = currentSupply?.slug === item.slug && !currentSupply?.create;
-        const ring = selected ? "border-primary bg-muted" : "border-border";
-        return `<li class="flex items-center gap-2 rounded-lg border ${ring} px-2 py-2" data-supply-slug="${escapeHtml(item.slug)}"><button type="button" class="cursor-grab touch-none px-1 text-muted-foreground" data-drag aria-label="Drag to reorder">⋮⋮</button><span class="w-4 text-xs text-muted-foreground">${index + 1}</span><button type="button" class="min-w-0 flex-1 text-left" data-supply-open><span class="font-medium text-foreground">${escapeHtml(item.title)}</span><span class="mt-0.5 block text-xs text-muted-foreground">${escapeHtml(item.brand)}${item.category ? ` · ${escapeHtml(item.category)}` : ""}</span>${extra}</button>${copyChip("Amazon", item.amazon)}${copyChip("Link", `${siteOrigin()}/art#${item.slug}`)}<div class="flex flex-col gap-1"><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-supply-up ${index === 0 ? "disabled" : ""}>↑</button><button type="button" class="rounded border border-border px-1.5 py-0.5 text-xs" data-supply-down ${index === sorted.length - 1 ? "disabled" : ""}>↓</button></div></li>`;
-      })
-      .join("");
+    renderKindList(supplyList, supplies, {
+      kind: "supply",
+      selectedSlug: currentSupply?.slug,
+      creating: currentSupply?.create,
+      origin: siteOrigin(),
+    });
   }
 
   function fillBook(book, options = {}) {
-    if (currentBook && currentBook.slug !== book.slug && !confirmLeave()) return;
-    currentBook = book;
-    bookEditor?.classList.remove("hidden");
-    document.querySelector("[data-book-empty]")?.classList.add("hidden");
-    const heading = document.querySelector("[data-book-heading]");
-    if (heading) heading.textContent = book.title;
-    document.querySelector("[data-book-title]").value = book.title;
-    document.querySelector("[data-book-author]").value = book.author;
-    document.querySelector("[data-book-genre]").value = book.genre === "Read" || book.genre === "Currently reading" ? "" : book.genre;
-    document.querySelector("[data-book-note]").value = book.note || "";
-    document.querySelector("[data-book-featured]").checked = book.featured;
-    document.querySelector("[data-book-isbn]").value = book.isbn || "";
-    document.querySelector("[data-book-isbn10]").value = book.isbn10 || "";
-    document.querySelector("[data-book-bookshop]").value = displayUrl(book.bookshop);
-    document.querySelector("[data-book-amazon]").value = displayUrl(book.amazon);
-    const view = document.querySelector("[data-book-view]");
-    if (view) view.href = `/books/${book.slug}`;
-    const bits = [];
-    if (book.rating) bits.push(`${book.rating}★ on Goodreads`);
-    if (book.status === "currently-reading") bits.push("Currently reading");
-    else if (book.dateRead) bits.push(`Read ${book.dateRead}`);
-    document.querySelector("[data-book-meta]").textContent = bits.join(" · ");
-    resetDrop(
-      "book",
-      book.coverUrl || "",
-      book.cover ? `Current cover: ${book.cover}. Drop a new photo to replace it.` : "",
-    );
-    updateBuyPreview();
-    updateNoteCount();
-    bookSnapshot = bookFormState();
-    renderQueue();
-    if (!options.skipUrl) syncUrl();
-    if (window.matchMedia("(max-width: 1023px)").matches) {
-      bookEditor?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    fillBookEditor(book, options, {
+      currentBook,
+      setCurrentBook(next) {
+        currentBook = next;
+      },
+      confirmLeave,
+      bookEditor,
+      displayUrl,
+      resetDrop,
+      updateBuyPreview,
+      updateNoteCount,
+      bookFormState,
+      setBookSnapshot(value) {
+        bookSnapshot = value;
+      },
+      renderQueue,
+      syncUrl,
+    });
   }
 
   function fillArt(piece) {
@@ -1473,16 +993,8 @@ const pageCopy = editableCopy(site);
     syncUrl();
   }
 
-  function sortedArt() {
-    return artPieces.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
-  }
-
-  function sortedSupply() {
-    return supplies.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
-  }
-
   async function persistKindOrder(kind) {
-    const items = kind === "art" ? sortedArt() : sortedSupply();
+    const items = sortByOrderThenTitle(kind === "art" ? artPieces : supplies);
     items.forEach((item, index) => {
       item.order = index + 1;
     });
@@ -1688,7 +1200,7 @@ const pageCopy = editableCopy(site);
   });
 
   document.querySelectorAll("[data-queue]").forEach((button) => {
-    button.addEventListener("click", () => setQueue(button.dataset.queue || defaultQueue()));
+    button.addEventListener("click", () => setQueue(button.dataset.queue || defaultQueueId(books)));
   });
 
   document.querySelectorAll("[data-health-tab]").forEach((button) => {
@@ -1708,7 +1220,7 @@ const pageCopy = editableCopy(site);
 
   document.querySelector("[data-copy-save]")?.addEventListener("click", async () => {
     await withSave(document.querySelector("[data-copy-save]"), "Save pages", async () => {
-      const textChanged = copyState() !== copySnapshot;
+      const textChanged = copyTextChanged();
       const body = readCopy();
       if (!body.about.paragraphs.length) throw new Error("About needs at least one paragraph.");
       const file = document.querySelector("[data-about-image]")?.files?.[0];
@@ -1725,7 +1237,7 @@ const pageCopy = editableCopy(site);
           pageCopy.about.imageDark = result.image;
         }
       }
-      copySnapshot = copyState();
+      acceptCopySnapshot();
       return {
         label: file && textChanged ? "page text and the about photo" : file ? "the about photo" : "page text",
         hint: file
@@ -1863,7 +1375,7 @@ const pageCopy = editableCopy(site);
     if (event.target.closest("[data-copy-value], [data-drag]")) return;
     const row = event.target.closest("[data-art-slug]");
     if (!row) return;
-    const sorted = artPieces.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const sorted = sortByOrderThenTitle(artPieces);
     const index = sorted.findIndex((item) => item.slug === row.dataset.artSlug);
     if (index < 0) return;
     if (event.target.closest("[data-art-up]") || event.target.closest("[data-art-down]")) {
@@ -1909,7 +1421,7 @@ const pageCopy = editableCopy(site);
     if (event.target.closest("[data-copy-value], [data-drag]")) return;
     const row = event.target.closest("[data-supply-slug]");
     if (!row) return;
-    const sorted = supplies.toSorted((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title));
+    const sorted = sortByOrderThenTitle(supplies);
     const index = sorted.findIndex((item) => item.slug === row.dataset.supplySlug);
     if (index < 0) return;
     if (event.target.closest("[data-supply-up]") || event.target.closest("[data-supply-down]")) {
