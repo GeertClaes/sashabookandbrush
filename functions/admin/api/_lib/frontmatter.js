@@ -45,6 +45,34 @@ export function yamlString(value) {
   return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n")}"`;
 }
 
+export function unescapeYaml(value) {
+  return String(value).replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+}
+
+export function readYamlField(text, key) {
+  const match = String(text ?? "").match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
+  if (!match) return "";
+  const value = match[1].trim();
+  if (value.startsWith('"') && value.endsWith('"')) return unescapeYaml(value.slice(1, -1));
+  return value;
+}
+
+export function parseFrontmatter(text) {
+  // Content files are LF in git and CRLF in a Windows checkout.
+  const normalized = String(text ?? "").replace(/\r\n/g, "\n");
+  const block = normalized.match(/^---\n([\s\S]*?)\n---/);
+  if (!block) return {};
+  const data = {};
+  for (const line of block[1].split("\n")) {
+    const idx = line.indexOf(":");
+    if (idx === -1) continue;
+    const key = line.slice(0, idx).trim();
+    if (!key) continue;
+    data[key] = readYamlField(`---\n${line}\n---`, key);
+  }
+  return data;
+}
+
 export function upsertField(text, key, line) {
   if (new RegExp(`^${key}:`, "m").test(text)) {
     return text.replace(new RegExp(`^${key}:.*$`, "m"), () => line);

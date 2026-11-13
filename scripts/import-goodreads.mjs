@@ -1,16 +1,20 @@
-import { mkdir, readFile, readdir, writeFile, access, unlink, rename } from "node:fs/promises";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+// Load a Goodreads library CSV, match it to the books on disk, write
+// markdown, and optionally download covers.
+import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  parseFrontmatter,
+  upsertField,
+  yamlString,
+} from "../functions/admin/api/_lib/frontmatter.js";
+import { downloadCover, existingLocalCover, fillMissingCovers } from "./lib/cover-fetch.mjs";
+import { bookFromRow, normalizeTitle, parseCsv, pickNote, slugify } from "./lib/goodreads-csv.mjs";
 
 const ROOT = process.cwd();
 const DATA_DIR = path.join(ROOT, "data");
 const BOOKS_DIR = path.join(ROOT, "src", "content", "books");
 const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
 const PLACEHOLDER = "";
-const USER_AGENT = "SashaBookAndBrush/1.0 (https://sashabookandbrush.com; cover cache)";
-const BROWSER_UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
 const DEFAULT_NAMES = ["goodreads_library_export.csv", "export.csv"];
 const CURATED = new Set([
   "acotar.md",
@@ -37,141 +41,6 @@ function parseArgs(argv) {
   return args;
 }
 
-function parseCsv(text) {
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let inQuotes = false;
-
-  const source = text.replace(/^\uFEFF/, "");
-  for (let i = 0; i < source.length; i += 1) {
-    const char = source[i];
-    const next = source[i + 1];
-    if (inQuotes) {
-      if (char === '"' && next === '"') {
-        cell += '"';
-        i += 1;
-      } else if (char === '"') {
-        inQuotes = false;
-      } else {
-        cell += char;
-      }
-    } else if (char === '"') {
-      inQuotes = true;
-    } else if (char === ",") {
-      row.push(cell);
-      cell = "";
-    } else if (char === "\n") {
-      row.push(cell);
-      rows.push(row);
-      row = [];
-      cell = "";
-    } else if (char !== "\r") {
-      cell += char;
-    }
-  }
-  if (cell.length > 0 || row.length > 0) {
-    row.push(cell);
-    rows.push(row);
-  }
-  return rows.filter((entry) => entry.some((value) => value.trim() !== ""));
-}
-
-function normalizeTitle(value) {
-  return String(value)
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/\s*\([^)]*\)\s*$/g, "")
-    .replace(/[^a-z0-9]+/g, "");
-}
-
-function shortTitle(value) {
-  return String(value)
-    .replace(/\s*\([^)]*\)\s*$/g, "")
-    .trim();
-}
-
-function slugify(value) {
-  const slug = value
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[^\w\s-]/g, "")
-    .trim()
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80);
-  return slug || "book";
-}
-
-function yamlString(value) {
-  return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n")}"`;
-}
-
-function cleanIsbn(value) {
-  return String(value || "").replace(/[^\dXx]/g, "");
-}
-
-function parseGoodreadsDate(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return "";
-  const match = raw.replace(/\//g, "-").match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (!match) return "";
-  return `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}`;
-}
-
-function parseYear(value) {
-  const match = String(value || "").match(/\d{4}/);
-  return match ? Number(match[0]) : 0;
-}
-
-function decodeEntities(text) {
-  return text
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
-}
-
-function cleanReview(text) {
-  let value = String(text || "");
-  value = value.replace(/<\s*br\s*\/?\s*>/gi, "\n");
-  value = value.replace(/<\s*\/\s*p\s*>/gi, "\n\n");
-  value = value.replace(/<\s*p(?:\s[^>]*)?>/gi, "");
-  value = value.replace(/<\s*\/?\s*div[^>]*>/gi, "\n");
-  value = value.replace(/<[^>]+>/g, "");
-  value = decodeEntities(value);
-  return value
-    .replace(/\r\n/g, "\n")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function genreFromShelves(shelves) {
-  const skip = new Set([
-    "read",
-    "currently-reading",
-    "to-read",
-    "favorites",
-    "favourites",
-    "owned",
-    "ebooks",
-    "kindle",
-    "dnf",
-  ]);
-  const names = String(shelves || "")
-    .split(",")
-    .map((name) => name.trim())
-    .filter(Boolean);
-  const match = names.find((name) => !skip.has(name.toLowerCase()));
-  if (!match) return "Read";
-  return match.replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
 async function exists(file) {
   try {
     await access(file);
@@ -196,9 +65,6 @@ async function resolveCsv(explicit) {
   return path.join(DATA_DIR, DEFAULT_NAMES[0]);
 }
 
-const execFileP = promisify(execFile);
-const CURL = process.platform === "win32" ? "curl.exe" : "curl";
-
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -215,106 +81,6 @@ async function mapLimit(items, limit, fn) {
   }
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => worker()));
   return results;
-}
-
-async function curlFile(url, dest) {
-  await execFileP(CURL, ["-L", "--fail", "-sS", "-A", USER_AGENT, "-o", dest, url], {
-    timeout: 45000,
-  });
-}
-
-async function curlText(url, ua = USER_AGENT) {
-  const { stdout } = await execFileP(CURL, ["-L", "--fail", "-sS", "-A", ua, url], {
-    encoding: "utf8",
-    timeout: 45000,
-    maxBuffer: 8_000_000,
-  });
-  return stdout;
-}
-
-function largerGoodreadsCover(url) {
-  if (!url) return url;
-  if (/nophoto|no-cover|nocover/i.test(url)) return "";
-  return url.replace("http://", "https://").replace(/\._[A-Z]{2}\d+_(?=\.)/g, "._SX800_");
-}
-
-async function goodreadsCoverUrl(id) {
-  if (!id) return null;
-  try {
-    const html = await curlText(`https://www.goodreads.com/book/show/${id}`, BROWSER_UA);
-    const og =
-      html.match(/property="og:image"\s+content="([^"]+)"/i) ||
-      html.match(/content="([^"]+)"\s+property="og:image"/i);
-    let url = og?.[1] || "";
-    if (!url) {
-      const img = html.match(
-        /https:\/\/[^"'\s]+compressed\.photo\.goodreads\.com\/books\/[^"'\s]+\.(?:jpg|jpeg|png|webp)/i,
-      );
-      url = img?.[0] || "";
-    }
-    url = largerGoodreadsCover(url);
-    return url || null;
-  } catch {
-    return null;
-  }
-}
-
-function unescapeYaml(value) {
-  return String(value).replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-}
-
-function frontField(text, key) {
-  const match = text.match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
-  if (!match) return "";
-  let value = match[1].trim();
-  if (value === "true" || value === "false") return value;
-  if (/^-?\d+$/.test(value)) return value;
-  if (value.startsWith('"') && value.endsWith('"')) {
-    return unescapeYaml(value.slice(1, -1));
-  }
-  return value;
-}
-
-function parseFrontmatter(text) {
-  const block = text.match(/^---\n([\s\S]*?)\n---/);
-  if (!block) return {};
-  const data = {};
-  for (const line of block[1].split("\n")) {
-    const idx = line.indexOf(":");
-    if (idx === -1) continue;
-    const key = line.slice(0, idx).trim();
-    data[key] = frontField(`---\n${line}\n---`, key);
-  }
-  return data;
-}
-
-function isRealUrl(value) {
-  return /^https?:\/\//i.test(String(value || "").trim());
-}
-
-function pickNote(siteNote, goodreadsNote) {
-  const site = String(siteNote || "").trim();
-  const incoming = String(goodreadsNote || "").trim();
-  if (!site) return incoming;
-  if (!incoming) return site;
-  if (site === incoming) return site;
-  if (site.length >= incoming.length) return site;
-  return incoming;
-}
-
-function genericGenre(value) {
-  return !value || value === "Read" || value === "Currently reading";
-}
-
-function upsertField(text, key, line) {
-  if (new RegExp(`^${key}:`, "m").test(text)) {
-    return text.replace(new RegExp(`^${key}:.*$`, "m"), line);
-  }
-  return text.replace(/\n---\s*$/, `\n${line}\n---`);
-}
-
-function stripPlaceholderAffiliates(text) {
-  return text.replace(/^(bookshop|amazon):\s*["']?#["']?\s*\r?\n/gm, "");
 }
 
 async function loadExistingLibrary() {
@@ -334,183 +100,16 @@ async function loadExistingLibrary() {
   return { byId, byTitle, files };
 }
 
-async function trySaveImage(url, destBase) {
-  const tmp = `${destBase}.download`;
-  try {
-    await curlFile(url, tmp);
-    const buffer = await readFile(tmp);
-    if (buffer.length < 2500) return null;
-    if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) return null;
-    let ext = ".jpg";
-    if (buffer[0] === 0x89 && buffer[1] === 0x50) ext = ".png";
-    else if (buffer[0] === 0x52 && buffer[1] === 0x49) ext = ".webp";
-    const dest = `${destBase}${ext}`;
-    if (await exists(dest)) await unlink(dest);
-    await rename(tmp, dest);
-    return path.basename(dest);
-  } catch {
-    return null;
-  } finally {
-    if (await exists(tmp)) await unlink(tmp).catch(() => {});
-  }
+function isRealUrl(value) {
+  return /^https?:\/\//i.test(String(value || "").trim());
 }
 
-async function googleCoverUrl(isbn, title, author) {
-  const queries = [];
-  if (isbn) queries.push(`isbn:${isbn}`);
-  queries.push(`intitle:${shortTitle(title)} inauthor:${author}`);
-  for (const query of queries) {
-    try {
-      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=1`;
-      const data = JSON.parse(await curlText(url));
-      const links = data.items?.[0]?.volumeInfo?.imageLinks;
-      const raw =
-        links?.extraLarge ||
-        links?.large ||
-        links?.medium ||
-        links?.thumbnail ||
-        links?.smallThumbnail;
-      if (!raw) continue;
-      return raw
-        .replace("http://", "https://")
-        .replace("&edge=curl", "")
-        .replace("zoom=5", "zoom=2")
-        .replace("zoom=1", "zoom=2");
-    } catch {
-      // try next query
-    }
-  }
-  return null;
+function genericGenre(value) {
+  return !value || value === "Read" || value === "Currently reading";
 }
 
-async function openLibrarySearchCover(title, author) {
-  try {
-    const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(shortTitle(title))}&author=${encodeURIComponent(author)}&limit=1`;
-    const data = JSON.parse(await curlText(url));
-    const coverId = data.docs?.[0]?.cover_i;
-    if (!coverId) return null;
-    return `https://covers.openlibrary.org/b/id/${coverId}-L.jpg?default=false`;
-  } catch {
-    return null;
-  }
-}
-
-async function existingLocalCover(slug) {
-  for (const ext of [".jpg", ".jpeg", ".png", ".webp"]) {
-    const file = path.join(COVERS_DIR, `${slug}${ext}`);
-    if (await exists(file)) return `${slug}${ext}`;
-  }
-  return null;
-}
-
-async function downloadCover({ isbn, title, author, slug, goodreadsId, preferGoodreads = false }) {
-  const cached = await existingLocalCover(slug);
-  if (cached) return cached;
-
-  const destBase = path.join(COVERS_DIR, slug);
-
-  async function fromGoodreads() {
-    const url = await goodreadsCoverUrl(goodreadsId);
-    if (!url) return null;
-    return trySaveImage(url, destBase);
-  }
-
-  if (preferGoodreads) {
-    const saved = await fromGoodreads();
-    if (saved) return saved;
-  }
-
-  if (isbn) {
-    const fromIsbn = await trySaveImage(
-      `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`,
-      destBase,
-    );
-    if (fromIsbn) return fromIsbn;
-  }
-
-  if (!preferGoodreads) {
-    const saved = await fromGoodreads();
-    if (saved) return saved;
-  }
-
-  const fromSearch = await openLibrarySearchCover(title, author);
-  if (fromSearch) {
-    const saved = await trySaveImage(fromSearch, destBase);
-    if (saved) return saved;
-  }
-
-  const fromGoogle = await googleCoverUrl(isbn, title, author);
-  if (fromGoogle) {
-    const saved = await trySaveImage(fromGoogle, destBase);
-    if (saved) return saved;
-  }
-
-  return PLACEHOLDER;
-}
-
-async function fillMissingCovers() {
-  await mkdir(COVERS_DIR, { recursive: true });
-  const names = (await readdir(BOOKS_DIR)).filter((name) => name.endsWith(".md"));
-  const missing = [];
-  for (const name of names) {
-    const file = path.join(BOOKS_DIR, name);
-    const text = await readFile(file, "utf8");
-    const cover = frontField(text, "cover");
-    const slug = path.basename(name, ".md");
-    const cached = await existingLocalCover(slug);
-    if (cover && cached && (cover === cached || cover.endsWith(`/${cached}`))) continue;
-    if (cached && (!cover || cover.startsWith("/"))) {
-      const updated = text.replace(/^cover:.*$/m, `cover: ${yamlString(cached)}`);
-      await writeFile(file, updated.endsWith("\n") ? updated : `${updated}\n`, "utf8");
-      missing.push({
-        file,
-        name,
-        slug,
-        text: updated,
-        title: frontField(updated, "title"),
-        already: cached,
-      });
-      continue;
-    }
-    missing.push({
-      file,
-      name,
-      slug,
-      text,
-      title: frontField(text, "title"),
-      author: frontField(text, "author"),
-      isbn: frontField(text, "isbn"),
-      goodreadsId: frontField(text, "goodreadsId"),
-      already: null,
-    });
-  }
-
-  const toFetch = missing.filter((book) => !book.already);
-  console.log(`Missing covers: ${toFetch.length}. Checking Goodreads…`);
-
-  let saved = 0;
-  let stillMissing = 0;
-  await mapLimit(toFetch, 2, async (book, index) => {
-    const cover = await downloadCover({ ...book, preferGoodreads: true });
-    if (cover) {
-      const updated = book.text.replace(/^cover:.*$/m, `cover: ${yamlString(cover)}`);
-      await writeFile(book.file, updated.endsWith("\n") ? updated : `${updated}\n`, "utf8");
-      saved += 1;
-      console.log(`  got ${book.title}`);
-    } else {
-      stillMissing += 1;
-      console.log(`  no cover for ${book.title}`);
-    }
-    if ((index + 1) % 10 === 0 || index + 1 === toFetch.length) {
-      console.log(`Covers ${index + 1}/${toFetch.length}`);
-    }
-    await sleep(250);
-  });
-
-  const relinked = missing.filter((book) => book.already).length;
-  console.log(
-    `Goodreads cover pass: saved ${saved}, already on disk ${relinked}, still missing ${stillMissing}.`,
-  );
+function stripPlaceholderAffiliates(text) {
+  return text.replace(/^(bookshop|amazon):\s*["']?#["']?\s*\r?\n/gm, "");
 }
 
 function extraYaml(book) {
@@ -637,41 +236,15 @@ for (const row of rows) {
   }
   seen.add(key);
 
-  const isbn13 = cleanIsbn(col(row, "ISBN13"));
-  const isbn10 = cleanIsbn(col(row, "ISBN"));
-  const isbn = isbn13.length === 13 ? isbn13 : isbn10 || isbn13;
-  const status = isReading ? "currently-reading" : "read";
   const goodreadsId = col(row, "Book Id").trim();
   const existing =
     (goodreadsId && library.byId.get(goodreadsId)) || library.byTitle.get(key) || null;
-  const book = {
-    title,
-    author,
-    note: cleanReview(col(row, "My Review")),
-    rating,
-    genre:
-      isReading &&
-      !col(row, "Bookshelves")
-        .replace(/currently-reading/gi, "")
-        .trim()
-        ? "Currently reading"
-        : genreFromShelves(col(row, "Bookshelves")),
-    status,
-    isbn,
-    isbn10: isbn10.length === 10 ? isbn10 : "",
-    goodreadsId,
-    dateRead: parseGoodreadsDate(col(row, "Date Read")),
-    dateAdded: parseGoodreadsDate(col(row, "Date Added")),
-    pages: Number(col(row, "Number of Pages")) || 0,
-    yearPublished: parseYear(col(row, "Year Published")),
-    originalYear: parseYear(col(row, "Original Publication Year")),
-    publisher: col(row, "Publisher").trim(),
-    readCount: Number(col(row, "Read Count")) || 0,
+  const book = bookFromRow(row, col, {
+    status: isReading ? "currently-reading" : "read",
     slug: existing?.slug || slugify(`${title}-${author}`),
-    existingFile: existing?.file || null,
-    existingData: existing?.data || null,
-  };
-
+  });
+  book.existingFile = existing?.file || null;
+  book.existingData = existing?.data || null;
   toWrite.push(book);
 }
 
@@ -696,7 +269,7 @@ if (args.dryRun) {
 let coversSaved = 0;
 let coversMissing = 0;
 
-await mapLimit(toWrite, 4, async (book, index) => {
+await mapLimit(toWrite, 4, async (book, position) => {
   const cached = await existingLocalCover(book.slug);
   if (args.skipCovers) {
     book.cover = cached || book.existingData?.cover || PLACEHOLDER;
@@ -704,8 +277,8 @@ await mapLimit(toWrite, 4, async (book, index) => {
     book.cover = await downloadCover(book);
     if (book.cover === PLACEHOLDER) coversMissing += 1;
     else coversSaved += 1;
-    if ((index + 1) % 20 === 0 || index + 1 === toWrite.length) {
-      console.log(`Covers ${index + 1}/${toWrite.length}`);
+    if ((position + 1) % 20 === 0 || position + 1 === toWrite.length) {
+      console.log(`Covers ${position + 1}/${toWrite.length}`);
     }
     await sleep(80);
   }
