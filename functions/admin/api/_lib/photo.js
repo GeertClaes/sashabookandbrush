@@ -39,7 +39,13 @@ export function managedAboutImagePaths(...publicPaths) {
   return paths;
 }
 
-export function parseImageUpload(body, slug) {
+const PHOTO_DIRS = {
+  art: "src/assets/art",
+  book: "src/assets/covers",
+  supply: "src/assets/supplies",
+};
+
+export function parseImageUpload(body, slug, kind) {
   const contentBase64 = String(body.contentBase64 || "").replace(/\s/g, "");
   if (!contentBase64) return { ok: true, photo: null };
 
@@ -57,15 +63,11 @@ export function parseImageUpload(body, slug) {
   }
 
   const filename = `${slug}${ext}`;
-  return {
-    ok: true,
-    photo: {
-      filename,
-      contentBase64,
-      publicPath: filename,
-      artRepoPath: `src/assets/art/${filename}`,
-      bookRepoPath: `src/assets/covers/${filename}`,
-      supplyRepoPath: `src/assets/supplies/${filename}`,
-    },
+  const photo = {
+    filename,
+    contentBase64,
+    publicPath: filename,
   };
+  if (PHOTO_DIRS[kind]) photo.repoPath = `${PHOTO_DIRS[kind]}/${filename}`;
+  return { ok: true, photo };
 }

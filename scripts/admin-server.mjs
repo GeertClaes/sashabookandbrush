@@ -11,10 +11,24 @@ import {
   parseActivityLog,
   stringifyActivity,
 } from "./lib/activity.mjs";
-import { applyYamlFields } from "../functions/admin/api/_lib/frontmatter.js";
+import {
+  featuredSaveDetail,
+  planFeaturedBoard,
+  planReorder,
+  reorderSaveDetail,
+} from "../functions/admin/api/_lib/board-save.js";
+import {
+  contentSaveDetail,
+  planContentSave,
+  resolveContentWrite,
+} from "../functions/admin/api/_lib/content-save.js";
+import {
+  applyYamlFields,
+  readYamlField,
+  safeSlug,
+} from "../functions/admin/api/_lib/frontmatter.js";
+import { syncFromLive } from "../functions/admin/api/_lib/sync-summary.js";
 import { deriveBookUpdates } from "../functions/admin/api/_lib/book.js";
-import { artMarkdown, deriveArtFields } from "../functions/admin/api/_lib/art.js";
-import { deriveSupplyFields, supplyMarkdown } from "../functions/admin/api/_lib/supply.js";
 import { parseImageUpload } from "../functions/admin/api/_lib/photo.js";
 import {
   applySiteCopy,
@@ -48,7 +62,6 @@ const ART_DIR = path.join(ROOT, "src", "content", "art");
 const SUPPLIES_DIR = path.join(ROOT, "src", "content", "supplies");
 const COVERS_DIR = path.join(ROOT, "src", "assets", "covers");
 const ART_IMAGES_DIR = path.join(ROOT, "src", "assets", "art");
-const SUPPLY_IMAGES_DIR = path.join(ROOT, "src", "assets", "supplies");
 const DATA_DIR = path.join(ROOT, "data");
 const PORT = Number(process.env.ADMIN_PORT || 8787);
 const SITE = String(process.env.PUBLIC_SITE_URL || "http://127.0.0.1:4321").replace(/\/$/, "");
@@ -81,25 +94,6 @@ function authorized(req) {
   return match?.[1] === TOKEN;
 }
 
-function unescapeYaml(value) {
-  return String(value).replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-}
-
-function frontField(text, key) {
-  const match = text.match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
-  if (!match) return "";
-  let value = match[1].trim();
-  if (value.startsWith('"') && value.endsWith('"')) return unescapeYaml(value.slice(1, -1));
-  return value;
-}
-
-function slugFromTitle(title) {
-  return String(title || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 async function recordLocalActivity(entry) {
   try {
     const file = path.join(ROOT, ACTIVITY_FILE);
@@ -122,10 +116,68 @@ async function removeFile(file) {
   }
 }
 
-function artPhotoFile(image) {
-  const value = String(image || "").trim();
-  const match = value.match(/^(?:\/images\/art\/)?([a-z0-9._-]+)$/i);
-  return match ? path.join(ART_IMAGES_DIR, match[1]) : "";
+async function readOptional(file) {
+  try {
+    return await readFile(file, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+async function filesForSlugs(dir, slugs) {
+  const files = {};
+  for (const raw of slugs) {
+    let slug;
+    try {
+      slug = safeSlug(raw);
+    } catch (error) {
+      if (error instanceof Error && /invalid name/i.test(error.message)) {
+        return { error: "Invalid name", status: 400 };
+      }
+      throw error;
+    }
+    if (!(slug in files)) files[slug] = await readOptional(path.join(dir, `${slug}.md`));
+  }
+  return { files };
+}
+
+async function writePlan(res, plan, detail) {
+  if (plan.error) {
+    json(res, plan.status, { error: plan.error });
+    return;
+  }
+  for (const file of plan.files) {
+    const abs = path.join(ROOT, file.path);
+    if (file.delete) {
+      await removeFile(abs);
+      continue;
+    }
+    await mkdir(path.dirname(abs), { recursive: true });
+    await writeFile(
+      abs,
+      file.encoding === "base64" ? Buffer.from(file.content, "base64") : file.content,
+    );
+  }
+  await recordLocalActivity({
+    type: "admin",
+    title: plan.activity.title,
+    detail,
+  });
+  json(res, 200, plan.result);
+}
+
+async function saveContent(res, kind, body) {
+  const target = resolveContentWrite(kind, body);
+  if (target.error) {
+    json(res, target.status, { error: target.error });
+    return;
+  }
+  const plan = planContentSave({
+    kind,
+    body,
+    existingText: await readOptional(path.join(ROOT, target.filePath)),
+  });
+  await writePlan(res, plan, contentSaveDetail(plan, { local: true }));
 }
 
 async function listBooks() {
@@ -135,13 +187,13 @@ async function listBooks() {
     const text = await readFile(path.join(BOOKS_DIR, name), "utf8");
     books.push({
       slug: path.basename(name, ".md"),
-      title: frontField(text, "title"),
-      author: frontField(text, "author"),
-      note: frontField(text, "note"),
-      featured: frontField(text, "featured") === "true",
-      cover: frontField(text, "cover"),
-      rating: Number(frontField(text, "rating") || 0),
-      status: frontField(text, "status") || "read",
+      title: readYamlField(text, "title"),
+      author: readYamlField(text, "author"),
+      note: readYamlField(text, "note"),
+      featured: readYamlField(text, "featured") === "true",
+      cover: readYamlField(text, "cover"),
+      rating: Number(readYamlField(text, "rating") || 0),
+      status: readYamlField(text, "status") || "read",
     });
   }
   return books.toSorted((a, b) => a.title.localeCompare(b.title));
@@ -273,23 +325,7 @@ const server = createServer(async (req, res) => {
       );
       json(res, 200, {
         ok: true,
-        sync: {
-          at: live.lastSync?.at || live.updated || "",
-          ok: live.lastSync ? Boolean(live.lastSync.ok) : Boolean(live.updated),
-          source: live.lastSync?.source || "local",
-          readingCount: live.lastSync?.readingCount ?? live.currentlyReading?.length ?? 0,
-          upNextCount: live.lastSync?.upNextCount ?? live.upNext?.length ?? 0,
-          changes: live.lastSync?.changes || [],
-          warning: live.lastSync?.warning ?? null,
-          error: live.lastSync?.error ?? null,
-          reading: live.lastSync?.reading?.length
-            ? live.lastSync.reading
-            : (live.currentlyReading || []).map((book) => ({
-                title: book.title,
-                progress: book.progress ?? null,
-              })),
-          upNext: (live.upNext || []).map((book) => ({ title: book.title })),
-        },
+        sync: syncFromLive(live, { source: "local" }),
         events: log.events,
         site: {
           state: "local",
@@ -342,257 +378,46 @@ const server = createServer(async (req, res) => {
     if (pathname === "/api/featured" && req.method === "POST") {
       const body = JSON.parse((await readBody(req)) || "{}");
       const rows = Array.isArray(body.books) ? body.books : [];
-      if (!rows.length || rows.length > 20) {
-        json(res, 400, { error: "Send between 1 and 20 books" });
+      const loaded =
+        rows.length > 0 && rows.length <= 20
+          ? await filesForSlugs(
+              BOOKS_DIR,
+              rows.map((row) => row?.slug),
+            )
+          : { files: {} };
+      if (loaded.error) {
+        json(res, loaded.status, { error: loaded.error });
         return;
       }
-      const prepared = [];
-      for (const row of rows) {
-        const slug = path.basename(String(row.slug || ""));
-        if (!slug) {
-          json(res, 400, { error: "Invalid name" });
-          return;
-        }
-        const file = path.join(BOOKS_DIR, `${slug}.md`);
-        let text = null;
-        try {
-          text = await readFile(file, "utf8");
-        } catch {
-          json(res, 400, { error: `Unknown book: ${slug}` });
-          return;
-        }
-        prepared.push({ slug, file, text, featured: Boolean(row.featured) });
-      }
-      let featuredIndex = 0;
-      for (const row of prepared) {
-        const updates = { featured: row.featured };
-        if (row.featured) {
-          featuredIndex += 1;
-          updates.order = featuredIndex;
-        }
-        const text = applyYamlFields(row.text, updates);
-        await writeFile(row.file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-      }
-      await recordLocalActivity({
-        type: "admin",
-        title: `Updated featured board (${featuredIndex} on Home)`,
-        detail: "Saved on this computer. Refresh the site to see it.",
-      });
-      json(res, 200, { ok: true, featured: featuredIndex });
+      const plan = planFeaturedBoard(rows, loaded.files);
+      await writePlan(res, plan, featuredSaveDetail({ local: true }));
       return;
     }
 
     if (pathname === "/api/order" && req.method === "POST") {
       const body = JSON.parse((await readBody(req)) || "{}");
-      const dir = body.kind === "art" ? ART_DIR : body.kind === "supply" ? SUPPLIES_DIR : "";
-      const label = body.kind === "art" ? "paintings" : body.kind === "supply" ? "tools" : "";
       const slugs = Array.isArray(body.slugs) ? body.slugs : [];
-      if (!dir || !label) {
-        json(res, 400, { error: "Unknown list" });
+      const dir = body.kind === "art" ? ART_DIR : body.kind === "supply" ? SUPPLIES_DIR : "";
+      const loaded =
+        dir && slugs.length > 0 && slugs.length <= 40
+          ? await filesForSlugs(dir, slugs)
+          : { files: {} };
+      if (loaded.error) {
+        json(res, loaded.status, { error: loaded.error });
         return;
       }
-      if (!slugs.length || slugs.length > 40) {
-        json(res, 400, { error: "Send between 1 and 40 items" });
-        return;
-      }
-      const prepared = [];
-      for (const raw of slugs) {
-        const slug = path.basename(String(raw || ""));
-        if (!slug) {
-          json(res, 400, { error: "Invalid name" });
-          return;
-        }
-        const file = path.join(dir, `${slug}.md`);
-        let text = null;
-        try {
-          text = await readFile(file, "utf8");
-        } catch {
-          json(res, 400, { error: `Unknown item: ${slug}` });
-          return;
-        }
-        prepared.push({ file, text });
-      }
-      for (const [index, row] of prepared.entries()) {
-        const text = applyYamlFields(row.text, { order: index + 1 });
-        await writeFile(row.file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-      }
-      await recordLocalActivity({
-        type: "admin",
-        title: `Reordered ${label}`,
-        detail: "Saved on this computer. Refresh the site to see it.",
-      });
-      json(res, 200, { ok: true, count: prepared.length });
+      const plan = planReorder({ kind: body.kind, slugs, filesBySlug: loaded.files });
+      await writePlan(res, plan, reorderSaveDetail({ local: true }));
       return;
     }
 
     if (pathname === "/api/art" && req.method === "POST") {
-      const body = JSON.parse((await readBody(req)) || "{}");
-      if (body.delete) {
-        const slug = path.basename(String(body.slug || ""));
-        if (!slug) {
-          json(res, 400, { error: "Missing name" });
-          return;
-        }
-        const file = path.join(ART_DIR, `${slug}.md`);
-        let existing = null;
-        try {
-          existing = await readFile(file, "utf8");
-        } catch {
-          json(res, 404, { error: "Painting not found" });
-          return;
-        }
-        const photo = artPhotoFile(frontField(existing, "image"));
-        await removeFile(file);
-        if (photo) await removeFile(photo);
-        json(res, 200, { ok: true, slug, deleted: true });
-        return;
-      }
-      const title = String(body.title || "").trim();
-      if (!title) {
-        json(res, 400, { error: "Title is required" });
-        return;
-      }
-      const slug = path.basename(body.slug || slugFromTitle(title));
-      const file = path.join(ART_DIR, `${slug}.md`);
-      let existing = null;
-      try {
-        existing = await readFile(file, "utf8");
-      } catch {
-        existing = null;
-      }
-      if (body.create && existing) {
-        json(res, 409, { error: "A painting with that name already exists" });
-        return;
-      }
-      if (!body.create && !existing) {
-        json(res, 404, { error: "Painting not found" });
-        return;
-      }
-      const { error, fields } = deriveArtFields(body);
-      if (error) {
-        json(res, 400, { error });
-        return;
-      }
-      const { note, medium, featured, available, shop, shopLabel, order } = fields;
-      const parsed = parseImageUpload(body, slug);
-      if (!parsed.ok) {
-        json(res, 400, { error: parsed.error });
-        return;
-      }
-      const photo = parsed.photo;
-      const image = photo?.publicPath || (typeof body.image === "string" ? body.image.trim() : "");
-      let text = existing;
-      if (!text) {
-        text = artMarkdown({
-          title,
-          medium,
-          note,
-          featured,
-          order,
-          image,
-          available,
-          shop,
-          shopLabel,
-        });
-      } else {
-        const updates = { title, medium, note, featured, order, available, shop, shopLabel };
-        if (image) updates.image = image;
-        text = applyYamlFields(text, updates);
-      }
-      await mkdir(ART_DIR, { recursive: true });
-      await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-      if (photo) {
-        await mkdir(ART_IMAGES_DIR, { recursive: true });
-        await writeFile(
-          path.join(ART_IMAGES_DIR, photo.filename),
-          Buffer.from(photo.contentBase64, "base64"),
-        );
-      }
-      json(res, 200, { ok: true, slug, image: image || undefined });
+      await saveContent(res, "art", JSON.parse((await readBody(req)) || "{}"));
       return;
     }
 
     if (pathname === "/api/supply" && req.method === "POST") {
-      const body = JSON.parse((await readBody(req)) || "{}");
-      if (body.delete) {
-        const slug = path.basename(String(body.slug || ""));
-        if (!slug) {
-          json(res, 400, { error: "Missing name" });
-          return;
-        }
-        const file = path.join(SUPPLIES_DIR, `${slug}.md`);
-        try {
-          await unlink(file);
-        } catch {
-          json(res, 404, { error: "Tool not found" });
-          return;
-        }
-        json(res, 200, { ok: true, slug, deleted: true });
-        return;
-      }
-      const title = String(body.title || "").trim();
-      if (!title) {
-        json(res, 400, { error: "Title is required" });
-        return;
-      }
-      const slug = path.basename(body.slug || slugFromTitle(title));
-      const file = path.join(SUPPLIES_DIR, `${slug}.md`);
-      let existing = null;
-      try {
-        existing = await readFile(file, "utf8");
-      } catch {
-        existing = null;
-      }
-      if (body.create && existing) {
-        json(res, 409, { error: "A tool with that name already exists" });
-        return;
-      }
-      if (!body.create && !existing) {
-        json(res, 404, { error: "Tool not found" });
-        return;
-      }
-      const { error, fields } = deriveSupplyFields(body);
-      if (error) {
-        json(res, 400, { error });
-        return;
-      }
-      const { brand, category, note, amazon, shop, shopLabel, featured, order } = fields;
-      const parsed = parseImageUpload(body, slug);
-      if (!parsed.ok) {
-        json(res, 400, { error: parsed.error });
-        return;
-      }
-      const photo = parsed.photo;
-      const image = photo?.publicPath || (typeof body.image === "string" ? body.image.trim() : "");
-      let text = existing;
-      if (!text) {
-        text = supplyMarkdown({
-          title,
-          brand,
-          category,
-          note,
-          amazon,
-          shop,
-          shopLabel,
-          featured,
-          order,
-          image,
-        });
-      } else {
-        const updates = { title, brand, category, note, amazon, shop, shopLabel, featured, order };
-        if (image) updates.image = image;
-        text = applyYamlFields(text, updates);
-      }
-      await mkdir(SUPPLIES_DIR, { recursive: true });
-      await writeFile(file, text.endsWith("\n") ? text : `${text}\n`, "utf8");
-      if (photo) {
-        await mkdir(SUPPLY_IMAGES_DIR, { recursive: true });
-        await writeFile(
-          path.join(SUPPLY_IMAGES_DIR, photo.filename),
-          Buffer.from(photo.contentBase64, "base64"),
-        );
-      }
-      json(res, 200, { ok: true, slug, amazon, image: image || undefined });
+      await saveContent(res, "supply", JSON.parse((await readBody(req)) || "{}"));
       return;
     }
 
@@ -600,7 +425,7 @@ const server = createServer(async (req, res) => {
       const body = JSON.parse((await readBody(req)) || "{}");
       const kind = body.kind === "art" ? "art" : "book";
       const slug = path.basename(body.slug);
-      const parsed = parseImageUpload(body, slug);
+      const parsed = parseImageUpload(body, slug, kind);
       if (!parsed.ok) {
         json(res, 400, { error: parsed.error });
         return;

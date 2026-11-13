@@ -1,7 +1,7 @@
 import { tryGetTextFile } from "./github.js";
 
 export const ACTIVITY_FILE = "src/data/activity-log.json";
-const MAX_EVENTS = 40;
+export const MAX_EVENTS = 40;
 
 export function parseActivityLog(text) {
   try {
@@ -23,15 +23,23 @@ export function activityEntry({ at, type, ok = true, title, detail = "", by = ""
   };
 }
 
+export function appendActivity(log, entry) {
+  const events = [activityEntry(entry), ...(log?.events || [])];
+  return { events: events.slice(0, MAX_EVENTS) };
+}
+
+export function stringifyActivity(log) {
+  return `${JSON.stringify(log, null, 2)}\n`;
+}
+
 export async function filesWithActivity(env, files, entry) {
   const text = await tryGetTextFile(env, ACTIVITY_FILE);
-  const log = parseActivityLog(text);
-  log.events = [activityEntry(entry), ...log.events].slice(0, MAX_EVENTS);
+  const log = appendActivity(parseActivityLog(text), entry);
   return [
     ...files,
     {
       path: ACTIVITY_FILE,
-      content: `${JSON.stringify(log, null, 2)}\n`,
+      content: stringifyActivity(log),
       encoding: "utf-8",
     },
   ];

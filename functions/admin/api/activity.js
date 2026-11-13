@@ -1,6 +1,7 @@
 import { json, fail } from "./_lib/frontmatter.js";
 import { tryGetTextFile } from "./_lib/github.js";
 import { ACTIVITY_FILE, parseActivityLog } from "./_lib/activity.js";
+import { syncFromLive } from "./_lib/sync-summary.js";
 import { listDeployments, summarizeDeployments } from "./_lib/pages.js";
 
 function parseLive(text) {
@@ -17,29 +18,6 @@ function shelfTitles(books, withProgress) {
     const percent = typeof book.progress === "number" ? ` (${book.progress}%)` : "";
     return `${book.title}${percent}`;
   });
-}
-
-function syncFromLive(live) {
-  const recorded = live.lastSync || {};
-  const reading = recorded.reading?.length
-    ? recorded.reading
-    : (live.currentlyReading || []).map((book) => ({
-        title: book.title,
-        progress: book.progress ?? null,
-      }));
-  const upNext = (live.upNext || []).map((book) => ({ title: book.title }));
-  return {
-    at: recorded.at || live.updated || "",
-    ok: recorded.at ? Boolean(recorded.ok) : Boolean(live.updated),
-    source: recorded.source || "file",
-    readingCount: recorded.readingCount ?? reading.length,
-    upNextCount: recorded.upNextCount ?? upNext.length,
-    changes: recorded.changes || [],
-    warning: recorded.warning ?? (live.updated ? null : "No Goodreads sync has been recorded yet."),
-    error: recorded.error ?? null,
-    reading,
-    upNext,
-  };
 }
 
 function syncDetail(sync) {

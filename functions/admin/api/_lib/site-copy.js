@@ -201,7 +201,7 @@ export function prepareCopySave(site, body) {
     return { next, photo: false, uploads: [], removals: [] };
   }
   if (typeof upload !== "object") throw new Error("About photo could not be read.");
-  const parsed = parseImageUpload(upload, "about");
+  const parsed = parseImageUpload(upload, "about", "about");
   if (!parsed.ok) throw new Error(parsed.error || "Use a JPG, PNG, or WebP photo");
   if (!parsed.photo) throw new Error("Missing image");
 

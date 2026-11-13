@@ -8,7 +8,7 @@ export async function onRequestPost(context) {
     const body = await readJson(context.request);
     const kind = body.kind === "art" ? "art" : "book";
     const slug = safeSlug(body.slug);
-    const parsed = parseImageUpload(body, slug);
+    const parsed = parseImageUpload(body, slug, kind);
     if (!parsed.ok) return json({ error: parsed.error }, 400);
     if (!parsed.photo) return json({ error: "Missing image" }, 400);
     const photo = parsed.photo;
@@ -24,7 +24,7 @@ export async function onRequestPost(context) {
         await filesWithActivity(
           context.env,
           [
-            { path: photo.artRepoPath, content: photo.contentBase64, encoding: "base64" },
+            { path: photo.repoPath, content: photo.contentBase64, encoding: "base64" },
             { path: filePath, content: text, encoding: "utf-8" },
           ],
           {
@@ -48,7 +48,7 @@ export async function onRequestPost(context) {
       await filesWithActivity(
         context.env,
         [
-          { path: photo.bookRepoPath, content: photo.contentBase64, encoding: "base64" },
+          { path: photo.repoPath, content: photo.contentBase64, encoding: "base64" },
           { path: filePath, content: text, encoding: "utf-8" },
         ],
         {

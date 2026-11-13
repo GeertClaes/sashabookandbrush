@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
+import { MAX_EVENTS as coreMaxEvents } from "../../functions/admin/api/_lib/activity.js";
 import {
+  MAX_EVENTS,
   appendActivity,
   describeReadingChanges,
   describeUpNextChanges,
   formatSyncDetail,
   parseActivityLog,
 } from "./activity.mjs";
+
+describe("MAX_EVENTS", () => {
+  it("is the same cap in the shared core and the script module", () => {
+    expect(MAX_EVENTS).toBe(40);
+    expect(coreMaxEvents).toBe(MAX_EVENTS);
+  });
+});
 
 describe("parseActivityLog", () => {
   it("returns an empty events list for missing or invalid input", () => {

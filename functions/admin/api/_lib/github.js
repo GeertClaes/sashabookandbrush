@@ -98,6 +98,20 @@ export async function fileExists(env, filePath) {
   }
 }
 
+export function blobPayload(file) {
+  return {
+    content: file.content,
+    encoding: file.encoding || "utf-8",
+  };
+}
+
+export function treeItem(file, blobSha) {
+  if (file.delete) {
+    return { path: file.path, mode: "100644", type: "blob", sha: null };
+  }
+  return { path: file.path, mode: "100644", type: "blob", sha: blobSha };
+}
+
 export async function commitFiles(env, message, files) {
   const ref = await github(env, `/git/ref/heads/${branch(env)}`);
   const commitSha = ref.object.sha;
@@ -106,27 +120,14 @@ export async function commitFiles(env, message, files) {
   const treeItems = [];
   for (const file of files) {
     if (file.delete) {
-      treeItems.push({
-        path: file.path,
-        mode: "100644",
-        type: "blob",
-        sha: null,
-      });
+      treeItems.push(treeItem(file));
       continue;
     }
     const blob = await github(env, "/git/blobs", {
       method: "POST",
-      body: JSON.stringify({
-        content: file.content,
-        encoding: file.encoding || "utf-8",
-      }),
+      body: JSON.stringify(blobPayload(file)),
     });
-    treeItems.push({
-      path: file.path,
-      mode: "100644",
-      type: "blob",
-      sha: blob.sha,
-    });
+    treeItems.push(treeItem(file, blob.sha));
   }
 
   const tree = await github(env, "/git/trees", {
