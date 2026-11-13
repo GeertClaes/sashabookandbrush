@@ -365,7 +365,7 @@ No database, no separate backend server to install — see below.
 
 ## Architecture
 
-A quick technical map for anyone picking this repo up.
+A quick technical map for anyone picking this repo up. For a more detailed map of the codebase's modules and the conventions/gotchas worth knowing before changing code — written for an AI coding agent, but useful to any contributor — see [AGENTS.md](AGENTS.md).
 
 ### No database — GitHub is the data store
 
@@ -375,7 +375,7 @@ Every book, painting, tool, and piece of site copy is a file in this repo (markd
 
 - **Public site**: [Astro](https://astro.build) generates the whole thing (currently ~290 pages) as static HTML at build time. [Cloudflare Pages](https://pages.cloudflare.com) serves the output; there's no server rendering a request live.
 - **Admin API (production)**: `functions/admin/api/*` are Cloudflare Pages Functions — small, individually-deployed handlers behind `/admin/api/*` that read and write repo files via GitHub's REST/Git Data API. [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/) gates `/admin*` with Google sign-in before any of this is reachable.
-- **Admin API (local dev)**: `scripts/admin-server.mjs` is a standalone Node HTTP server (`npm run admin`) that mirrors the same endpoints by writing to the local filesystem directly. This means the admin UI can be developed fully offline, without Wrangler or a Cloudflare account — but it's a second implementation of similar logic, so behavior can drift from production at the edges (for example, build/deploy status is always a fixed "local editor" placeholder here, since there's no real Cloudflare deployment to report on).
+- **Admin API (local dev)**: `scripts/admin-server.mjs` is a standalone Node HTTP server (`npm run admin`) that mirrors the same endpoints by writing to the local filesystem directly. This means the admin UI can be developed fully offline, without Wrangler or a Cloudflare account. The two backends share one set of pure "what should this save do" functions under `functions/admin/api/_lib/` (field validation, YAML templating, the create/update/delete decision for a painting or tool, the featured-board/reorder plan, the activity-log entry) — each backend is just a thin adapter translating that plan into GitHub API calls or direct filesystem writes. Build/deploy status is the one thing that's necessarily different locally: there's no real Cloudflare deployment to report on, so it's always a fixed "local editor" placeholder. See [AGENTS.md](AGENTS.md) for the shared-logic pattern in more detail.
 
 ### Automation: GitHub Actions + one tiny cron Worker
 
@@ -385,7 +385,7 @@ Every book, painting, tool, and piece of site copy is a file in this repo (markd
 
 ### Admin UI: one hand-rolled page, no framework
 
-[`src/pages/admin.astro`](src/pages/admin.astro) is a single Astro page with a large vanilla-JS `<script>` (bundled by Vite, not `is:inline`, so it can `import` from `src/lib/`) — there's no React/Vue/Svelte in this project, intentionally, to keep the shipped JS minimal. Pure logic that doesn't need the DOM (affiliate link building, series grouping, the Goodreads/Recent-timeline merge logic, Cloudflare deployment-status parsing) is factored out into small modules under `src/lib/` and `scripts/lib/`/`functions/admin/api/_lib/` instead of living inline, specifically so it can be unit tested — see Tooling below.
+[`src/pages/admin.astro`](src/pages/admin.astro) is a single Astro page with a large vanilla-JS `<script>` (bundled by Vite, not `is:inline`, so it can `import` from `src/lib/`) — there's no React/Vue/Svelte in this project, intentionally, to keep the shipped JS minimal. The page itself is the shell, the content-collection queries, and the stateful wiring (which book/painting/tool is being edited, drag-reorder); everything that doesn't need that shared state lives in `src/lib/admin-*.js` modules instead — step panels and the Recent timeline, the Copy/Pages tab, book search/queues/featured board, and the ordered art/tool list renderer. Other pure logic the admin page and the public site both need (affiliate link building, series grouping, Goodreads HTML parsing) lives in plain `src/lib/*` modules. All of it is factored out specifically so it can be unit tested — see Tooling below and [AGENTS.md](AGENTS.md) for a fuller map of what lives where.
 
 ### Directory map
 
@@ -394,8 +394,8 @@ Every book, painting, tool, and piece of site copy is a file in this repo (markd
 | `src/pages`, `src/components`, `src/layouts` | The public site and the admin page |
 | `src/content/{books,art,supplies}` | Markdown content collections, one file per item |
 | `src/data` | JSON config and data (`site.json`, `goodreads-live.json`, `activity-log.json`) |
-| `src/lib` | Shared TS/JS logic used by pages/components, unit-tested with Vitest |
-| `functions/admin/api` | Cloudflare Pages Functions behind `/admin/api/*`, plus their shared `_lib/` |
+| `src/lib` | Shared TS/JS logic used by pages/components (including `admin-*.js`, the admin page's extracted modules), unit-tested with Vitest |
+| `functions/admin/api` | Cloudflare Pages Functions behind `/admin/api/*`; `_lib/` holds the pure save-planning logic shared with `scripts/admin-server.mjs` |
 | `scripts` | Node CLI scripts (Goodreads sync/import, local admin server, brand asset rendering) and their shared `scripts/lib/` |
 | `workers/rebuild-pages` | The standalone daily-cron Worker that triggers a Pages rebuild |
 | `.github/workflows` | Scheduled/triggered automation (Goodreads sync, CSV import, CI) |
