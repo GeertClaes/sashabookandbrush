@@ -1,19 +1,17 @@
 {
-  "updated": "2026-11-13T03:26:07.179Z",
+  "updated": "2026-11-18T04:24:27.390Z",
   "lastSync": {
-    "at": "2026-11-17T10:36:30.597Z",
+    "at": "2026-11-18T04:24:27.390Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 4,
+    "readingCount": 3,
     "upNextCount": 8,
-    "changes": [],
+    "changes": [
+      "Left currently reading: Hollow Bones"
+    ],
     "warning": null,
     "error": null,
     "reading": [
-      {
-        "title": "Hollow Bones",
-        "progress": 17
-      },
       {
         "title": "Fourth Wing (The Empyrean, #1)",
         "progress": 65
@@ -55,14 +53,6 @@
     ]
   },
   "currentlyReading": [
-    {
-      "title": "Hollow Bones",
-      "author": "Jodi Picoult",
-      "goodreadsId": "245670591",
-      "isbn": "9780593726259",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1771387435l/245670591._SX98_.jpg",
-      "progress": 17
-    },
     {
       "title": "Fourth Wing (The Empyrean, #1)",
       "author": "Rebecca Yarros",
