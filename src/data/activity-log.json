@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-11-19T04:13:00.662Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads shelf sync",
+      "detail": "Now reading\nBeartown (Beartown, #1)\nFourth Wing (The Empyrean, #1) (65%)\nA Court of Wings and Ruin (A Court of Thorns and Roses, #3) (40%)\nCrown of Midnight (Throne of Glass, #2) (30%)\nUp next\nThe Knave and the Moon (The Stonewater Kingdom, #2)\nOf Her Blood\nThe Secret Paris Ingredient\nThe Memory Chamber\nA Time of Witches\nMad Mabel\nThe Lamplighters\nYou With the Sad Eyes\nChanges\nStarted Beartown (Beartown, #1)",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-11-18T04:24:27.390Z",
       "type": "goodreads",
       "ok": true,
@@ -311,14 +319,6 @@
       "title": "Updated page text",
       "detail": "Home, About, and Work with me update after the site rebuilds (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-10-11T13:35:34.687Z",
-      "type": "goodreads",
-      "ok": true,
-      "title": "Goodreads RSS sync",
-      "detail": "4 currently reading, 8 up next. Started Rebel Witch (The Crimson Moth, #2); Started Slashed Beauties; Left currently reading: Free Falling (Sweetwater Peak, #2); Left currently reading: The Secret Paris Ingredient",
-      "by": "local"
     }
   ]
 }

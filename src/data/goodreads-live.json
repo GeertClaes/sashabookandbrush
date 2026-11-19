@@ -1,17 +1,21 @@
 {
-  "updated": "2026-11-18T04:24:27.390Z",
+  "updated": "2026-11-19T04:13:00.662Z",
   "lastSync": {
-    "at": "2026-11-18T04:24:27.390Z",
+    "at": "2026-11-19T04:13:00.662Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 3,
+    "readingCount": 4,
     "upNextCount": 8,
     "changes": [
-      "Left currently reading: Hollow Bones"
+      "Started Beartown (Beartown, #1)"
     ],
     "warning": null,
     "error": null,
     "reading": [
+      {
+        "title": "Beartown (Beartown, #1)",
+        "progress": null
+      },
       {
         "title": "Fourth Wing (The Empyrean, #1)",
         "progress": 65
@@ -53,6 +57,14 @@
     ]
   },
   "currentlyReading": [
+    {
+      "title": "Beartown (Beartown, #1)",
+      "author": "Fredrik Backman",
+      "goodreadsId": "33413128",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1482108618l/33413128.jpg",
+      "progress": null
+    },
     {
       "title": "Fourth Wing (The Empyrean, #1)",
       "author": "Rebecca Yarros",
