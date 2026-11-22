@@ -1,18 +1,21 @@
 {
-  "updated": "2026-11-21T03:59:23.805Z",
+  "updated": "2026-11-22T03:12:25.108Z",
   "lastSync": {
-    "at": "2026-11-21T03:59:23.805Z",
+    "at": "2026-11-22T03:12:25.108Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 4,
+    "readingCount": 5,
     "upNextCount": 8,
     "changes": [
-      "Up next: Peculiar Stars",
-      "Left up next: You With the Sad Eyes"
+      "Started The Hunger Games (The Hunger Games, #1)"
     ],
     "warning": null,
     "error": null,
     "reading": [
+      {
+        "title": "The Hunger Games (The Hunger Games, #1)",
+        "progress": null
+      },
       {
         "title": "Beartown (Beartown, #1)",
         "progress": null
@@ -58,6 +61,14 @@
     ]
   },
   "currentlyReading": [
+    {
+      "title": "The Hunger Games (The Hunger Games, #1)",
+      "author": "Suzanne Collins",
+      "goodreadsId": "2767052",
+      "isbn": "",
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1586722975l/2767052.jpg",
+      "progress": null
+    },
     {
       "title": "Beartown (Beartown, #1)",
       "author": "Fredrik Backman",
