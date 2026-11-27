@@ -1,6 +1,14 @@
 {
   "events": [
     {
+      "at": "2026-11-27T05:04:53.640Z",
+      "type": "goodreads",
+      "ok": true,
+      "title": "Goodreads shelf sync",
+      "detail": "Now reading\nBeartown (Beartown, #1) (14%)\nA Court of Wings and Ruin (A Court of Thorns and Roses, #3) (40%)\nCrown of Midnight (Throne of Glass, #2) (30%)\nUp next\nPeculiar Stars\nThe Knave and the Moon (The Stonewater Kingdom, #2)\nOf Her Blood\nThe Secret Paris Ingredient\nThe Memory Chamber\nA Time of Witches\nMad Mabel\nThe Lamplighters\nChanges\nBeartown (Beartown, #1): — → 14%\nStarted Crown of Midnight (Throne of Glass, #2)\nLeft currently reading: The Hunger Games (The Hunger Games, #1)\nLeft currently reading: Fourth Wing (The Empyrean, #1)",
+      "by": "github-actions"
+    },
+    {
       "at": "2026-11-25T05:27:39.754Z",
       "type": "goodreads",
       "ok": true,
@@ -309,14 +317,6 @@
       "type": "admin",
       "ok": true,
       "title": "Updated Archway",
-      "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
-      "by": "sasha.l.barnes@gmail.com"
-    },
-    {
-      "at": "2026-10-12T15:06:49.876Z",
-      "type": "admin",
-      "ok": true,
-      "title": "Updated Velaris",
       "detail": "Painting and photo saved. They show on the site after the rebuild (about a minute).",
       "by": "sasha.l.barnes@gmail.com"
     }

@@ -1,33 +1,31 @@
 {
-  "updated": "2026-11-25T05:27:39.754Z",
+  "updated": "2026-11-27T05:04:53.640Z",
   "lastSync": {
-    "at": "2026-11-25T05:27:39.754Z",
+    "at": "2026-11-27T05:04:53.640Z",
     "ok": true,
     "source": "github-actions",
-    "readingCount": 4,
+    "readingCount": 3,
     "upNextCount": 8,
     "changes": [
-      "The Hunger Games (The Hunger Games, #1): — → 65%",
-      "Left currently reading: Crown of Midnight (Throne of Glass, #2)"
+      "Beartown (Beartown, #1): — → 14%",
+      "Started Crown of Midnight (Throne of Glass, #2)",
+      "Left currently reading: The Hunger Games (The Hunger Games, #1)",
+      "Left currently reading: Fourth Wing (The Empyrean, #1)"
     ],
     "warning": null,
     "error": null,
     "reading": [
       {
-        "title": "The Hunger Games (The Hunger Games, #1)",
-        "progress": 65
-      },
-      {
         "title": "Beartown (Beartown, #1)",
-        "progress": null
+        "progress": 14
       },
       {
         "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
         "progress": 40
       },
       {
-        "title": "Fourth Wing (The Empyrean, #1)",
-        "progress": 65
+        "title": "Crown of Midnight (Throne of Glass, #2)",
+        "progress": 30
       }
     ],
     "upNext": [
@@ -59,20 +57,12 @@
   },
   "currentlyReading": [
     {
-      "title": "The Hunger Games (The Hunger Games, #1)",
-      "author": "Suzanne Collins",
-      "goodreadsId": "2767052",
-      "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1586722975l/2767052.jpg",
-      "progress": 65
-    },
-    {
       "title": "Beartown (Beartown, #1)",
       "author": "Fredrik Backman",
       "goodreadsId": "33413128",
       "isbn": "",
       "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1482108618l/33413128.jpg",
-      "progress": null
+      "progress": 14
     },
     {
       "title": "A Court of Wings and Ruin (A Court of Thorns and Roses, #3)",
@@ -83,12 +73,12 @@
       "progress": 40
     },
     {
-      "title": "Fourth Wing (The Empyrean, #1)",
-      "author": "Rebecca Yarros",
-      "goodreadsId": "61431922",
+      "title": "Crown of Midnight (Throne of Glass, #2)",
+      "author": "Sarah J. Maas",
+      "goodreadsId": "17167166",
       "isbn": "",
-      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1761312598l/61431922._SX98_.jpg",
-      "progress": 65
+      "image": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1391580481l/17167166.jpg",
+      "progress": 30
     }
   ],
   "upNext": [
